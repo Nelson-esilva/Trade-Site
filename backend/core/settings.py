@@ -71,7 +71,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'TradeSite.wsgi.application'
+WSGI_APPLICATION = 'core.wsgi.application'
 
 REST_FRAMEWORK = {
     # Usa a autenticação de sessão do Django
