@@ -23,6 +23,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../contexts/AppContext';
 import ItemCard from '../components/ItemCard';
+import ImageEditModal from '../components/ImageEditModal';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -39,6 +40,10 @@ const Home = () => {
   const [searchFilters, setSearchFilters] = useState({
     category: '',
     status: 'disponivel',
+  });
+  const [imageEditModal, setImageEditModal] = useState({
+    open: false,
+    item: null,
   });
 
   // Carregar itens quando o componente monta
@@ -65,6 +70,32 @@ const Home = () => {
   const handleCategoryClick = async (category) => {
     setSearchFilters({ ...searchFilters, category: category.name });
     await searchItems('', { ...searchFilters, category: category.name });
+  };
+
+  const handleEditImage = (item) => {
+    setImageEditModal({
+      open: true,
+      item: item,
+    });
+  };
+
+  const handleCloseImageModal = () => {
+    setImageEditModal({
+      open: false,
+      item: null,
+    });
+  };
+
+  const handleSaveImage = async (itemId, imageData) => {
+    try {
+      // TODO: Implementar atualização da imagem via API
+      console.log('Salvando imagem para item:', itemId, imageData);
+      // Por enquanto, apenas recarregamos os itens
+      await loadItems();
+    } catch (error) {
+      console.error('Erro ao salvar imagem:', error);
+      throw error;
+    }
   };
 
   const handleItemClick = (item) => {
@@ -202,25 +233,61 @@ const Home = () => {
             </Button>
           </Box>
         ) : (
-          <Grid container spacing={3}>
-            {Array.isArray(items) && items.map((item) => (
-              <Grid item xs={12} sm={6} md={4} key={item.id}>
-                <ItemCard
-                  item={{
-                    ...item,
-                    category: 'Geral', // Categoria padrão
-                    location: 'Local não informado',
-                    offerCount: 0,
-                    image: '/api/placeholder/300/200',
-                  }}
-                  onViewDetails={handleItemClick}
-                  onMakeOffer={handleMakeOffer}
-                />
-              </Grid>
-            ))}
+          <Grid container spacing={2}>
+            {Array.isArray(items) && items.map((item, index) => {
+              // Imagens de exemplo baseadas no título do item
+              const getExampleImage = (title) => {
+                const lowerTitle = title.toLowerCase();
+                if (lowerTitle.includes('livro') || lowerTitle.includes('cálculo')) {
+                  return 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&h=200&fit=crop';
+                } else if (lowerTitle.includes('apostila') || lowerTitle.includes('programação')) {
+                  return 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=300&h=200&fit=crop';
+                } else if (lowerTitle.includes('microscópio') || lowerTitle.includes('equipamento')) {
+                  return 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=300&h=200&fit=crop';
+                } else if (lowerTitle.includes('tecnologia') || lowerTitle.includes('computador')) {
+                  return 'https://images.unsplash.com/photo-1518717758536-85ae29035b6d?w=300&h=200&fit=crop';
+                } else {
+                  // Imagens alternativas para outros itens
+                  const defaultImages = [
+                    'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=200&fit=crop',
+                    'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=300&h=200&fit=crop',
+                    'https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=300&h=200&fit=crop',
+                    'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=200&fit=crop',
+                  ];
+                  return defaultImages[index % defaultImages.length];
+                }
+              };
+
+              return (
+                <Grid item xs={12} sm={6} md={3} key={item.id}>
+                  <ItemCard
+                    item={{
+                      ...item,
+                      category: item.category || 'Geral',
+                      location: item.location || 'Local não informado',
+                      offerCount: item.offerCount || 0,
+                      image: item.image || getExampleImage(item.title),
+                      condition: item.condition || 'Bom estado',
+                    }}
+                    compact={true}
+                    onViewDetails={handleItemClick}
+                    onMakeOffer={handleMakeOffer}
+                    onEditImage={handleEditImage}
+                  />
+                </Grid>
+              );
+            })}
           </Grid>
         )}
       </Box>
+
+      {/* Modal de Edição de Imagem */}
+      <ImageEditModal
+        open={imageEditModal.open}
+        onClose={handleCloseImageModal}
+        item={imageEditModal.item}
+        onSave={handleSaveImage}
+      />
     </Container>
   );
 };

@@ -10,6 +10,7 @@ import {
   Chip,
   IconButton,
   Avatar,
+  Tooltip,
 } from '@mui/material';
 import {
   LocationOn as LocationIcon,
@@ -19,6 +20,7 @@ import {
   Visibility as ViewIcon,
   SwapHoriz as SwapIcon,
   Person as PersonIcon,
+  Edit as EditIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
@@ -29,7 +31,8 @@ const ItemCard = ({
   onFavorite,
   onShare,
   onViewDetails,
-  onMakeOffer 
+  onMakeOffer,
+  onEditImage
 }) => {
   const navigate = useNavigate();
   const [isFavorite, setIsFavorite] = useState(item.isFavorite || false);
@@ -73,6 +76,13 @@ const ItemCard = ({
     }
   };
 
+  const handleEditImageClick = (e) => {
+    e.stopPropagation();
+    if (onEditImage) {
+      onEditImage(item);
+    }
+  };
+
   return (
     <Card
       sx={{
@@ -93,47 +103,79 @@ const ItemCard = ({
       <Box sx={{ position: 'relative' }}>
         <CardMedia
           component="img"
-          height={compact ? 150 : 200}
+          height={compact ? 120 : 160}
           image={item.image || '/api/placeholder/300/200'}
           alt={item.title}
+          sx={{
+            objectFit: 'cover',
+            transition: 'transform 0.3s ease',
+            '&:hover': {
+              transform: 'scale(1.05)',
+            },
+          }}
         />
         
         {/* Ações de Overlay */}
         <Box
           sx={{
             position: 'absolute',
-            top: 8,
-            right: 8,
+            top: 4,
+            right: 4,
             display: 'flex',
             flexDirection: 'column',
             gap: 0.5,
           }}
         >
-          <IconButton
-            size="small"
-            onClick={handleFavoriteClick}
-            sx={{
-              backgroundColor: 'rgba(255, 255, 255, 0.9)',
-              '&:hover': { backgroundColor: 'rgba(255, 255, 255, 1)' },
-            }}
-          >
-            {isFavorite ? (
-              <FavoriteIcon color="error" fontSize="small" />
-            ) : (
-              <FavoriteBorderIcon fontSize="small" />
-            )}
-          </IconButton>
+          <Tooltip title="Favoritar">
+            <IconButton
+              size="small"
+              onClick={handleFavoriteClick}
+              sx={{
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                '&:hover': { backgroundColor: 'rgba(255, 255, 255, 1)' },
+                width: 28,
+                height: 28,
+              }}
+            >
+              {isFavorite ? (
+                <FavoriteIcon color="error" fontSize="small" />
+              ) : (
+                <FavoriteBorderIcon fontSize="small" />
+              )}
+            </IconButton>
+          </Tooltip>
           
-          <IconButton
-            size="small"
-            onClick={handleShareClick}
-            sx={{
-              backgroundColor: 'rgba(255, 255, 255, 0.9)',
-              '&:hover': { backgroundColor: 'rgba(255, 255, 255, 1)' },
-            }}
-          >
-            <ShareIcon fontSize="small" />
-          </IconButton>
+          <Tooltip title="Compartilhar">
+            <IconButton
+              size="small"
+              onClick={handleShareClick}
+              sx={{
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                '&:hover': { backgroundColor: 'rgba(255, 255, 255, 1)' },
+                width: 28,
+                height: 28,
+              }}
+            >
+              <ShareIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+
+          {onEditImage && (
+            <Tooltip title="Editar Imagem">
+              <IconButton
+                size="small"
+                onClick={handleEditImageClick}
+                sx={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                  '&:hover': { backgroundColor: 'rgba(255, 255, 255, 1)' },
+                  width: 28,
+                  height: 28,
+                }}
+              >
+                <EditIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
         </Box>
 
         {/* Badge de Categoria */}
@@ -172,9 +214,9 @@ const ItemCard = ({
       </Box>
 
       {/* Conteúdo do Card */}
-      <CardContent sx={{ flexGrow: 1, pb: compact ? 1 : 2 }}>
+      <CardContent sx={{ flexGrow: 1, pb: 1, pt: 1.5 }}>
         <Typography
-          variant={compact ? 'subtitle2' : 'h6'}
+          variant="subtitle2"
           component="h3"
           gutterBottom
           sx={{
@@ -184,72 +226,52 @@ const ItemCard = ({
             WebkitLineClamp: 2,
             WebkitBoxOrient: 'vertical',
             lineHeight: 1.2,
-            minHeight: compact ? '2.4em' : '2.8em',
+            minHeight: '2.4em',
+            fontSize: '0.875rem',
+            fontWeight: 600,
           }}
         >
           {item.title}
         </Typography>
 
-        {!compact && (
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              mb: 2,
-            }}
-          >
-            {item.description}
-          </Typography>
-        )}
-
-        {/* Localização */}
-        <Box display="flex" alignItems="center" mb={1}>
-          <LocationIcon fontSize="small" color="action" sx={{ mr: 0.5 }} />
-          <Typography variant="body2" color="text.secondary">
-            {item.location}
-          </Typography>
-        </Box>
-
-        {/* Condição do Item */}
-        {item.condition && (
-          <Box mb={1}>
+        {/* Localização e Condição em linha */}
+        <Box display="flex" alignItems="center" justifyContent="space-between" mb={1}>
+          <Box display="flex" alignItems="center">
+            <LocationIcon fontSize="small" color="action" sx={{ mr: 0.5 }} />
+            <Typography variant="caption" color="text.secondary">
+              {item.location}
+            </Typography>
+          </Box>
+          
+          {item.condition && (
             <Chip
               label={item.condition}
               size="small"
               variant="outlined"
               color="success"
+              sx={{ fontSize: '0.7rem', height: 20 }}
             />
-          </Box>
-        )}
+          )}
+        </Box>
 
         {/* Informações do Proprietário */}
         {showOwner && item.owner && (
-          <Box display="flex" alignItems="center" mt={2}>
+          <Box display="flex" alignItems="center" mt={1}>
             <Avatar
               src={item.owner.avatar}
-              sx={{ width: 24, height: 24, mr: 1 }}
+              sx={{ width: 20, height: 20, mr: 0.5 }}
             >
               <PersonIcon fontSize="small" />
             </Avatar>
-            <Typography variant="body2" color="text.secondary">
-              {item.owner.name}
+            <Typography variant="caption" color="text.secondary">
+              {item.owner.name || item.owner}
             </Typography>
-            {item.owner.rating && (
-              <Typography variant="body2" color="text.secondary" sx={{ ml: 'auto' }}>
-                ⭐ {item.owner.rating}
-              </Typography>
-            )}
           </Box>
         )}
       </CardContent>
 
       {/* Ações do Card */}
-      <CardActions sx={{ px: 2, pb: 2 }}>
+      <CardActions sx={{ px: 1.5, pb: 1.5, pt: 0 }}>
         <Button
           size="small"
           startIcon={<ViewIcon />}
@@ -257,17 +279,23 @@ const ItemCard = ({
             e.stopPropagation();
             handleCardClick();
           }}
+          sx={{ fontSize: '0.75rem', minWidth: 'auto', px: 1 }}
         >
-          Ver Detalhes
+          Ver
         </Button>
         <Button
           size="small"
           color="secondary"
           startIcon={<SwapIcon />}
           onClick={handleMakeOfferClick}
-          sx={{ ml: 'auto' }}
+          sx={{ 
+            ml: 'auto', 
+            fontSize: '0.75rem', 
+            minWidth: 'auto', 
+            px: 1 
+          }}
         >
-          Fazer Oferta
+          Oferta
         </Button>
       </CardActions>
 
