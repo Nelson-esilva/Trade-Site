@@ -7,10 +7,7 @@ import {
   Button,
   Grid,
   Card,
-  CardMedia,
   CardContent,
-  CardActions,
-  Chip,
   InputAdornment,
   Paper,
   CircularProgress,
@@ -18,7 +15,6 @@ import {
 } from '@mui/material';
 import {
   Search as SearchIcon,
-  LocationOn as LocationIcon,
   School as SchoolIcon,
   MenuBook as BookIcon,
   Science as ScienceIcon,
@@ -52,10 +48,10 @@ const Home = () => {
 
   // Categorias estáticas (podem ser dinâmicas no futuro)
   const categories = [
-    { name: 'Livros', icon: <BookIcon fontSize="large" />, count: items.filter(item => item.title?.toLowerCase().includes('livro')).length },
-    { name: 'Apostilas', icon: <SchoolIcon fontSize="large" />, count: items.filter(item => item.title?.toLowerCase().includes('apostila')).length },
-    { name: 'Equipamentos', icon: <ScienceIcon fontSize="large" />, count: items.filter(item => item.title?.toLowerCase().includes('equipamento')).length },
-    { name: 'Tecnologia', icon: <ComputerIcon fontSize="large" />, count: items.filter(item => item.title?.toLowerCase().includes('tecnologia')).length },
+    { name: 'Livros', icon: <BookIcon fontSize="large" />, count: Array.isArray(items) ? items.filter(item => item.title?.toLowerCase().includes('livro')).length : 0 },
+    { name: 'Apostilas', icon: <SchoolIcon fontSize="large" />, count: Array.isArray(items) ? items.filter(item => item.title?.toLowerCase().includes('apostila')).length : 0 },
+    { name: 'Equipamentos', icon: <ScienceIcon fontSize="large" />, count: Array.isArray(items) ? items.filter(item => item.title?.toLowerCase().includes('equipamento')).length : 0 },
+    { name: 'Tecnologia', icon: <ComputerIcon fontSize="large" />, count: Array.isArray(items) ? items.filter(item => item.title?.toLowerCase().includes('tecnologia')).length : 0 },
   ];
 
   const handleSearch = async () => {
@@ -187,7 +183,7 @@ const Home = () => {
           <Box display="flex" justifyContent="center" py={4}>
             <CircularProgress />
           </Box>
-        ) : items.length === 0 ? (
+        ) : !Array.isArray(items) || items.length === 0 ? (
           <Box textAlign="center" py={8}>
             <Typography variant="h6" color="text.secondary" gutterBottom>
               Nenhum item encontrado
@@ -207,7 +203,7 @@ const Home = () => {
           </Box>
         ) : (
           <Grid container spacing={3}>
-            {items.map((item) => (
+            {Array.isArray(items) && items.map((item) => (
               <Grid item xs={12} sm={6} md={4} key={item.id}>
                 <ItemCard
                   item={{

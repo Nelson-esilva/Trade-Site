@@ -20,8 +20,6 @@ import {
   Email as EmailIcon,
   Lock as LockIcon,
   Person as PersonIcon,
-  Phone as PhoneIcon,
-  LocationOn as LocationIcon,
 } from '@mui/icons-material';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useApp } from '../../contexts/AppContext';

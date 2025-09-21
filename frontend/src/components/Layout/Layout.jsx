@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Container, Typography, Link, Grid, Divider } from '@mui/material';
-import Header from './Header';
+import Header from './header';
 
 const Footer = () => {
   return (

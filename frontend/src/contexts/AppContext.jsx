@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
 import apiService from '../services/api';
 
 // Estado inicial
@@ -206,12 +206,44 @@ const AppContext = createContext();
 export const AppProvider = ({ children }) => {
   const [state, dispatch] = useReducer(appReducer, initialState);
 
-  // Carregar dados iniciais
-  useEffect(() => {
-    loadInitialData();
+  // === AÇÕES DE USUÁRIO ===
+  const loadCurrentUser = useCallback(async () => {
+    try {
+      const user = await apiService.getCurrentUser();
+      dispatch({ type: ActionTypes.SET_USER, payload: user });
+    } catch (error) {
+      // Se não conseguir carregar usuário, não é erro crítico
+      console.log('Usuário não autenticado');
+    }
   }, []);
 
-  const loadInitialData = async () => {
+  const loadItems = useCallback(async () => {
+    try {
+      dispatch({ type: ActionTypes.SET_LOADING_ITEMS, payload: true });
+      const response = await apiService.getItems();
+      const items = response.results || response || [];
+      dispatch({ type: ActionTypes.SET_ITEMS, payload: items });
+    } catch (error) {
+      dispatch({ type: ActionTypes.SET_ERROR, payload: 'Erro ao carregar itens' });
+    } finally {
+      dispatch({ type: ActionTypes.SET_LOADING_ITEMS, payload: false });
+    }
+  }, []);
+
+  const loadOffers = useCallback(async () => {
+    try {
+      dispatch({ type: ActionTypes.SET_LOADING_OFFERS, payload: true });
+      const response = await apiService.getOffers();
+      const offers = response.results || response || [];
+      dispatch({ type: ActionTypes.SET_OFFERS, payload: offers });
+    } catch (error) {
+      dispatch({ type: ActionTypes.SET_ERROR, payload: 'Erro ao carregar ofertas' });
+    } finally {
+      dispatch({ type: ActionTypes.SET_LOADING_OFFERS, payload: false });
+    }
+  }, []);
+
+  const loadInitialData = useCallback(async () => {
     try {
       dispatch({ type: ActionTypes.SET_LOADING, payload: true });
       
@@ -230,18 +262,12 @@ export const AppProvider = ({ children }) => {
     } finally {
       dispatch({ type: ActionTypes.SET_LOADING, payload: false });
     }
-  };
+  }, [loadCurrentUser, loadItems, loadOffers]);
 
-  // === AÇÕES DE USUÁRIO ===
-  const loadCurrentUser = async () => {
-    try {
-      const user = await apiService.getCurrentUser();
-      dispatch({ type: ActionTypes.SET_USER, payload: user });
-    } catch (error) {
-      // Se não conseguir carregar usuário, não é erro crítico
-      console.log('Usuário não autenticado');
-    }
-  };
+  // Carregar dados iniciais
+  useEffect(() => {
+    loadInitialData();
+  }, [loadInitialData]);
 
   const registerUser = async (userData) => {
     try {
@@ -264,17 +290,8 @@ export const AppProvider = ({ children }) => {
   };
 
   // === AÇÕES DE ITENS ===
-  const loadItems = async () => {
-    try {
-      dispatch({ type: ActionTypes.SET_LOADING_ITEMS, payload: true });
-      const items = await apiService.getItems();
-      dispatch({ type: ActionTypes.SET_ITEMS, payload: items });
-    } catch (error) {
-      dispatch({ type: ActionTypes.SET_ERROR, payload: 'Erro ao carregar itens' });
-    }
-  };
 
-  const loadItem = async (id) => {
+  const loadItem = useCallback(async (id) => {
     try {
       dispatch({ type: ActionTypes.SET_LOADING, payload: true });
       const item = await apiService.getItem(id);
@@ -286,7 +303,7 @@ export const AppProvider = ({ children }) => {
     } finally {
       dispatch({ type: ActionTypes.SET_LOADING, payload: false });
     }
-  };
+  }, []);
 
   const createItem = async (itemData) => {
     try {
@@ -333,15 +350,6 @@ export const AppProvider = ({ children }) => {
   };
 
   // === AÇÕES DE OFERTAS ===
-  const loadOffers = async () => {
-    try {
-      dispatch({ type: ActionTypes.SET_LOADING_OFFERS, payload: true });
-      const offers = await apiService.getOffers();
-      dispatch({ type: ActionTypes.SET_OFFERS, payload: offers });
-    } catch (error) {
-      dispatch({ type: ActionTypes.SET_ERROR, payload: 'Erro ao carregar ofertas' });
-    }
-  };
 
   const createOffer = async (offerData) => {
     try {
@@ -389,7 +397,7 @@ export const AppProvider = ({ children }) => {
   };
 
   // === AÇÕES DE UI ===
-  const addNotification = (message, type = 'info') => {
+  const addNotification = useCallback((message, type = 'info') => {
     const notification = {
       id: Date.now(),
       message,
@@ -401,22 +409,25 @@ export const AppProvider = ({ children }) => {
     setTimeout(() => {
       dispatch({ type: ActionTypes.REMOVE_NOTIFICATION, payload: notification.id });
     }, 5000);
-  };
+  }, []);
 
-  const clearError = () => {
+  const clearError = useCallback(() => {
     dispatch({ type: ActionTypes.CLEAR_ERROR });
-  };
+  }, []);
 
   // === BUSCA ===
-  const searchItems = async (query, filters = {}) => {
+  const searchItems = useCallback(async (query, filters = {}) => {
     try {
       dispatch({ type: ActionTypes.SET_LOADING_ITEMS, payload: true });
-      const items = await apiService.searchItems(query, filters);
+      const response = await apiService.searchItems(query, filters);
+      const items = response.results || response || [];
       dispatch({ type: ActionTypes.SET_ITEMS, payload: items });
     } catch (error) {
       dispatch({ type: ActionTypes.SET_ERROR, payload: 'Erro ao buscar itens' });
+    } finally {
+      dispatch({ type: ActionTypes.SET_LOADING_ITEMS, payload: false });
     }
-  };
+  }, []);
 
   // Valor do contexto
   const value = {

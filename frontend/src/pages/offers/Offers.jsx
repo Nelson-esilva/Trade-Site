@@ -8,7 +8,6 @@ import {
   CardContent,
   Button,
   Chip,
-  Divider,
   Alert,
   CircularProgress,
   Tabs,
@@ -20,7 +19,6 @@ import {
   CheckCircle as CheckIcon,
   Cancel as CancelIcon,
   AccessTime as TimeIcon,
-  Person as PersonIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../contexts/AppContext';

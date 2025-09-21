@@ -10,7 +10,6 @@ import {
   Chip,
   IconButton,
   Avatar,
-  Tooltip,
 } from '@mui/material';
 import {
   LocationOn as LocationIcon,

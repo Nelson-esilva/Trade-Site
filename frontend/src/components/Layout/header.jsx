@@ -15,10 +15,7 @@ import {
 } from '@mui/material';
 import {
   Search as SearchIcon,
-  Notifications as NotificationsIcon,
-  Message as MessageIcon,
   Add as AddIcon,
-  AccountCircle,
   Menu as MenuIcon,
   SwapHoriz as SwapIcon,
 } from '@mui/icons-material';
