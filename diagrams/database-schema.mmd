@@ -1,0 +1,37 @@
+graph TD
+    subgraph Database["Banco de Dados PostgreSQL"]
+        subgraph UserTable["Tabela: User"]
+            U1["id (PK)"]
+            U2["username"]
+            U3["email"]
+            U4["name"]
+            U5["is_trade_admin"]
+        end
+        
+        subgraph ItemTable["Tabela: Item"]
+            I1["id (PK)"]
+            I2["title"]
+            I3["description"]
+            I4["category"]
+            I5["status"]
+            I6["owner_id (FK)"]
+        end
+        
+        subgraph OfferTable["Tabela: Offer"]
+            O1["id (PK)"]
+            O2["item_desired_id (FK)"]
+            O3["item_offered_id (FK)"]
+            O4["offerer_id (FK)"]
+            O5["offer_type"]
+            O6["status"]
+        end
+    end
+    
+    U1 --> I6
+    U1 --> O4
+    I1 --> O2
+    I1 --> O3
+    
+    style U1 fill:#e3f2fd
+    style I1 fill:#e8f5e8
+    style O1 fill:#fff3e0

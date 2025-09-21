@@ -1,0 +1,91 @@
+graph TB
+    subgraph State["AppContext State"]
+        A["user"]
+        B["isAuthenticated"]
+        C["items"]
+        D["offers"]
+        E["loading"]
+        F["error"]
+        G["notifications"]
+    end
+    
+    subgraph Actions["Actions"]
+        H["LOGIN_SUCCESS"]
+        I["LOGOUT"]
+        J["SET_ITEMS"]
+        K["ADD_ITEM"]
+        L["UPDATE_ITEM"]
+        M["REMOVE_ITEM"]
+        N["SET_OFFERS"]
+        O["ADD_OFFER"]
+        P["UPDATE_OFFER"]
+        Q["SET_LOADING"]
+        R["SET_ERROR"]
+        S["ADD_NOTIFICATION"]
+    end
+    
+    subgraph API["API Calls"]
+        T["loadItems"]
+        U["loadOffers"]
+        V["createItem"]
+        W["createOffer"]
+        X["acceptOffer"]
+        Y["refuseOffer"]
+        Z["login"]
+        AA["logout"]
+    end
+    
+    subgraph Components["Components"]
+        BB["Home"]
+        CC["ItemDetails"]
+        DD["MyItems"]
+        EE["MyOffers"]
+        FF["Login"]
+        GG["Register"]
+    end
+    
+    H --> A
+    H --> B
+    I --> A
+    I --> B
+    
+    J --> C
+    K --> C
+    L --> C
+    M --> C
+    
+    N --> D
+    O --> D
+    P --> D
+    
+    Q --> E
+    R --> F
+    S --> G
+    
+    T --> J
+    U --> N
+    V --> K
+    W --> O
+    X --> P
+    Y --> P
+    Z --> H
+    AA --> I
+    
+    BB --> T
+    BB --> C
+    CC --> T
+    CC --> C
+    DD --> T
+    DD --> C
+    EE --> U
+    EE --> D
+    FF --> Z
+    GG --> Z
+    
+    style A fill:#e3f2fd
+    style B fill:#e3f2fd
+    style C fill:#e8f5e8
+    style D fill:#e8f5e8
+    style E fill:#fff3e0
+    style F fill:#ffebee
+    style G fill:#f3e5f5

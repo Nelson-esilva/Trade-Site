@@ -1,0 +1,44 @@
+flowchart TD
+    A[Usuário Acessa Site] --> B{Está Logado?}
+    B -->|Não| C[Página de Login/Registro]
+    B -->|Sim| D[Home Page]
+    
+    C --> E[Login/Registro]
+    E --> F{Sucesso?}
+    F -->|Não| C
+    F -->|Sim| D
+    
+    D --> G[Visualizar Itens]
+    G --> H[Clicar em Item]
+    H --> I[Detalhes do Item]
+    
+    I --> J{É o Dono?}
+    J -->|Sim| K[Editar/Excluir Item]
+    J -->|Não| L[Fazer Oferta]
+    
+    L --> M{Tipo de Oferta}
+    M -->|Item| N[Selecionar Item para Troca]
+    M -->|Dinheiro| O[Inserir Valor]
+    
+    N --> P[Enviar Oferta]
+    O --> P
+    P --> Q[Oferta Enviada]
+    
+    Q --> R[Notificação para Dono]
+    R --> S[Dono Recebe Oferta]
+    S --> T{Aceitar/Recusar}
+    T -->|Aceitar| U[Item Fica Indisponível]
+    T -->|Recusar| V[Item Continua Disponível]
+    
+    U --> W[Oferta Vai para Histórico]
+    V --> W
+    
+    K --> X[Atualizar Item]
+    X --> D
+    
+    style A fill:#e3f2fd
+    style D fill:#e8f5e8
+    style I fill:#fff3e0
+    style P fill:#f3e5f5
+    style U fill:#e8f5e8
+    style V fill:#ffebee

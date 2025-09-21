@@ -1,0 +1,79 @@
+graph TB
+    subgraph "Frontend (React)"
+        A[Home Page]
+        B[Item Details]
+        C[Create Item]
+        D[My Items]
+        E[My Offers]
+        F[Profile]
+        G[Login/Register]
+    end
+    
+    subgraph "Backend (Django)"
+        H[API Gateway]
+        I[Items API]
+        J[Offers API]
+        K[Users API]
+        L[Auth API]
+    end
+    
+    subgraph "Database"
+        M[(PostgreSQL)]
+        N[Users Table]
+        O[Items Table]
+        P[Offers Table]
+    end
+    
+    subgraph "Infrastructure"
+        Q[Docker Compose]
+        R[Frontend Container]
+        S[Backend Container]
+        T[Database Container]
+    end
+    
+    A --> H
+    B --> H
+    C --> H
+    D --> H
+    E --> H
+    F --> H
+    G --> H
+    
+    H --> I
+    H --> J
+    H --> K
+    H --> L
+    
+    I --> M
+    J --> M
+    K --> M
+    L --> M
+    
+    M --> N
+    M --> O
+    M --> P
+    
+    Q --> R
+    Q --> S
+    Q --> T
+    
+    R --> A
+    S --> H
+    T --> M
+    
+    style A fill:#e1f5fe
+    style B fill:#e1f5fe
+    style C fill:#e1f5fe
+    style D fill:#e1f5fe
+    style E fill:#e1f5fe
+    style F fill:#e1f5fe
+    style G fill:#e1f5fe
+    style H fill:#f3e5f5
+    style I fill:#f3e5f5
+    style J fill:#f3e5f5
+    style K fill:#f3e5f5
+    style L fill:#f3e5f5
+    style M fill:#e8f5e8
+    style N fill:#e8f5e8
+    style O fill:#e8f5e8
+    style P fill:#e8f5e8

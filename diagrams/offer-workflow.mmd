@@ -1,0 +1,44 @@
+sequenceDiagram
+    participant U1 as Usuário A
+    participant U2 as Usuário B
+    participant API as Backend API
+    participant DB as Database
+    
+    Note over U1,DB: Fluxo de Oferta de Troca
+    
+    U1->>API: GET /api/items/
+    API->>DB: Buscar itens disponíveis
+    DB-->>API: Lista de itens
+    API-->>U1: Itens disponíveis
+    
+    U1->>API: GET /api/items/{id}/
+    API->>DB: Buscar detalhes do item
+    DB-->>API: Detalhes do item
+    API-->>U1: Detalhes do item
+    
+    U1->>API: POST /api/offers/
+    Note right of U1: {item_desired: X, item_offered: Y, offer_type: "item"}
+    API->>DB: Validar oferta
+    API->>DB: Criar oferta
+    DB-->>API: Oferta criada
+    API-->>U1: Oferta enviada
+    
+    Note over U2,DB: Notificação para o dono do item
+    
+    U2->>API: GET /api/offers/
+    API->>DB: Buscar ofertas recebidas
+    DB-->>API: Ofertas recebidas
+    API-->>U2: Lista de ofertas
+    
+    U2->>API: POST /api/offers/{id}/accept/
+    API->>DB: Atualizar status da oferta
+    API->>DB: Marcar itens como indisponíveis
+    DB-->>API: Atualizações realizadas
+    API-->>U2: Oferta aceita
+    
+    Note over U1,DB: Notificação para o ofertante
+    
+    U1->>API: GET /api/offers/
+    API->>DB: Buscar ofertas enviadas
+    DB-->>API: Ofertas enviadas
+    API-->>U1: Oferta aceita

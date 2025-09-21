@@ -1,0 +1,84 @@
+graph TD
+    subgraph Niveis["Níveis de Permissão"]
+        A["Usuário Não Autenticado"]
+        B["Usuário Comum"]
+        C["Trade Admin"]
+        D["Superusuário"]
+    end
+    
+    subgraph Leitura["Permissões de Leitura"]
+        E["Visualizar Itens Disponíveis"]
+        F["Visualizar Detalhes do Item"]
+        G["Visualizar Próprios Itens"]
+        H["Visualizar Todos os Itens"]
+    end
+    
+    subgraph Escrita["Permissões de Escrita"]
+        I["Criar Item"]
+        J["Editar Próprio Item"]
+        K["Excluir Próprio Item"]
+        L["Editar Qualquer Item"]
+        M["Excluir Qualquer Item"]
+    end
+    
+    subgraph Ofertas["Permissões de Ofertas"]
+        N["Fazer Ofertas"]
+        O["Gerenciar Próprias Ofertas"]
+        P["Aceitar/Recusar Ofertas dos Próprios Itens"]
+        Q["Aceitar/Recusar Qualquer Oferta"]
+    end
+    
+    subgraph Admin["Permissões Administrativas"]
+        R["Alterar Status de Itens"]
+        S["Gerenciar Usuários"]
+        T["Acesso Total ao Sistema"]
+    end
+    
+    A --> E
+    A --> F
+    
+    B --> E
+    B --> F
+    B --> G
+    B --> I
+    B --> J
+    B --> K
+    B --> N
+    B --> O
+    B --> P
+    
+    C --> E
+    C --> F
+    C --> G
+    C --> H
+    C --> I
+    C --> J
+    C --> K
+    C --> L
+    C --> N
+    C --> O
+    C --> P
+    C --> Q
+    C --> R
+    
+    D --> E
+    D --> F
+    D --> G
+    D --> H
+    D --> I
+    D --> J
+    D --> K
+    D --> L
+    D --> M
+    D --> N
+    D --> O
+    D --> P
+    D --> Q
+    D --> R
+    D --> S
+    D --> T
+    
+    style A fill:#ffebee
+    style B fill:#e8f5e8
+    style C fill:#fff3e0
+    style D fill:#e3f2fd
