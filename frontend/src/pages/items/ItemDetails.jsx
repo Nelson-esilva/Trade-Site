@@ -1,336 +1,327 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
-  Grid,
-  Card,
-  CardMedia,
-  CardContent,
+  Paper,
   Typography,
   Box,
+  Grid,
   Button,
   Chip,
-  Avatar,
   Divider,
-  TextField,
+  Card,
+  CardContent,
+  Alert,
+  CircularProgress,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Rating,
-  Tab,
-  Tabs,
-  Paper,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import {
-  LocationOn as LocationIcon,
-  Person as PersonIcon,
-  AttachMoney as MoneyIcon,
+  ArrowBack as ArrowBackIcon,
   SwapHoriz as SwapIcon,
-  Favorite as FavoriteIcon,
-  FavoriteBorder as FavoriteBorderIcon,
-  Share as ShareIcon,
-  Flag as FlagIcon,
+  Person as PersonIcon,
+  AccessTime as TimeIcon,
+  LocationOn as LocationIcon,
+  CheckCircle as CheckIcon,
+  Cancel as CancelIcon,
 } from '@mui/icons-material';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useApp } from '../../contexts/AppContext';
 
 const ItemDetails = () => {
-  const [tabValue, setTabValue] = useState(0);
-  const [offerDialogOpen, setOfferDialogOpen] = useState(false);
-  const [offerType, setOfferType] = useState('money'); // 'money' ou 'item'
-  const [moneyOffer, setMoneyOffer] = useState('');
-  const [itemOffer, setItemOffer] = useState('');
-  const [isFavorite, setIsFavorite] = useState(false);
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { 
+    currentItem, 
+    items, 
+    offers, 
+    loading, 
+    error, 
+    loadItem, 
+    createOffer, 
+    acceptOffer, 
+    refuseOffer,
+    clearError 
+  } = useApp();
+  
+  const [showOfferDialog, setShowOfferDialog] = useState(false);
+  const [offerData, setOfferData] = useState({
+    item_offered: '',
+  });
 
-  // Mock data
-  const item = {
-    id: 1,
-    title: 'Livro de Cálculo I - James Stewart',
-    description: 'Livro em excelente estado de conservação, usado apenas durante um semestre. Todas as páginas estão intactas, sem rabiscos ou anotações. Inclui CD-ROM com exercícios extras. Ideal para estudantes de engenharia e matemática.',
-    category: 'Livros',
-    condition: 'Muito Bom',
-    images: [
-      '/frontend/public/images/calculo1.jpg',
-      '/api/placeholder/600/400',
-      '/api/placeholder/600/400',
-    ],
-    owner: {
-      name: 'Maria Silva',
-      avatar: '/api/placeholder/60/60',
-      rating: 4.8,
-      reviewCount: 23,
-      memberSince: '2022',
-      location: 'São Paulo, SP',
-    },
-    createdAt: '2024-01-15',
-    offers: [
-      {
-        id: 1,
-        user: 'João Santos',
-        type: 'money',
-        amount: 80,
-        date: '2024-01-20',
-        status: 'pending',
-      },
-      {
-        id: 2,
-        user: 'Ana Costa',
-        type: 'item',
-        itemName: 'Livro de Física - Halliday',
-        date: '2024-01-19',
-        status: 'accepted',
-      },
-    ],
+  useEffect(() => {
+    if (id) {
+      loadItem(id);
+    }
+  }, [id, loadItem]);
+
+  const handleMakeOffer = () => {
+    setShowOfferDialog(true);
   };
 
-  const handleTabChange = (event, newValue) => {
-    setTabValue(newValue);
+  const handleCloseOfferDialog = () => {
+    setShowOfferDialog(false);
+    setOfferData({ item_offered: '' });
   };
 
-  const handleOfferSubmit = () => {
-    console.log('Oferta enviada:', { type: offerType, moneyOffer, itemOffer });
-    setOfferDialogOpen(false);
-    setMoneyOffer('');
-    setItemOffer('');
+  const handleSubmitOffer = async () => {
+    if (!offerData.item_offered) {
+      return;
+    }
+
+    try {
+      await createOffer({
+        item_desired: parseInt(id),
+        item_offered: parseInt(offerData.item_offered),
+        status: 'pendente',
+      });
+      handleCloseOfferDialog();
+    } catch (error) {
+      console.error('Erro ao criar oferta:', error);
+    }
   };
 
-  const toggleFavorite = () => {
-    setIsFavorite(!isFavorite);
+  const handleAcceptOffer = async (offerId) => {
+    try {
+      await acceptOffer(offerId);
+    } catch (error) {
+      console.error('Erro ao aceitar oferta:', error);
+    }
   };
+
+  const handleRefuseOffer = async (offerId) => {
+    try {
+      await refuseOffer(offerId);
+    } catch (error) {
+      console.error('Erro ao recusar oferta:', error);
+    }
+  };
+
+  // Filtrar ofertas relacionadas a este item
+  const itemOffers = offers.filter(offer => 
+    offer.item_desired === parseInt(id) || offer.item_offered === parseInt(id)
+  );
+
+  // Itens disponíveis para troca (excluindo o item atual)
+  const availableItems = items.filter(item => 
+    item.id !== parseInt(id) && item.status === 'disponivel'
+  );
+
+  if (loading) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Box display="flex" justifyContent="center" py={8}>
+          <CircularProgress />
+        </Box>
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Alert severity="error" onClose={clearError}>
+          {error}
+        </Alert>
+      </Container>
+    );
+  }
+
+  if (!currentItem) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Alert severity="warning">
+          Item não encontrado
+        </Alert>
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
+      {/* Header */}
+      <Box sx={{ mb: 4 }}>
+        <Button
+          startIcon={<ArrowBackIcon />}
+          onClick={() => navigate('/')}
+          sx={{ mb: 2 }}
+        >
+          Voltar
+        </Button>
+      </Box>
+
       <Grid container spacing={4}>
-        {/* Imagens do Item */}
-        <Grid item xs={12} md={6}>
-          <Card elevation={0} sx={{ borderRadius: 2 }}>
-            <CardMedia
-              component="img"
-              height="400"
-              image={item.images[0]}
-              alt={item.title}
-              sx={{ borderRadius: 2 }}
-            />
-          </Card>
-          <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
-            {item.images.slice(1).map((image, index) => (
-              <Card key={index} elevation={0} sx={{ width: 100, height: 80, borderRadius: 2 }}>
-                <CardMedia
-                  component="img"
-                  height="80"
-                  image={image}
-                  alt={`${item.title} ${index + 2}`}
-                  sx={{ cursor: 'pointer', borderRadius: 2 }}
-                />
-              </Card>
-            ))}
-          </Box>
-        </Grid>
-
         {/* Informações do Item */}
-        <Grid item xs={12} md={6}>
-          <Box>
-            <Typography variant="h4" gutterBottom>
-              {item.title}
-            </Typography>
-            
-            <Box display="flex" gap={1} mb={2}>
-              <Chip label={item.category} color="primary" />
-              <Chip label={item.condition} color="success" />
-            </Box>
-
-            <Typography variant="body1" paragraph>
-              {item.description}
-            </Typography>
-
-            <Box display="flex" alignItems="center" mb={2}>
-              <LocationIcon color="action" sx={{ mr: 1 }} />
-              <Typography variant="body2" color="text.secondary">
-                {item.owner.location}
+        <Grid item xs={12} md={8}>
+          <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
+            <Box sx={{ mb: 3 }}>
+              <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
+                <Typography variant="h4" component="h1" gutterBottom>
+                  {currentItem.title}
+                </Typography>
+                <Chip
+                  label={currentItem.status === 'disponivel' ? 'Disponível' : 'Indisponível'}
+                  color={currentItem.status === 'disponivel' ? 'success' : 'default'}
+                  variant="outlined"
+                />
+              </Box>
+              
+              <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+                {currentItem.description}
               </Typography>
             </Box>
 
+            <Divider sx={{ my: 3 }} />
+
+            {/* Informações do Proprietário */}
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="h6" gutterBottom>
+                <PersonIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+                Proprietário
+              </Typography>
+              <Box sx={{ ml: 4 }}>
+                <Typography variant="body1">
+                  {currentItem.owner?.name || 'Usuário não informado'}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  @{currentItem.owner?.username || 'username'}
+                </Typography>
+              </Box>
+            </Box>
+
+            {/* Data de Criação */}
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="h6" gutterBottom>
+                <TimeIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+                Data de Publicação
+              </Typography>
+              <Box sx={{ ml: 4 }}>
+                <Typography variant="body2" color="text.secondary">
+                  {new Date(currentItem.created_at).toLocaleDateString('pt-BR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </Typography>
+              </Box>
+            </Box>
+
             {/* Ações */}
-            <Box display="flex" gap={2} mb={3}>
+            <Box sx={{ mt: 4 }}>
               <Button
                 variant="contained"
                 size="large"
                 startIcon={<SwapIcon />}
-                onClick={() => setOfferDialogOpen(true)}
-                sx={{ flex: 1 }}
+                onClick={handleMakeOffer}
+                disabled={currentItem.status !== 'disponivel'}
+                sx={{ mr: 2 }}
               >
                 Fazer Oferta
               </Button>
               <Button
                 variant="outlined"
-                onClick={toggleFavorite}
-                startIcon={isFavorite ? <FavoriteIcon /> : <FavoriteBorderIcon />}
+                size="large"
+                onClick={() => navigate('/')}
               >
-                {isFavorite ? 'Favoritado' : 'Favoritar'}
-              </Button>
-              <Button variant="outlined" startIcon={<ShareIcon />}>
-                Compartilhar
+                Ver Outros Itens
               </Button>
             </Box>
+          </Paper>
+        </Grid>
 
-            {/* Informações do Proprietário */}
-            <Card sx={{ p: 2, borderRadius: 2 }}>
-              <Typography variant="h6" gutterBottom>
-                Proprietário
+        {/* Ofertas */}
+        <Grid item xs={12} md={4}>
+          <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              Ofertas ({itemOffers.length})
+            </Typography>
+            
+            {itemOffers.length === 0 ? (
+              <Typography variant="body2" color="text.secondary">
+                Nenhuma oferta ainda
               </Typography>
-              <Box display="flex" alignItems="center" gap={2}>
-                <Avatar src={item.owner.avatar} sx={{ width: 60, height: 60 }} />
-                <Box>
-                  <Typography variant="subtitle1">{item.owner.name}</Typography>
-                  <Box display="flex" alignItems="center" gap={1}>
-                    <Rating value={item.owner.rating} readOnly size="small" />
-                    <Typography variant="body2" color="text.secondary">
-                      ({item.owner.reviewCount} avaliações)
-                    </Typography>
-                  </Box>
-                  <Typography variant="body2" color="text.secondary">
-                    Membro desde {item.owner.memberSince}
-                  </Typography>
-                </Box>
+            ) : (
+              <Box sx={{ mt: 2 }}>
+                {itemOffers.map((offer) => (
+                  <Card key={offer.id} sx={{ mb: 2 }}>
+                    <CardContent sx={{ p: 2 }}>
+                      <Typography variant="subtitle2" gutterBottom>
+                        Oferta #{offer.id}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" gutterBottom>
+                        Status: {offer.status}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Por: {offer.offerer?.name || 'Usuário'}
+                      </Typography>
+                      
+                      {offer.status === 'pendente' && (
+                        <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
+                          <Button
+                            size="small"
+                            startIcon={<CheckIcon />}
+                            color="success"
+                            onClick={() => handleAcceptOffer(offer.id)}
+                          >
+                            Aceitar
+                          </Button>
+                          <Button
+                            size="small"
+                            startIcon={<CancelIcon />}
+                            color="error"
+                            onClick={() => handleRefuseOffer(offer.id)}
+                          >
+                            Recusar
+                          </Button>
+                        </Box>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
               </Box>
-              <Box display="flex" gap={1} mt={2}>
-                <Button variant="outlined" size="small" fullWidth>
-                  Ver Perfil
-                </Button>
-                <Button variant="outlined" size="small" fullWidth>
-                  Enviar Mensagem
-                </Button>
-              </Box>
-            </Card>
-          </Box>
+            )}
+          </Paper>
         </Grid>
       </Grid>
 
-      {/* Tabs com informações adicionais */}
-      <Box sx={{ mt: 4 }}>
-        <Tabs value={tabValue} onChange={handleTabChange}>
-          <Tab label="Ofertas Recebidas" />
-          <Tab label="Descrição Completa" />
-          <Tab label="Políticas de Troca" />
-        </Tabs>
-
-        <Paper sx={{ p: 3, mt: 2, borderRadius: 2 }}>
-          {tabValue === 0 && (
-            <Box>
-              <Typography variant="h6" gutterBottom>
-                Ofertas para este item ({item.offers.length})
-              </Typography>
-              <List>
-                {item.offers.map((offer) => (
-                  <ListItem key={offer.id} divider>
-                    <ListItemAvatar>
-                      <Avatar>
-                        {offer.type === 'money' ? <MoneyIcon /> : <SwapIcon />}
-                      </Avatar>
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary={
-                        offer.type === 'money'
-                          ? `R$ ${offer.amount}`
-                          : offer.itemName
-                      }
-                      secondary={`Por ${offer.user} • ${offer.date} • ${offer.status === 'accepted' ? 'Aceita' : 'Pendente'}`}
-                    />
-                    <Chip
-                      label={offer.status === 'accepted' ? 'Aceita' : 'Pendente'}
-                      color={offer.status === 'accepted' ? 'success' : 'default'}
-                      size="small"
-                    />
-                  </ListItem>
-                ))}
-              </List>
-            </Box>
-          )}
-
-          {tabValue === 1 && (
-            <Box>
-              <Typography variant="h6" gutterBottom>
-                Descrição Detalhada
-              </Typography>
-              <Typography variant="body1">
-                {item.description}
-              </Typography>
-            </Box>
-          )}
-
-          {tabValue === 2 && (
-            <Box>
-              <Typography variant="h6" gutterBottom>
-                Políticas de Troca
-              </Typography>
-              <Typography variant="body1" paragraph>
-                • Trocas preferencialmente presenciais na região de São Paulo
-              </Typography>
-              <Typography variant="body1" paragraph>
-                • Aceito tanto ofertas em dinheiro quanto troca por outros livros
-              </Typography>
-              <Typography variant="body1" paragraph>
-                • Item deve ser retirado em até 7 dias após confirmação da troca
-              </Typography>
-            </Box>
-          )}
-        </Paper>
-      </Box>
-
-      {/* Dialog para fazer oferta */}
-      <Dialog open={offerDialogOpen} onClose={() => setOfferDialogOpen(false)} maxWidth="sm" fullWidth>
+      {/* Dialog para Fazer Oferta */}
+      <Dialog open={showOfferDialog} onClose={handleCloseOfferDialog} maxWidth="sm" fullWidth>
         <DialogTitle>Fazer Oferta</DialogTitle>
         <DialogContent>
-          <Box sx={{ mb: 3 }}>
-            <Typography variant="subtitle1" gutterBottom>
-              Tipo de Oferta
-            </Typography>
-            <Box display="flex" gap={2}>
-              <Button
-                variant={offerType === 'money' ? 'contained' : 'outlined'}
-                onClick={() => setOfferType('money')}
-                startIcon={<MoneyIcon />}
-              >
-                Dinheiro
-              </Button>
-              <Button
-                variant={offerType === 'item' ? 'contained' : 'outlined'}
-                onClick={() => setOfferType('item')}
-                startIcon={<SwapIcon />}
-              >
-                Trocar por Item
-              </Button>
-            </Box>
-          </Box>
-
-          {offerType === 'money' ? (
-            <TextField
-              fullWidth
-              label="Valor da Oferta (R$)"
-              type="number"
-              value={moneyOffer}
-              onChange={(e) => setMoneyOffer(e.target.value)}
-              InputProps={{
-                startAdornment: <Typography sx={{ mr: 1 }}>R$</Typography>,
-              }}
-            />
-          ) : (
-            <TextField
-              fullWidth
-              label="Que item você quer oferecer?"
-              multiline
-              rows={3}
-              value={itemOffer}
-              onChange={(e) => setItemOffer(e.target.value)}
-              placeholder="Descreva o item que você gostaria de oferecer em troca..."
-            />
-          )}
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Selecione um item seu para trocar por "{currentItem.title}"
+          </Typography>
+          
+          <FormControl fullWidth sx={{ mt: 2 }}>
+            <InputLabel>Seu Item</InputLabel>
+            <Select
+              value={offerData.item_offered}
+              label="Seu Item"
+              onChange={(e) => setOfferData({ ...offerData, item_offered: e.target.value })}
+            >
+              {availableItems.map((item) => (
+                <MenuItem key={item.id} value={item.id}>
+                  {item.title}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOfferDialogOpen(false)}>Cancelar</Button>
-          <Button onClick={handleOfferSubmit} variant="contained">
+          <Button onClick={handleCloseOfferDialog}>Cancelar</Button>
+          <Button 
+            onClick={handleSubmitOffer}
+            variant="contained"
+            disabled={!offerData.item_offered}
+          >
             Enviar Oferta
           </Button>
         </DialogActions>

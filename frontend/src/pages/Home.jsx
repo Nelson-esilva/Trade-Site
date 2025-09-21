@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
   Typography,
@@ -13,6 +13,8 @@ import {
   Chip,
   InputAdornment,
   Paper,
+  CircularProgress,
+  Alert,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -22,55 +24,74 @@ import {
   Science as ScienceIcon,
   Computer as ComputerIcon,
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
+import { useApp } from '../contexts/AppContext';
+import ItemCard from '../components/ItemCard';
 
 const Home = () => {
+  const navigate = useNavigate();
+  const { 
+    items, 
+    loadingItems, 
+    error, 
+    searchItems, 
+    loadItems,
+    clearError 
+  } = useApp();
+  
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchFilters, setSearchFilters] = useState({
+    category: '',
+    status: 'disponivel',
+  });
 
-  // Mock data para demonstração
-  const featuredItems = [
-    {
-      id: 1,
-      title: 'Livro de Cálculo I - Stewart',
-      description: 'Livro em ótimo estado, usado apenas um semestre',
-      category: 'Livros',
-      location: 'São Paulo, SP',
-      image: '/api/placeholder/300/200',
-      offers: 3,
-    },
-    {
-      id: 2,
-      title: 'Kit Microscópio Escolar',
-      description: 'Microscópio com acessórios completos para estudos',
-      category: 'Equipamentos',
-      location: 'Rio de Janeiro, RJ',
-      image: '/api/placeholder/300/200',
-      offers: 1,
-    },
-    {
-      id: 3,
-      title: 'Apostila Curso de Programação',
-      description: 'Material completo de curso de desenvolvimento web',
-      category: 'Apostilas',
-      location: 'Belo Horizonte, MG',
-      image: '/api/placeholder/300/200',
-      offers: 5,
-    },
-  ];
+  // Carregar itens quando o componente monta
+  useEffect(() => {
+    loadItems();
+  }, [loadItems]);
 
+  // Categorias estáticas (podem ser dinâmicas no futuro)
   const categories = [
-    { name: 'Livros', icon: <BookIcon fontSize="large" />, count: 1250 },
-    { name: 'Apostilas', icon: <SchoolIcon fontSize="large" />, count: 890 },
-    { name: 'Equipamentos', icon: <ScienceIcon fontSize="large" />, count: 340 },
-    { name: 'Tecnologia', icon: <ComputerIcon fontSize="large" />, count: 567 },
+    { name: 'Livros', icon: <BookIcon fontSize="large" />, count: items.filter(item => item.title?.toLowerCase().includes('livro')).length },
+    { name: 'Apostilas', icon: <SchoolIcon fontSize="large" />, count: items.filter(item => item.title?.toLowerCase().includes('apostila')).length },
+    { name: 'Equipamentos', icon: <ScienceIcon fontSize="large" />, count: items.filter(item => item.title?.toLowerCase().includes('equipamento')).length },
+    { name: 'Tecnologia', icon: <ComputerIcon fontSize="large" />, count: items.filter(item => item.title?.toLowerCase().includes('tecnologia')).length },
   ];
 
-  const handleSearch = () => {
-    console.log('Buscar por:', searchTerm);
-    // Implementar lógica de busca
+  const handleSearch = async () => {
+    if (searchTerm.trim()) {
+      await searchItems(searchTerm, searchFilters);
+    } else {
+      await loadItems();
+    }
+  };
+
+  const handleCategoryClick = async (category) => {
+    setSearchFilters({ ...searchFilters, category: category.name });
+    await searchItems('', { ...searchFilters, category: category.name });
+  };
+
+  const handleItemClick = (item) => {
+    navigate(`/item/${item.id}`);
+  };
+
+  const handleMakeOffer = (item) => {
+    navigate(`/item/${item.id}#offer`);
   };
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
+      {/* Error Alert */}
+      {error && (
+        <Alert 
+          severity="error" 
+          onClose={clearError}
+          sx={{ mb: 3 }}
+        >
+          {error}
+        </Alert>
+      )}
+
       {/* Hero Section */}
       <Box textAlign="center" mb={6} sx={{ backgroundColor: 'primary.main', color: 'white', py: 8, borderRadius: 2 }}>
         <Typography variant="h2" component="h1" gutterBottom>
@@ -91,6 +112,7 @@ const Home = () => {
               placeholder="O que você está procurando?"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -103,8 +125,9 @@ const Home = () => {
               variant="contained"
               onClick={handleSearch}
               sx={{ minWidth: 100 }}
+              disabled={loadingItems}
             >
-              Buscar
+              {loadingItems ? <CircularProgress size={20} /> : 'Buscar'}
             </Button>
           </Box>
         </Paper>
@@ -126,6 +149,7 @@ const Home = () => {
                   textAlign: 'center',
                   p: 2,
                 }}
+                onClick={() => handleCategoryClick(category)}
               >
                 <CardContent>
                   <Box color="primary.main" mb={1}>
@@ -144,60 +168,62 @@ const Home = () => {
         </Grid>
       </Box>
 
-      {/* Featured Items */}
+      {/* Items Section */}
       <Box>
-        <Typography variant="h4" gutterBottom sx={{ mb: 3 }}>
-          Itens em Destaque
-        </Typography>
-        <Grid container spacing={3}>
-          {featuredItems.map((item) => (
-            <Grid item xs={12} sm={6} md={4} key={item.id}>
-              <Card
-                sx={{
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  cursor: 'pointer',
-                  transition: 'transform 0.2s',
-                  '&:hover': { transform: 'translateY(-4px)' },
-                }}
-              >
-                <CardMedia
-                  component="img"
-                  height="200"
-                  image={item.image}
-                  alt={item.title}
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+          <Typography variant="h4">
+            {searchTerm ? `Resultados para "${searchTerm}"` : 'Itens Disponíveis'}
+          </Typography>
+          <Button
+            variant="contained"
+            onClick={() => navigate('/create-item')}
+            sx={{ minWidth: 150 }}
+          >
+            Adicionar Item
+          </Button>
+        </Box>
+
+        {loadingItems ? (
+          <Box display="flex" justifyContent="center" py={4}>
+            <CircularProgress />
+          </Box>
+        ) : items.length === 0 ? (
+          <Box textAlign="center" py={8}>
+            <Typography variant="h6" color="text.secondary" gutterBottom>
+              Nenhum item encontrado
+            </Typography>
+            <Typography variant="body2" color="text.secondary" mb={3}>
+              {searchTerm 
+                ? 'Tente ajustar sua busca ou filtros'
+                : 'Seja o primeiro a adicionar um item!'
+              }
+            </Typography>
+            <Button
+              variant="contained"
+              onClick={() => navigate('/create-item')}
+            >
+              Adicionar Primeiro Item
+            </Button>
+          </Box>
+        ) : (
+          <Grid container spacing={3}>
+            {items.map((item) => (
+              <Grid item xs={12} sm={6} md={4} key={item.id}>
+                <ItemCard
+                  item={{
+                    ...item,
+                    category: 'Geral', // Categoria padrão
+                    location: 'Local não informado',
+                    offerCount: 0,
+                    image: '/api/placeholder/300/200',
+                  }}
+                  onViewDetails={handleItemClick}
+                  onMakeOffer={handleMakeOffer}
                 />
-                <CardContent sx={{ flexGrow: 1 }}>
-                  <Typography variant="h6" gutterBottom>
-                    {item.title}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" mb={2}>
-                    {item.description}
-                  </Typography>
-                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-                    <Chip label={item.category} size="small" color="primary" />
-                    <Typography variant="body2" color="text.secondary">
-                      {item.offers} ofertas
-                    </Typography>
-                  </Box>
-                  <Box display="flex" alignItems="center" color="text.secondary">
-                    <LocationIcon fontSize="small" sx={{ mr: 0.5 }} />
-                    <Typography variant="body2">{item.location}</Typography>
-                  </Box>
-                </CardContent>
-                <CardActions>
-                  <Button size="small" color="primary">
-                    Ver Detalhes
-                  </Button>
-                  <Button size="small" color="secondary">
-                    Fazer Oferta
-                  </Button>
-                </CardActions>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
+              </Grid>
+            ))}
+          </Grid>
+        )}
       </Box>
     </Container>
   );

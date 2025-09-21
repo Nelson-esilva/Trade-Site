@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: trade-site-db
+    environment:
+      POSTGRES_DB: trade_site_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    build: .
+    container_name: trade-site-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DEBUG=1
+      - SECRET_KEY=django-insecure-88kl-y8-rj-5281cv29d_wdw-a-h-lrh-wo9_5t3-o-4-k
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/trade_site_db
+      - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
+    depends_on:
+      - db
+    command: >
+      sh -c "sleep 10 &&
+             python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             gunicorn --bind 0.0.0.0:8000 --workers 3 core.wsgi:application"
+
+volumes:
+  postgres_data:

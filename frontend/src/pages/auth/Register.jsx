@@ -23,24 +23,24 @@ import {
   Phone as PhoneIcon,
   LocationOn as LocationIcon,
 } from '@mui/icons-material';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { useApp } from '../../contexts/AppContext';
 
 const Register = () => {
+  const navigate = useNavigate();
+  const { registerUser, loading, error, clearError } = useApp();
+  
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    username: '',
     email: '',
-    phone: '',
-    city: '',
-    state: '',
+    name: '',
     password: '',
     confirmPassword: '',
     acceptTerms: false,
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -48,47 +48,73 @@ const Register = () => {
       ...formData,
       [name]: type === 'checkbox' ? checked : value,
     });
+    
+    // Limpar erro do campo quando o usuário começar a digitar
+    if (formErrors[name]) {
+      setFormErrors({
+        ...formErrors,
+        [name]: '',
+      });
+    }
   };
 
   const validateForm = () => {
+    const errors = {};
+    
+    if (!formData.username.trim()) {
+      errors.username = 'Nome de usuário é obrigatório';
+    } else if (formData.username.trim().length < 3) {
+      errors.username = 'Nome de usuário deve ter pelo menos 3 caracteres';
+    }
+    
+    if (!formData.name.trim()) {
+      errors.name = 'Nome completo é obrigatório';
+    } else if (formData.name.trim().length < 2) {
+      errors.name = 'Nome deve ter pelo menos 2 caracteres';
+    }
+    
+    if (!formData.email.trim()) {
+      errors.email = 'Email é obrigatório';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      errors.email = 'Email inválido';
+    }
+    
+    if (!formData.password) {
+      errors.password = 'Senha é obrigatória';
+    } else if (formData.password.length < 6) {
+      errors.password = 'Senha deve ter pelo menos 6 caracteres';
+    }
+    
     if (formData.password !== formData.confirmPassword) {
-      setError('As senhas não coincidem');
-      return false;
+      errors.confirmPassword = 'As senhas não coincidem';
     }
-    if (formData.password.length < 6) {
-      setError('A senha deve ter pelo menos 6 caracteres');
-      return false;
-    }
+    
     if (!formData.acceptTerms) {
-      setError('Você deve aceitar os termos de uso');
-      return false;
+      errors.acceptTerms = 'Você deve aceitar os termos de uso';
     }
-    return true;
+    
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    clearError();
 
     if (!validateForm()) {
       return;
     }
 
-    setLoading(true);
-
     try {
-      // Implementar lógica de cadastro aqui
-      console.log('Register data:', formData);
-      
-      // Simulação de delay da API
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Redirecionar para login ou dashboard
-      // navigate('/login');
-    } catch (err) {
-      setError('Erro ao criar conta. Tente novamente.');
-    } finally {
-      setLoading(false);
+      await registerUser({
+        username: formData.username,
+        email: formData.email,
+        name: formData.name,
+        password: formData.password,
+      });
+      navigate('/');
+    } catch (error) {
+      console.error('Erro ao registrar usuário:', error);
     }
   };
 
@@ -125,7 +151,7 @@ const Register = () => {
           </Box>
 
           {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
+            <Alert severity="error" onClose={clearError} sx={{ mb: 2 }}>
               {error}
             </Alert>
           )}
@@ -136,12 +162,14 @@ const Register = () => {
                 <TextField
                   required
                   fullWidth
-                  id="firstName"
-                  label="Nome"
-                  name="firstName"
-                  autoComplete="given-name"
-                  value={formData.firstName}
+                  id="username"
+                  label="Nome de Usuário"
+                  name="username"
+                  autoComplete="username"
+                  value={formData.username}
                   onChange={handleChange}
+                  error={!!formErrors.username}
+                  helperText={formErrors.username}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
@@ -155,12 +183,14 @@ const Register = () => {
                 <TextField
                   required
                   fullWidth
-                  id="lastName"
-                  label="Sobrenome"
-                  name="lastName"
-                  autoComplete="family-name"
-                  value={formData.lastName}
+                  id="name"
+                  label="Nome Completo"
+                  name="name"
+                  autoComplete="name"
+                  value={formData.name}
                   onChange={handleChange}
+                  error={!!formErrors.name}
+                  helperText={formErrors.name}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -173,45 +203,12 @@ const Register = () => {
                   autoComplete="email"
                   value={formData.email}
                   onChange={handleChange}
+                  error={!!formErrors.email}
+                  helperText={formErrors.email}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
                         <EmailIcon color="action" />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  id="phone"
-                  label="Telefone"
-                  name="phone"
-                  autoComplete="tel"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <PhoneIcon color="action" />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  id="city"
-                  label="Cidade"
-                  name="city"
-                  value={formData.city}
-                  onChange={handleChange}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <LocationIcon color="action" />
                       </InputAdornment>
                     ),
                   }}
@@ -228,25 +225,8 @@ const Register = () => {
                   autoComplete="new-password"
                   value={formData.password}
                   onChange={handleChange}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <LockIcon color="action" />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  required
-                  fullWidth
-                  name="confirmPassword"
-                  label="Confirmar Senha"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  id="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
+                  error={!!formErrors.password}
+                  helperText={formErrors.password}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
@@ -268,6 +248,38 @@ const Register = () => {
                 />
               </Grid>
               <Grid item xs={12}>
+                <TextField
+                  required
+                  fullWidth
+                  name="confirmPassword"
+                  label="Confirmar Senha"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  id="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  error={!!formErrors.confirmPassword}
+                  helperText={formErrors.confirmPassword}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <LockIcon color="action" />
+                      </InputAdornment>
+                    ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="toggle confirm password visibility"
+                          onClick={toggleConfirmPasswordVisibility}
+                          edge="end"
+                        >
+                          {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
                 <FormControlLabel
                   control={
                     <Checkbox
@@ -278,7 +290,7 @@ const Register = () => {
                     />
                   }
                   label={
-                    <Typography variant="body2">
+                    <Typography variant="body2" color={formErrors.acceptTerms ? 'error' : 'inherit'}>
                       Eu aceito os{' '}
                       <Link href="#" underline="hover">
                         Termos de Uso
@@ -290,6 +302,11 @@ const Register = () => {
                     </Typography>
                   }
                 />
+                {formErrors.acceptTerms && (
+                  <Typography variant="body2" color="error" sx={{ mt: 1 }}>
+                    {formErrors.acceptTerms}
+                  </Typography>
+                )}
               </Grid>
             </Grid>
             

@@ -20,9 +20,11 @@ import {
   Add as AddIcon,
   AccountCircle,
   Menu as MenuIcon,
+  SwapHoriz as SwapIcon,
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
+import { useApp } from '../../contexts/AppContext';
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -67,15 +69,13 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 
 const Header = () => {
   const navigate = useNavigate();
+  const { user, isAuthenticated, logout, offers } = useApp();
   const [anchorEl, setAnchorEl] = useState(null);
   const [mobileMenuAnchorEl, setMobileMenuAnchorEl] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
   
-  // Mock user data - em produção viria do contexto de autenticação
-  const user = {
-    name: 'João Silva',
-    avatar: '/api/placeholder/40/40',
-    isLoggedIn: true,
-  };
+  // Contar ofertas pendentes
+  const pendingOffersCount = offers.filter(offer => offer.status === 'pendente').length;
 
   const handleProfileMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -91,9 +91,14 @@ const Header = () => {
   };
 
   const handleLogout = () => {
-    // Implementar lógica de logout
-    console.log('Logout');
+    logout();
     handleMenuClose();
+  };
+
+  const handleSearch = (e) => {
+    if (e.key === 'Enter' && searchTerm.trim()) {
+      navigate(`/?search=${encodeURIComponent(searchTerm)}`);
+    }
   };
 
   const menuId = 'primary-search-account-menu';
@@ -119,7 +124,7 @@ const Header = () => {
       <MenuItem onClick={() => { navigate('/my-items'); handleMenuClose(); }}>
         Meus Itens
       </MenuItem>
-      <MenuItem onClick={() => { navigate('/my-offers'); handleMenuClose(); }}>
+      <MenuItem onClick={() => { navigate('/offers'); handleMenuClose(); }}>
         Minhas Ofertas
       </MenuItem>
       <MenuItem onClick={() => { navigate('/settings'); handleMenuClose(); }}>
@@ -158,6 +163,9 @@ const Header = () => {
             placeholder="Buscar materiais..."
             inputProps={{ 'aria-label': 'search' }}
             sx={{ color: 'white' }}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyPress={handleSearch}
           />
         </Search>
 
@@ -165,26 +173,24 @@ const Header = () => {
 
         {/* Desktop Menu */}
         <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1 }}>
-          {user.isLoggedIn ? (
+          {isAuthenticated ? (
             <>
               <Button
                 color="inherit"
                 startIcon={<AddIcon />}
-                onClick={() => navigate('/add-item')}
+                onClick={() => navigate('/create-item')}
                 sx={{ color: 'white', borderColor: 'white' }}
               >
                 Anunciar
               </Button>
               
-              <IconButton color="inherit" sx={{ color: 'white' }}>
-                <Badge badgeContent={4} color="error">
-                  <NotificationsIcon />
-                </Badge>
-              </IconButton>
-              
-              <IconButton color="inherit" sx={{ color: 'white' }}>
-                <Badge badgeContent={2} color="error">
-                  <MessageIcon />
+              <IconButton 
+                color="inherit" 
+                sx={{ color: 'white' }}
+                onClick={() => navigate('/offers')}
+              >
+                <Badge badgeContent={pendingOffersCount} color="error">
+                  <SwapIcon />
                 </Badge>
               </IconButton>
               
@@ -199,9 +205,10 @@ const Header = () => {
                 sx={{ color: 'white' }}
               >
                 <Avatar
-                  src={user.avatar}
-                  sx={{ width: 32, height: 32 }}
-                />
+                  sx={{ width: 32, height: 32, backgroundColor: 'secondary.main' }}
+                >
+                  {user?.name?.charAt(0) || 'U'}
+                </Avatar>
               </IconButton>
             </>
           ) : (
@@ -247,6 +254,9 @@ const Header = () => {
             inputProps={{ 'aria-label': 'search' }}
             fullWidth
             sx={{ color: 'white' }}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyPress={handleSearch}
           />
         </Search>
       </Box>

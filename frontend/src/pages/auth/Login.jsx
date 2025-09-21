@@ -17,9 +17,10 @@ import {
   Email as EmailIcon,
   Lock as LockIcon,
 } from '@mui/icons-material';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 
 const Login = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -41,14 +42,16 @@ const Login = () => {
     setError('');
 
     try {
-      // Implementar lógica de login aqui
+      // Como não temos autenticação real no backend, vamos simular um login
+      // Em produção, isso seria uma chamada real para a API
       console.log('Login data:', formData);
       
       // Simulação de delay da API
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Redirecionar para dashboard ou home
-      // navigate('/dashboard');
+      // Para desenvolvimento, vamos apenas redirecionar
+      // Em produção, você faria a autenticação real aqui
+      navigate('/');
     } catch (err) {
       setError('Email ou senha incorretos');
     } finally {
