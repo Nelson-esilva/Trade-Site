@@ -6,43 +6,54 @@ from rest_framework.response import Response
 from .models import User
 from .serializers import UserSerializer
 
+class IsTradeAdminOrReadOnly(permissions.BasePermission):
+    """
+    Permissão para permitir que apenas administradores de troca façam operações de escrita.
+    """
+    def has_permission(self, request, view):
+        # Superusuários e administradores de troca têm acesso total
+        if hasattr(request.user, 'is_trade_admin') and request.user.is_trade_admin:
+            return True
+        if request.user.is_superuser:
+            return True
+            
+        # Para métodos seguros, todos podem acessar
+        if request.method in permissions.SAFE_METHODS:
+            return True
+            
+        # Para outros métodos, apenas administradores
+        return False
+
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     """
     ViewSet para listar e visualizar usuários.
-    DESENVOLVIMENTO: Sem permissões - acesso livre para todos.
+    - Lista: apenas administradores de troca
+    - Detalhes: usuários autenticados
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    # DESENVOLVIMENTO: Removidas todas as permissões
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [IsTradeAdminOrReadOnly]
 
-    # DESENVOLVIMENTO: Comentado o método de permissões
-    # def get_permissions(self):
-    #     """
-    #     Define permissões diferentes para ações diferentes.
-    #     - 'list': Apenas administradores.
-    #     - 'retrieve', 'me': Qualquer usuário autenticado.
-    #     """
-    #     if self.action == 'list':
-    #         self.permission_classes = [permissions.IsAdminUser]
-    #     else:
-    #         self.permission_classes = [permissions.IsAuthenticated]
-    #     return super().get_permissions()
+    def get_permissions(self):
+        """
+        Define permissões diferentes para ações diferentes.
+        - 'list': Apenas administradores de troca.
+        - 'retrieve', 'me': Qualquer usuário autenticado.
+        """
+        if self.action == 'list':
+            self.permission_classes = [IsTradeAdminOrReadOnly]
+        else:
+            self.permission_classes = [permissions.IsAuthenticated]
+        return super().get_permissions()
 
     @action(detail=False, methods=['get'], url_path='me')
     def me(self, request):
         """
         Endpoint customizado que retorna os dados do usuário logado.
-        DESENVOLVIMENTO: Retorna o primeiro usuário disponível.
         Acessível em /api/users/me/
         """
-        # DESENVOLVIMENTO: Se não há usuário logado, retorna o primeiro usuário
-        if hasattr(request, 'user') and request.user.is_authenticated:
-            user = request.user
+        if request.user.is_authenticated:
+            serializer = self.get_serializer(request.user)
+            return Response(serializer.data)
         else:
-            user = User.objects.first()
-            if not user:
-                return Response({'error': 'Nenhum usuário encontrado'}, status=404)
-        
-        serializer = self.get_serializer(user)
-        return Response(serializer.data)
+            return Response({'error': 'Usuário não autenticado'}, status=401)

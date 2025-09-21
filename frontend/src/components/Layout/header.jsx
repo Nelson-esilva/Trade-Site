@@ -16,7 +16,6 @@ import {
 import {
   Search as SearchIcon,
   Add as AddIcon,
-  Menu as MenuIcon,
   SwapHoriz as SwapIcon,
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
@@ -68,7 +67,6 @@ const Header = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated, logout, offers } = useApp();
   const [anchorEl, setAnchorEl] = useState(null);
-  const [mobileMenuAnchorEl, setMobileMenuAnchorEl] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   
   // Contar ofertas pendentes
@@ -78,18 +76,14 @@ const Header = () => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleMobileMenuOpen = (event) => {
-    setMobileMenuAnchorEl(event.currentTarget);
-  };
-
   const handleMenuClose = () => {
     setAnchorEl(null);
-    setMobileMenuAnchorEl(null);
   };
 
   const handleLogout = () => {
     logout();
     handleMenuClose();
+    navigate('/login');
   };
 
   const handleSearch = (e) => {
@@ -121,7 +115,7 @@ const Header = () => {
       <MenuItem onClick={() => { navigate('/my-items'); handleMenuClose(); }}>
         Meus Itens
       </MenuItem>
-      <MenuItem onClick={() => { navigate('/offers'); handleMenuClose(); }}>
+      <MenuItem onClick={() => { navigate('/my-offers'); handleMenuClose(); }}>
         Minhas Ofertas
       </MenuItem>
       <MenuItem onClick={() => { navigate('/settings'); handleMenuClose(); }}>
@@ -226,18 +220,6 @@ const Header = () => {
         </Box>
 
         {/* Mobile Menu */}
-        <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
-          <IconButton
-            size="large"
-            aria-label="show more"
-            aria-haspopup="true"
-            onClick={handleMobileMenuOpen}
-            color="inherit"
-            sx={{ color: 'white' }}
-          >
-            <MenuIcon />
-          </IconButton>
-        </Box>
       </Toolbar>
 
       {/* Search Bar - Mobile */}

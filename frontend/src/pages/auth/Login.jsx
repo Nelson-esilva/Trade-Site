@@ -18,16 +18,16 @@ import {
   Lock as LockIcon,
 } from '@mui/icons-material';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { useApp } from '../../contexts/AppContext';
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login, loading, error, clearError } = useApp();
   const [formData, setFormData] = useState({
-    email: '',
+    username: '',
     password: '',
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -38,24 +38,14 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError('');
+    clearError();
 
     try {
-      // Como não temos autenticação real no backend, vamos simular um login
-      // Em produção, isso seria uma chamada real para a API
-      console.log('Login data:', formData);
-      
-      // Simulação de delay da API
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Para desenvolvimento, vamos apenas redirecionar
-      // Em produção, você faria a autenticação real aqui
+      await login(formData.username, formData.password);
       navigate('/');
     } catch (err) {
-      setError('Email ou senha incorretos');
-    } finally {
-      setLoading(false);
+      // Erro já é tratado pelo contexto
+      console.error('Erro no login:', err);
     }
   };
 
@@ -97,12 +87,12 @@ const Login = () => {
               margin="normal"
               required
               fullWidth
-              id="email"
-              label="Email"
-              name="email"
-              autoComplete="email"
+              id="username"
+              label="Usuário"
+              name="username"
+              autoComplete="username"
               autoFocus
-              value={formData.email}
+              value={formData.username}
               onChange={handleChange}
               InputProps={{
                 startAdornment: (

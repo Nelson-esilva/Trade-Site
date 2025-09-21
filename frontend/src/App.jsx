@@ -13,6 +13,9 @@ import Register from './pages/auth/Register';
 import ItemDetails from './pages/items/ItemDetails';
 import CreateItem from './pages/items/CreateItem';
 import Offers from './pages/offers/Offers';
+import Profile from './pages/Profile';
+import MyItems from './pages/MyItems';
+import MyOffers from './pages/MyOffers';
 
 import './App.css';
 
@@ -30,6 +33,9 @@ function App() {
               <Route path="/item/:id" element={<ItemDetails />} />
               <Route path="/create-item" element={<CreateItem />} />
               <Route path="/offers" element={<Offers />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/my-items" element={<MyItems />} />
+              <Route path="/my-offers" element={<MyOffers />} />
               {/* Adicionar mais rotas conforme necessário */}
             </Routes>
           </Layout>

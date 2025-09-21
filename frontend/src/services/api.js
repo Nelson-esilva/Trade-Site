@@ -7,13 +7,29 @@ class ApiService {
     this.baseURL = API_BASE_URL;
   }
 
+  // Método para obter o token de autenticação
+  getAuthToken() {
+    return localStorage.getItem('token');
+  }
+
+  // Método para definir o token de autenticação
+  setAuthToken(token) {
+    if (token) {
+      localStorage.setItem('token', token);
+    } else {
+      localStorage.removeItem('token');
+    }
+  }
+
   // Método genérico para fazer requisições
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`;
+    const token = this.getAuthToken();
     
     const config = {
       headers: {
         'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Token ${token}` }),
         ...options.headers,
       },
       ...options,
@@ -74,6 +90,27 @@ class ApiService {
 
   // ===== SERVIÇOS ESPECÍFICOS =====
 
+  // === AUTENTICAÇÃO ===
+  async login(username, password) {
+    const response = await this.post('/auth/login/', { username, password });
+    if (response.token) {
+      this.setAuthToken(response.token);
+    }
+    return response;
+  }
+
+  async logout() {
+    this.setAuthToken(null);
+  }
+
+  async registerUser(userData) {
+    const response = await this.post('/auth/register/', userData);
+    if (response.token) {
+      this.setAuthToken(response.token);
+    }
+    return response;
+  }
+
   // === USUÁRIOS ===
   async getUsers() {
     return this.get('/users/');
@@ -85,10 +122,6 @@ class ApiService {
 
   async getCurrentUser() {
     return this.get('/users/me/');
-  }
-
-  async registerUser(userData) {
-    return this.post('/auth/register/', userData);
   }
 
   // === ITENS ===
@@ -110,6 +143,10 @@ class ApiService {
 
   async deleteItem(id) {
     return this.delete(`/items/${id}/`);
+  }
+
+  async changeItemStatus(id, status) {
+    return this.patch(`/items/${id}/change_status/`, { status });
   }
 
   // === OFERTAS ===

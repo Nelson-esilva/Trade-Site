@@ -23,7 +23,6 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../contexts/AppContext';
 import ItemCard from '../components/ItemCard';
-import ImageEditModal from '../components/ImageEditModal';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -41,22 +40,38 @@ const Home = () => {
     category: '',
     status: 'disponivel',
   });
-  const [imageEditModal, setImageEditModal] = useState({
-    open: false,
-    item: null,
-  });
 
   // Carregar itens quando o componente monta
   useEffect(() => {
     loadItems();
   }, [loadItems]);
 
-  // Categorias estáticas (podem ser dinâmicas no futuro)
+  // Categorias com contagem dinâmica
   const categories = [
-    { name: 'Livros', icon: <BookIcon fontSize="large" />, count: Array.isArray(items) ? items.filter(item => item.title?.toLowerCase().includes('livro')).length : 0 },
-    { name: 'Apostilas', icon: <SchoolIcon fontSize="large" />, count: Array.isArray(items) ? items.filter(item => item.title?.toLowerCase().includes('apostila')).length : 0 },
-    { name: 'Equipamentos', icon: <ScienceIcon fontSize="large" />, count: Array.isArray(items) ? items.filter(item => item.title?.toLowerCase().includes('equipamento')).length : 0 },
-    { name: 'Tecnologia', icon: <ComputerIcon fontSize="large" />, count: Array.isArray(items) ? items.filter(item => item.title?.toLowerCase().includes('tecnologia')).length : 0 },
+    { 
+      name: 'Livros', 
+      key: 'livros',
+      icon: <BookIcon fontSize="large" />, 
+      count: Array.isArray(items) ? items.filter(item => item.category === 'livros').length : 0 
+    },
+    { 
+      name: 'Apostilas', 
+      key: 'apostilas',
+      icon: <SchoolIcon fontSize="large" />, 
+      count: Array.isArray(items) ? items.filter(item => item.category === 'apostilas').length : 0 
+    },
+    { 
+      name: 'Equipamentos', 
+      key: 'equipamentos',
+      icon: <ScienceIcon fontSize="large" />, 
+      count: Array.isArray(items) ? items.filter(item => item.category === 'equipamentos').length : 0 
+    },
+    { 
+      name: 'Tecnologia', 
+      key: 'tecnologia',
+      icon: <ComputerIcon fontSize="large" />, 
+      count: Array.isArray(items) ? items.filter(item => item.category === 'tecnologia').length : 0 
+    },
   ];
 
   const handleSearch = async () => {
@@ -68,35 +83,19 @@ const Home = () => {
   };
 
   const handleCategoryClick = async (category) => {
-    setSearchFilters({ ...searchFilters, category: category.name });
-    await searchItems('', { ...searchFilters, category: category.name });
-  };
-
-  const handleEditImage = (item) => {
-    setImageEditModal({
-      open: true,
-      item: item,
-    });
-  };
-
-  const handleCloseImageModal = () => {
-    setImageEditModal({
-      open: false,
-      item: null,
-    });
-  };
-
-  const handleSaveImage = async (itemId, imageData) => {
-    try {
-      // TODO: Implementar atualização da imagem via API
-      console.log('Salvando imagem para item:', itemId, imageData);
-      // Por enquanto, apenas recarregamos os itens
-      await loadItems();
-    } catch (error) {
-      console.error('Erro ao salvar imagem:', error);
-      throw error;
+    // Se clicou na mesma categoria, limpar o filtro
+    if (searchFilters.category === category.key) {
+      const newFilters = { ...searchFilters, category: '' };
+      setSearchFilters(newFilters);
+      await loadItems(); // Carregar todos os itens
+    } else {
+      // Aplicar filtro da categoria
+      const newFilters = { ...searchFilters, category: category.key };
+      setSearchFilters(newFilters);
+      await searchItems('', newFilters);
     }
   };
+
 
   const handleItemClick = (item) => {
     navigate(`/item/${item.id}`);
@@ -175,6 +174,9 @@ const Home = () => {
                   '&:hover': { transform: 'translateY(-4px)' },
                   textAlign: 'center',
                   p: 2,
+                  backgroundColor: searchFilters.category === category.key ? 'primary.light' : 'background.paper',
+                  border: searchFilters.category === category.key ? '2px solid' : '1px solid',
+                  borderColor: searchFilters.category === category.key ? 'primary.main' : 'divider',
                 }}
                 onClick={() => handleCategoryClick(category)}
               >
@@ -263,16 +265,16 @@ const Home = () => {
                   <ItemCard
                     item={{
                       ...item,
-                      category: item.category || 'Geral',
+                      category: item.category || 'livros',
                       location: item.location || 'Local não informado',
                       offerCount: item.offerCount || 0,
                       image: item.image || getExampleImage(item.title),
                       condition: item.condition || 'Bom estado',
+                      status: item.status || 'disponivel',
                     }}
                     compact={true}
                     onViewDetails={handleItemClick}
                     onMakeOffer={handleMakeOffer}
-                    onEditImage={handleEditImage}
                   />
                 </Grid>
               );
@@ -281,13 +283,6 @@ const Home = () => {
         )}
       </Box>
 
-      {/* Modal de Edição de Imagem */}
-      <ImageEditModal
-        open={imageEditModal.open}
-        onClose={handleCloseImageModal}
-        item={imageEditModal.item}
-        onSave={handleSaveImage}
-      />
     </Container>
   );
 };

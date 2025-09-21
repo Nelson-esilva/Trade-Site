@@ -20,7 +20,6 @@ import {
   Visibility as ViewIcon,
   SwapHoriz as SwapIcon,
   Person as PersonIcon,
-  Edit as EditIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
@@ -32,10 +31,28 @@ const ItemCard = ({
   onShare,
   onViewDetails,
   onMakeOffer,
-  onEditImage
 }) => {
   const navigate = useNavigate();
   const [isFavorite, setIsFavorite] = useState(item.isFavorite || false);
+
+  const getCategoryLabel = (category) => {
+    const categoryLabels = {
+      'livros': 'Livros',
+      'apostilas': 'Apostilas',
+      'equipamentos': 'Equipamentos',
+      'tecnologia': 'Tecnologia',
+    };
+    return categoryLabels[category] || category;
+  };
+
+  const getStatusInfo = (status) => {
+    const statusInfo = {
+      'disponivel': { label: 'Disponível', color: 'success' },
+      'indisponível': { label: 'Indisponível', color: 'error' },
+      'trocado': { label: 'Trocado', color: 'info' },
+    };
+    return statusInfo[status] || { label: status, color: 'default' };
+  };
 
   const handleFavoriteClick = (e) => {
     e.stopPropagation();
@@ -76,12 +93,6 @@ const ItemCard = ({
     }
   };
 
-  const handleEditImageClick = (e) => {
-    e.stopPropagation();
-    if (onEditImage) {
-      onEditImage(item);
-    }
-  };
 
   return (
     <Card
@@ -160,22 +171,6 @@ const ItemCard = ({
             </IconButton>
           </Tooltip>
 
-          {onEditImage && (
-            <Tooltip title="Editar Imagem">
-              <IconButton
-                size="small"
-                onClick={handleEditImageClick}
-                sx={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                  '&:hover': { backgroundColor: 'rgba(255, 255, 255, 1)' },
-                  width: 28,
-                  height: 28,
-                }}
-              >
-                <EditIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          )}
         </Box>
 
         {/* Badge de Categoria */}
@@ -187,7 +182,7 @@ const ItemCard = ({
           }}
         >
           <Chip
-            label={item.category}
+            label={getCategoryLabel(item.category)}
             size="small"
             color="primary"
             sx={{ backgroundColor: 'rgba(25, 118, 210, 0.9)' }}
@@ -234,15 +229,17 @@ const ItemCard = ({
           {item.title}
         </Typography>
 
-        {/* Localização e Condição em linha */}
-        <Box display="flex" alignItems="center" justifyContent="space-between" mb={1}>
-          <Box display="flex" alignItems="center">
-            <LocationIcon fontSize="small" color="action" sx={{ mr: 0.5 }} />
-            <Typography variant="caption" color="text.secondary">
-              {item.location}
-            </Typography>
-          </Box>
-          
+        {/* Status e Estado */}
+        <Box display="flex" gap={0.5} mb={1} flexWrap="wrap">
+          {item.status && (
+            <Chip
+              label={getStatusInfo(item.status).label}
+              size="small"
+              variant="outlined"
+              color={getStatusInfo(item.status).color}
+              sx={{ fontSize: '0.7rem', height: 20 }}
+            />
+          )}
           {item.condition && (
             <Chip
               label={item.condition}
@@ -252,6 +249,14 @@ const ItemCard = ({
               sx={{ fontSize: '0.7rem', height: 20 }}
             />
           )}
+        </Box>
+
+        {/* Localização */}
+        <Box display="flex" alignItems="center" mb={1}>
+          <LocationIcon fontSize="small" color="action" sx={{ mr: 0.5 }} />
+          <Typography variant="caption" color="text.secondary">
+            {item.location}
+          </Typography>
         </Box>
 
         {/* Informações do Proprietário */}

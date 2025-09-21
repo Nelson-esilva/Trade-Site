@@ -28,11 +28,13 @@ export const ActionTypes = {
   // Usuário
   SET_USER: 'SET_USER',
   SET_AUTHENTICATED: 'SET_AUTHENTICATED',
+  LOGIN_SUCCESS: 'LOGIN_SUCCESS',
   LOGOUT: 'LOGOUT',
   
   // Itens
   SET_ITEMS: 'SET_ITEMS',
   SET_CURRENT_ITEM: 'SET_CURRENT_ITEM',
+  UPDATE_CURRENT_ITEM: 'UPDATE_CURRENT_ITEM',
   ADD_ITEM: 'ADD_ITEM',
   UPDATE_ITEM: 'UPDATE_ITEM',
   REMOVE_ITEM: 'REMOVE_ITEM',
@@ -71,6 +73,14 @@ const appReducer = (state, action) => {
         isAuthenticated: action.payload,
       };
     
+    case ActionTypes.LOGIN_SUCCESS:
+      return {
+        ...state,
+        user: action.payload.user,
+        isAuthenticated: true,
+        error: null,
+      };
+    
     case ActionTypes.LOGOUT:
       return {
         ...state,
@@ -87,6 +97,12 @@ const appReducer = (state, action) => {
       };
     
     case ActionTypes.SET_CURRENT_ITEM:
+      return {
+        ...state,
+        currentItem: action.payload,
+      };
+    
+    case ActionTypes.UPDATE_CURRENT_ITEM:
       return {
         ...state,
         currentItem: action.payload,
@@ -206,14 +222,58 @@ const AppContext = createContext();
 export const AppProvider = ({ children }) => {
   const [state, dispatch] = useReducer(appReducer, initialState);
 
+  // === AÇÕES DE AUTENTICAÇÃO ===
+  const login = useCallback(async (username, password) => {
+    try {
+      dispatch({ type: ActionTypes.SET_LOADING, payload: true });
+      const response = await apiService.login(username, password);
+      dispatch({ type: ActionTypes.LOGIN_SUCCESS, payload: { user: response.user } });
+      return response;
+    } catch (error) {
+      dispatch({ type: ActionTypes.SET_ERROR, payload: 'Erro ao fazer login' });
+      throw error;
+    } finally {
+      dispatch({ type: ActionTypes.SET_LOADING, payload: false });
+    }
+  }, []);
+
+  const logout = useCallback(async () => {
+    try {
+      await apiService.logout();
+      dispatch({ type: ActionTypes.LOGOUT });
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error);
+    }
+  }, []);
+
+  const registerUser = useCallback(async (userData) => {
+    try {
+      dispatch({ type: ActionTypes.SET_LOADING, payload: true });
+      const response = await apiService.registerUser(userData);
+      dispatch({ type: ActionTypes.LOGIN_SUCCESS, payload: { user: response.user } });
+      return response;
+    } catch (error) {
+      dispatch({ type: ActionTypes.SET_ERROR, payload: 'Erro ao registrar usuário' });
+      throw error;
+    } finally {
+      dispatch({ type: ActionTypes.SET_LOADING, payload: false });
+    }
+  }, []);
+
   // === AÇÕES DE USUÁRIO ===
   const loadCurrentUser = useCallback(async () => {
     try {
-      const user = await apiService.getCurrentUser();
-      dispatch({ type: ActionTypes.SET_USER, payload: user });
+      const token = apiService.getAuthToken();
+      if (token) {
+        console.log('Token encontrado:', token);
+        const user = await apiService.getCurrentUser();
+        dispatch({ type: ActionTypes.SET_USER, payload: user });
+      } else {
+        console.log('Nenhum token encontrado');
+      }
     } catch (error) {
       // Se não conseguir carregar usuário, não é erro crítico
-      console.log('Usuário não autenticado');
+      console.log('Usuário não autenticado:', error);
     }
   }, []);
 
@@ -269,25 +329,7 @@ export const AppProvider = ({ children }) => {
     loadInitialData();
   }, [loadInitialData]);
 
-  const registerUser = async (userData) => {
-    try {
-      dispatch({ type: ActionTypes.SET_LOADING, payload: true });
-      const user = await apiService.registerUser(userData);
-      dispatch({ type: ActionTypes.SET_USER, payload: user });
-      addNotification('Usuário registrado com sucesso!', 'success');
-      return user;
-    } catch (error) {
-      dispatch({ type: ActionTypes.SET_ERROR, payload: 'Erro ao registrar usuário' });
-      throw error;
-    } finally {
-      dispatch({ type: ActionTypes.SET_LOADING, payload: false });
-    }
-  };
 
-  const logout = () => {
-    dispatch({ type: ActionTypes.LOGOUT });
-    addNotification('Logout realizado com sucesso!', 'info');
-  };
 
   // === AÇÕES DE ITENS ===
 
@@ -303,6 +345,10 @@ export const AppProvider = ({ children }) => {
     } finally {
       dispatch({ type: ActionTypes.SET_LOADING, payload: false });
     }
+  }, []);
+
+  const setCurrentItem = useCallback((item) => {
+    dispatch({ type: ActionTypes.UPDATE_CURRENT_ITEM, payload: item });
   }, []);
 
   const createItem = async (itemData) => {
@@ -371,6 +417,11 @@ export const AppProvider = ({ children }) => {
       dispatch({ type: ActionTypes.SET_LOADING, payload: true });
       const offer = await apiService.acceptOffer(id);
       dispatch({ type: ActionTypes.UPDATE_OFFER, payload: offer });
+      
+      // Recarregar ofertas e itens para atualizar a interface
+      await loadOffers();
+      await loadItems();
+      
       addNotification('Oferta aceita com sucesso!', 'success');
       return offer;
     } catch (error) {
@@ -386,6 +437,11 @@ export const AppProvider = ({ children }) => {
       dispatch({ type: ActionTypes.SET_LOADING, payload: true });
       const offer = await apiService.refuseOffer(id);
       dispatch({ type: ActionTypes.UPDATE_OFFER, payload: offer });
+      
+      // Recarregar ofertas e itens para atualizar a interface
+      await loadOffers();
+      await loadItems();
+      
       addNotification('Oferta recusada!', 'info');
       return offer;
     } catch (error) {
@@ -435,6 +491,7 @@ export const AppProvider = ({ children }) => {
     ...state,
     
     // Ações de usuário
+    login,
     loadCurrentUser,
     registerUser,
     logout,
@@ -442,6 +499,7 @@ export const AppProvider = ({ children }) => {
     // Ações de itens
     loadItems,
     loadItem,
+    setCurrentItem,
     createItem,
     updateItem,
     deleteItem,

@@ -28,6 +28,7 @@ const CreateItem = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
+    category: 'livros',
     status: 'disponivel',
   });
   
@@ -159,6 +160,26 @@ const CreateItem = () => {
                   helperText={formErrors.description}
                   placeholder="Descreva o item, sua condição, como foi usado, etc."
                 />
+              </Grid>
+
+              {/* Categoria */}
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <InputLabel id="category-label">Categoria</InputLabel>
+                  <Select
+                    labelId="category-label"
+                    id="category"
+                    name="category"
+                    value={formData.category}
+                    label="Categoria"
+                    onChange={handleChange}
+                  >
+                    <MenuItem value="livros">Livros</MenuItem>
+                    <MenuItem value="apostilas">Apostilas</MenuItem>
+                    <MenuItem value="equipamentos">Equipamentos</MenuItem>
+                    <MenuItem value="tecnologia">Tecnologia</MenuItem>
+                  </Select>
+                </FormControl>
               </Grid>
 
               {/* Status */}

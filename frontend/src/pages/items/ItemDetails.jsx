@@ -31,17 +31,21 @@ import {
 } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../../contexts/AppContext';
+import apiService from '../../services/api';
 
 const ItemDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { 
     currentItem, 
+    setCurrentItem,
     items, 
     offers, 
     loading, 
     error, 
+    user,
     loadItem, 
+    loadItems,
     createOffer, 
     acceptOffer, 
     refuseOffer,
@@ -50,8 +54,12 @@ const ItemDetails = () => {
   
   const [showOfferDialog, setShowOfferDialog] = useState(false);
   const [offerData, setOfferData] = useState({
+    offer_type: 'item',
     item_offered: '',
+    money_amount: '',
   });
+  const [showStatusDialog, setShowStatusDialog] = useState(false);
+  const [newStatus, setNewStatus] = useState('');
 
   useEffect(() => {
     if (id) {
@@ -65,20 +73,36 @@ const ItemDetails = () => {
 
   const handleCloseOfferDialog = () => {
     setShowOfferDialog(false);
-    setOfferData({ item_offered: '' });
+    setOfferData({ 
+      offer_type: 'item',
+      item_offered: '',
+      money_amount: '',
+    });
   };
 
   const handleSubmitOffer = async () => {
-    if (!offerData.item_offered) {
+    // Validação baseada no tipo de oferta
+    if (offerData.offer_type === 'item' && !offerData.item_offered) {
+      return;
+    }
+    if (offerData.offer_type === 'money' && !offerData.money_amount) {
       return;
     }
 
     try {
-      await createOffer({
+      const offerPayload = {
         item_desired: parseInt(id),
-        item_offered: parseInt(offerData.item_offered),
+        offer_type: offerData.offer_type,
         status: 'pendente',
-      });
+      };
+
+      if (offerData.offer_type === 'item') {
+        offerPayload.item_offered = parseInt(offerData.item_offered);
+      } else if (offerData.offer_type === 'money') {
+        offerPayload.money_amount = parseFloat(offerData.money_amount);
+      }
+
+      await createOffer(offerPayload);
       handleCloseOfferDialog();
     } catch (error) {
       console.error('Erro ao criar oferta:', error);
@@ -98,6 +122,42 @@ const ItemDetails = () => {
       await refuseOffer(offerId);
     } catch (error) {
       console.error('Erro ao recusar oferta:', error);
+    }
+  };
+
+  const handleChangeStatus = () => {
+    setNewStatus(currentItem?.status || '');
+    setShowStatusDialog(true);
+  };
+
+  const handleCloseStatusDialog = () => {
+    setShowStatusDialog(false);
+    setNewStatus('');
+  };
+
+  const handleSubmitStatusChange = async () => {
+    try {
+      const response = await apiService.request(`/items/${id}/change_status/`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (response.ok) {
+        // Atualizar o item atual com o novo status
+        setCurrentItem(prev => ({
+          ...prev,
+          status: newStatus
+        }));
+        
+        // Recarregar os itens para atualizar a lista
+        loadItems();
+        
+        handleCloseStatusDialog();
+      } else {
+        console.error('Erro ao alterar status:', await response.text());
+      }
+    } catch (error) {
+      console.error('Erro ao alterar status:', error);
     }
   };
 
@@ -168,11 +228,11 @@ const ItemDetails = () => {
                   color={currentItem.status === 'disponivel' ? 'success' : 'default'}
                   variant="outlined"
                 />
-              </Box>
+          </Box>
               
               <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
                 {currentItem.description}
-              </Typography>
+            </Typography>
             </Box>
 
             <Divider sx={{ my: 3 }} />
@@ -186,8 +246,8 @@ const ItemDetails = () => {
               <Box sx={{ ml: 4 }}>
                 <Typography variant="body1">
                   {currentItem.owner?.name || 'Usuário não informado'}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
+            </Typography>
+              <Typography variant="body2" color="text.secondary">
                   @{currentItem.owner?.username || 'username'}
                 </Typography>
               </Box>
@@ -214,6 +274,30 @@ const ItemDetails = () => {
 
             {/* Ações */}
             <Box sx={{ mt: 4 }}>
+              {/* Botões de Admin */}
+              {user && (user.is_trade_admin || user.is_superuser) && (
+                <>
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    size="large"
+                    onClick={handleChangeStatus}
+                  >
+                    Alterar Status
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="warning"
+                    size="large"
+                    startIcon={<SwapIcon />}
+                    onClick={handleMakeOffer}
+                  >
+                    Fazer Oferta (Admin)
+                  </Button>
+                </>
+              )}
+              
+              {/* Botões normais */}
               <Button
                 variant="contained"
                 size="large"
@@ -238,7 +322,7 @@ const ItemDetails = () => {
         {/* Ofertas */}
         <Grid item xs={12} md={4}>
           <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
-            <Typography variant="h6" gutterBottom>
+              <Typography variant="h6" gutterBottom>
               Ofertas ({itemOffers.length})
             </Typography>
             
@@ -256,10 +340,10 @@ const ItemDetails = () => {
                       </Typography>
                       <Typography variant="body2" color="text.secondary" gutterBottom>
                         Status: {offer.status}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
+                    </Typography>
+                  <Typography variant="body2" color="text.secondary">
                         Por: {offer.offerer?.name || 'Usuário'}
-                      </Typography>
+                  </Typography>
                       
                       {offer.status === 'pendente' && (
                         <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
@@ -270,7 +354,7 @@ const ItemDetails = () => {
                             onClick={() => handleAcceptOffer(offer.id)}
                           >
                             Aceitar
-                          </Button>
+                </Button>
                           <Button
                             size="small"
                             startIcon={<CancelIcon />}
@@ -278,7 +362,7 @@ const ItemDetails = () => {
                             onClick={() => handleRefuseOffer(offer.id)}
                           >
                             Recusar
-                          </Button>
+                </Button>
                         </Box>
                       )}
                     </CardContent>
@@ -295,32 +379,101 @@ const ItemDetails = () => {
         <DialogTitle>Fazer Oferta</DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Selecione um item seu para trocar por "{currentItem.title}"
-          </Typography>
+            Faça uma oferta por "{currentItem.title}"
+            </Typography>
           
+          {/* Tipo de Oferta */}
           <FormControl fullWidth sx={{ mt: 2 }}>
-            <InputLabel>Seu Item</InputLabel>
+            <InputLabel>Tipo de Oferta</InputLabel>
             <Select
-              value={offerData.item_offered}
-              label="Seu Item"
-              onChange={(e) => setOfferData({ ...offerData, item_offered: e.target.value })}
+              value={offerData.offer_type}
+              label="Tipo de Oferta"
+              onChange={(e) => setOfferData({ ...offerData, offer_type: e.target.value, item_offered: '', money_amount: '' })}
             >
-              {availableItems.map((item) => (
-                <MenuItem key={item.id} value={item.id}>
-                  {item.title}
-                </MenuItem>
-              ))}
+              <MenuItem value="item">Trocar por Item</MenuItem>
+              <MenuItem value="money">Oferta em Dinheiro</MenuItem>
             </Select>
           </FormControl>
+
+          {/* Campo condicional baseado no tipo */}
+          {offerData.offer_type === 'item' && (
+            <FormControl fullWidth sx={{ mt: 2 }}>
+              <InputLabel>Seu Item</InputLabel>
+              <Select
+                value={offerData.item_offered}
+                label="Seu Item"
+                onChange={(e) => setOfferData({ ...offerData, item_offered: e.target.value })}
+              >
+                {availableItems.map((item) => (
+                  <MenuItem key={item.id} value={item.id}>
+                    {item.title}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+
+          {offerData.offer_type === 'money' && (
+            <FormControl fullWidth sx={{ mt: 2 }}>
+              <InputLabel>Valor em Dinheiro (R$)</InputLabel>
+              <input
+              type="number"
+                step="0.01"
+                min="0"
+                value={offerData.money_amount}
+                onChange={(e) => setOfferData({ ...offerData, money_amount: e.target.value })}
+                style={{
+                  width: '100%',
+                  padding: '16.5px 14px',
+                  border: '1px solid #c4c4c4',
+                  borderRadius: '4px',
+                  fontSize: '16px',
+                }}
+                placeholder="0,00"
+              />
+            </FormControl>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseOfferDialog}>Cancelar</Button>
           <Button 
             onClick={handleSubmitOffer}
             variant="contained"
-            disabled={!offerData.item_offered}
+            disabled={
+              (offerData.offer_type === 'item' && !offerData.item_offered) ||
+              (offerData.offer_type === 'money' && !offerData.money_amount)
+            }
           >
             Enviar Oferta
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog para Alterar Status */}
+      <Dialog open={showStatusDialog} onClose={handleCloseStatusDialog}>
+        <DialogTitle>Alterar Status do Item</DialogTitle>
+        <DialogContent>
+          <FormControl fullWidth sx={{ mt: 2 }}>
+            <InputLabel>Status</InputLabel>
+            <Select
+              value={newStatus}
+              label="Status"
+              onChange={(e) => setNewStatus(e.target.value)}
+            >
+              <MenuItem value="disponivel">Disponível</MenuItem>
+              <MenuItem value="indisponível">Indisponível</MenuItem>
+              <MenuItem value="trocado">Trocado</MenuItem>
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseStatusDialog}>Cancelar</Button>
+          <Button 
+            onClick={handleSubmitStatusChange}
+            variant="contained"
+            disabled={!newStatus}
+          >
+            Alterar Status
           </Button>
         </DialogActions>
       </Dialog>
