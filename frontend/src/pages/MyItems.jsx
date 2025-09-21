@@ -39,7 +39,7 @@ import ImageEditModal from '../components/ImageEditModal';
 
 const MyItems = () => {
   const navigate = useNavigate();
-  const { user, isAuthenticated, items, loadItems, deleteItem } = useApp();
+  const { user, isAuthenticated, items, loadItems, deleteItem, updateItem } = useApp();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [deleteDialog, setDeleteDialog] = useState({ open: false, item: null });
@@ -56,8 +56,9 @@ const MyItems = () => {
     }
   }, [isAuthenticated, loadItems]);
 
-  // Filtrar apenas os itens do usuário atual
-  const myItems = Array.isArray(items) ? items.filter(item => item.owner === user?.username) : [];
+  // Filtrar itens: superuser vê todos, outros usuários veem apenas os próprios
+  const myItems = Array.isArray(items) ? 
+    (user?.is_superuser ? items : items.filter(item => item.owner === user?.username)) : [];
 
   const handleDeleteClick = (item) => {
     setDeleteDialog({ open: true, item });
@@ -115,10 +116,8 @@ const MyItems = () => {
 
   const handleSaveImage = async (itemId, imageData) => {
     try {
-      // TODO: Implementar atualização da imagem via API
-      console.log('Salvando imagem para item:', itemId, imageData);
-      // Por enquanto, apenas recarregamos os itens
-      await loadItems();
+      await updateItem(itemId, { image_url: imageData.image_url });
+      handleCloseImageModal();
     } catch (error) {
       console.error('Erro ao salvar imagem:', error);
       throw error;
@@ -177,7 +176,7 @@ const MyItems = () => {
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h4">
-          Meus Itens ({myItems.length})
+          {user?.is_superuser ? `Todos os Itens (${myItems.length})` : `Meus Itens (${myItems.length})`}
         </Typography>
         <Button
           variant="contained"

@@ -108,11 +108,20 @@ docker-compose exec frontend sh
 docker-compose exec frontend npm install
 ```
 
-## 📚 **Documentação**
+## 📚 **Documentação Completa**
 
-- [Configuração Docker](DOCKER_SETUP.md)
+### 📖 Índice da Documentação
+- **[📚 Índice da Documentação](DOCS_INDEX.md)** - Navegação completa da documentação
+
+### 📖 Documentação Principal
+- **[📋 Documentação Completa](DOCUMENTATION.md)** - Visão geral completa do projeto
+- **[🔌 API Documentation](API_DOCUMENTATION.md)** - Documentação detalhada da API
+- **[⚛️ Frontend Documentation](FRONTEND_DOCUMENTATION.md)** - Documentação do React
+- **[🔧 Backend Documentation](BACKEND_DOCUMENTATION.md)** - Documentação do Django
+
+### 🐳 Deploy e Infraestrutura
+- **[🐳 Docker Setup](DOCKER_SETUP.md)** - Configuração e uso do Docker
 - [Backend - Configuração Docker](backend/DOCKER_README.md)
-- [Frontend - Refatoração](frontend/FRONTEND_REFACTOR.md)
 - [Configuração de Desenvolvimento](backend/DEVELOPMENT_CONFIG.md)
 
 ## 🎯 **Próximos Passos**

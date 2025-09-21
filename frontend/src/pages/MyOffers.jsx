@@ -49,13 +49,20 @@ const MyOffers = () => {
     }
   }, [isAuthenticated, loadOffers]);
 
-  // Filtrar ofertas recebidas e enviadas
+  // Filtrar ofertas recebidas e enviadas (apenas pendentes)
   const receivedOffers = Array.isArray(offers) 
-    ? offers.filter(offer => offer.item?.owner === user?.username)
+    ? offers.filter(offer => offer.item_desired_data?.owner === user?.username && offer.status === 'pendente')
     : [];
   
   const sentOffers = Array.isArray(offers) 
-    ? offers.filter(offer => offer.offerer === user?.username)
+    ? offers.filter(offer => offer.offerer === user?.username && offer.status === 'pendente')
+    : [];
+
+  const historicalOffers = Array.isArray(offers) 
+    ? offers.filter(offer => 
+        (offer.item_desired_data?.owner === user?.username || offer.offerer === user?.username) &&
+        (offer.status === 'aceita' || offer.status === 'recusada' || offer.status === 'trocado')
+      )
     : [];
 
   const handleTabChange = (event, newValue) => {
@@ -111,6 +118,7 @@ const MyOffers = () => {
       'pendente': 'warning',
       'aceita': 'success',
       'recusada': 'error',
+      'trocado': 'success',
       'cancelada': 'default',
     };
     return colors[status] || 'default';
@@ -121,6 +129,7 @@ const MyOffers = () => {
       'pendente': 'Pendente',
       'aceita': 'Aceita',
       'recusada': 'Recusada',
+      'trocado': 'Trocado',
       'cancelada': 'Cancelada',
     };
     return labels[status] || status;
@@ -168,6 +177,11 @@ const MyOffers = () => {
           <Tab 
             label={`Ofertas Enviadas (${sentOffers.length})`} 
             icon={<SwapIcon />}
+            iconPosition="start"
+          />
+          <Tab 
+            label={`Histórico (${historicalOffers.length})`} 
+            icon={<AcceptIcon />}
             iconPosition="start"
           />
         </Tabs>
@@ -223,29 +237,39 @@ const MyOffers = () => {
                             Seu Item:
                           </Typography>
                           <Box display="flex" alignItems="center" mb={1}>
-                            {getCategoryIcon(offer.item?.category)}
+                            {getCategoryIcon(offer.item_desired_data?.category)}
                             <Typography variant="body1" sx={{ ml: 1 }}>
-                              {offer.item?.title}
+                              {offer.item_desired_data?.title}
                             </Typography>
                           </Box>
                           <Typography variant="body2" color="text.secondary">
-                            {offer.item?.description}
+                            {offer.item_desired_data?.description}
                           </Typography>
                         </Grid>
 
                         <Grid item xs={12} md={6}>
                           <Typography variant="subtitle2" gutterBottom>
-                            Item Oferecido:
+                            {offer.offer_type === 'item' ? 'Item Oferecido:' : 'Valor Oferecido:'}
                           </Typography>
                           <Box display="flex" alignItems="center" mb={1}>
-                            {getCategoryIcon(offer.offered_item?.category)}
-                            <Typography variant="body1" sx={{ ml: 1 }}>
-                              {offer.offered_item?.title}
-                            </Typography>
+                            {offer.offer_type === 'item' ? (
+                              <>
+                                {getCategoryIcon(offer.item_offered_data?.category)}
+                                <Typography variant="body1" sx={{ ml: 1 }}>
+                                  {offer.item_offered_data?.title}
+                                </Typography>
+                              </>
+                            ) : (
+                              <Typography variant="body1" sx={{ ml: 1 }}>
+                                R$ {offer.money_amount}
+                              </Typography>
+                            )}
                           </Box>
-                          <Typography variant="body2" color="text.secondary">
-                            {offer.offered_item?.description}
-                          </Typography>
+                          {offer.offer_type === 'item' && (
+                            <Typography variant="body2" color="text.secondary">
+                              {offer.item_offered_data?.description}
+                            </Typography>
+                          )}
                         </Grid>
                       </Grid>
 
@@ -316,7 +340,7 @@ const MyOffers = () => {
                           </Avatar>
                           <Box>
                             <Typography variant="h6">
-                              Oferta para {offer.item?.owner}
+                              Oferta para {offer.item_desired_data?.owner}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
                               {formatDate(offer.created_at)}
@@ -338,29 +362,39 @@ const MyOffers = () => {
                             Item Desejado:
                           </Typography>
                           <Box display="flex" alignItems="center" mb={1}>
-                            {getCategoryIcon(offer.item?.category)}
+                            {getCategoryIcon(offer.item_desired_data?.category)}
                             <Typography variant="body1" sx={{ ml: 1 }}>
-                              {offer.item?.title}
+                              {offer.item_desired_data?.title}
                             </Typography>
                           </Box>
                           <Typography variant="body2" color="text.secondary">
-                            {offer.item?.description}
+                            {offer.item_desired_data?.description}
                           </Typography>
                         </Grid>
 
                         <Grid item xs={12} md={6}>
                           <Typography variant="subtitle2" gutterBottom>
-                            Seu Item:
+                            {offer.offer_type === 'item' ? 'Seu Item:' : 'Valor Oferecido:'}
                           </Typography>
                           <Box display="flex" alignItems="center" mb={1}>
-                            {getCategoryIcon(offer.offered_item?.category)}
-                            <Typography variant="body1" sx={{ ml: 1 }}>
-                              {offer.offered_item?.title}
-                            </Typography>
+                            {offer.offer_type === 'item' ? (
+                              <>
+                                {getCategoryIcon(offer.item_offered_data?.category)}
+                                <Typography variant="body1" sx={{ ml: 1 }}>
+                                  {offer.item_offered_data?.title}
+                                </Typography>
+                              </>
+                            ) : (
+                              <Typography variant="body1" sx={{ ml: 1 }}>
+                                R$ {offer.money_amount}
+                              </Typography>
+                            )}
                           </Box>
-                          <Typography variant="body2" color="text.secondary">
-                            {offer.offered_item?.description}
-                          </Typography>
+                          {offer.offer_type === 'item' && (
+                            <Typography variant="body2" color="text.secondary">
+                              {offer.item_offered_data?.description}
+                            </Typography>
+                          )}
                         </Grid>
                       </Grid>
 
@@ -375,6 +409,94 @@ const MyOffers = () => {
                           </Typography>
                         </>
                       )}
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          )}
+        </Box>
+      )}
+
+      {/* Histórico de Ofertas */}
+      {tabValue === 2 && (
+        <Box>
+          {historicalOffers.length === 0 ? (
+            <Card>
+              <CardContent sx={{ textAlign: 'center', py: 6 }}>
+                <AcceptIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+                <Typography variant="h6" color="text.secondary" gutterBottom>
+                  Nenhuma oferta no histórico
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Ofertas aceitas, recusadas ou trocadas aparecerão aqui.
+                </Typography>
+              </CardContent>
+            </Card>
+          ) : (
+            <Grid container spacing={3}>
+              {historicalOffers.map((offer) => (
+                <Grid item xs={12} key={offer.id}>
+                  <Card>
+                    <CardContent>
+                      <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
+                        <Box display="flex" alignItems="center">
+                          <Avatar sx={{ mr: 2 }}>
+                            <PersonIcon />
+                          </Avatar>
+                          <Box>
+                            <Typography variant="h6">
+                              {offer.offerer === user?.username ? 
+                                `Oferta para ${offer.item_desired_data?.owner}` : 
+                                `Oferta de ${offer.offerer}`
+                              }
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {formatDate(offer.created_at)}
+                            </Typography>
+                          </Box>
+                        </Box>
+                        <Chip
+                          label={getStatusLabel(offer.status)}
+                          color={getStatusColor(offer.status)}
+                          size="small"
+                        />
+                      </Box>
+
+                      <Divider sx={{ my: 2 }} />
+
+                      <Grid container spacing={2}>
+                        <Grid item xs={12} md={6}>
+                          <Typography variant="subtitle2" gutterBottom>
+                            Item Desejado:
+                          </Typography>
+                          <Box display="flex" alignItems="center" mb={1}>
+                            {getCategoryIcon(offer.item_desired_data?.category)}
+                            <Typography variant="body2" sx={{ ml: 1 }}>
+                              {offer.item_desired_data?.title}
+                            </Typography>
+                          </Box>
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                          <Typography variant="subtitle2" gutterBottom>
+                            {offer.offer_type === 'item' ? 'Item Oferecido:' : 'Valor Oferecido:'}
+                          </Typography>
+                          <Box display="flex" alignItems="center" mb={1}>
+                            {offer.offer_type === 'item' ? (
+                              <>
+                                {getCategoryIcon(offer.item_offered_data?.category)}
+                                <Typography variant="body2" sx={{ ml: 1 }}>
+                                  {offer.item_offered_data?.title}
+                                </Typography>
+                              </>
+                            ) : (
+                              <Typography variant="body2" sx={{ ml: 1 }}>
+                                R$ {offer.money_amount}
+                              </Typography>
+                            )}
+                          </Box>
+                        </Grid>
+                      </Grid>
                     </CardContent>
                   </Card>
                 </Grid>

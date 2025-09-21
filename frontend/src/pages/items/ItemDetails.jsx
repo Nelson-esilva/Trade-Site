@@ -26,8 +26,6 @@ import {
   SwapHoriz as SwapIcon,
   Person as PersonIcon,
   AccessTime as TimeIcon,
-  CheckCircle as CheckIcon,
-  Cancel as CancelIcon,
 } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../../contexts/AppContext';
@@ -40,15 +38,11 @@ const ItemDetails = () => {
     currentItem, 
     setCurrentItem,
     items, 
-    offers, 
     loading, 
     error, 
     user,
     loadItem, 
-    loadItems,
-    createOffer, 
-    acceptOffer, 
-    refuseOffer,
+    createOffer,
     clearError 
   } = useApp();
   
@@ -65,7 +59,7 @@ const ItemDetails = () => {
     if (id) {
       loadItem(id);
     }
-  }, [id, loadItem]);
+  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleMakeOffer = () => {
     setShowOfferDialog(true);
@@ -109,21 +103,6 @@ const ItemDetails = () => {
     }
   };
 
-  const handleAcceptOffer = async (offerId) => {
-    try {
-      await acceptOffer(offerId);
-    } catch (error) {
-      console.error('Erro ao aceitar oferta:', error);
-    }
-  };
-
-  const handleRefuseOffer = async (offerId) => {
-    try {
-      await refuseOffer(offerId);
-    } catch (error) {
-      console.error('Erro ao recusar oferta:', error);
-    }
-  };
 
   const handleChangeStatus = () => {
     setNewStatus(currentItem?.status || '');
@@ -137,38 +116,27 @@ const ItemDetails = () => {
 
   const handleSubmitStatusChange = async () => {
     try {
-      const response = await apiService.request(`/items/${id}/change_status/`, {
+      const updatedItem = await apiService.request(`/items/${id}/change_status/`, {
         method: 'PATCH',
         body: JSON.stringify({ status: newStatus }),
       });
 
-      if (response.ok) {
-        // Atualizar o item atual com o novo status
-        setCurrentItem(prev => ({
-          ...prev,
-          status: newStatus
-        }));
-        
-        // Recarregar os itens para atualizar a lista
-        loadItems();
-        
-        handleCloseStatusDialog();
-      } else {
-        console.error('Erro ao alterar status:', await response.text());
-      }
+      // Atualizar o item atual com o novo status
+      setCurrentItem(updatedItem);
+      
+      handleCloseStatusDialog();
     } catch (error) {
       console.error('Erro ao alterar status:', error);
     }
   };
 
-  // Filtrar ofertas relacionadas a este item
-  const itemOffers = offers.filter(offer => 
-    offer.item_desired === parseInt(id) || offer.item_offered === parseInt(id)
-  );
 
-  // Itens disponíveis para troca (excluindo o item atual)
+
+  // Itens disponíveis para troca (excluindo o item atual e apenas itens do usuário logado)
   const availableItems = items.filter(item => 
-    item.id !== parseInt(id) && item.status === 'disponivel'
+    item.id !== parseInt(id) && 
+    item.status === 'disponivel' && 
+    item.owner === user?.username
   );
 
   if (loading) {
@@ -216,7 +184,7 @@ const ItemDetails = () => {
 
       <Grid container spacing={4}>
         {/* Informações do Item */}
-        <Grid item xs={12} md={8}>
+        <Grid item xs={12}>
           <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
             <Box sx={{ mb: 3 }}>
               <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
@@ -319,59 +287,6 @@ const ItemDetails = () => {
           </Paper>
         </Grid>
 
-        {/* Ofertas */}
-        <Grid item xs={12} md={4}>
-          <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
-              <Typography variant="h6" gutterBottom>
-              Ofertas ({itemOffers.length})
-            </Typography>
-            
-            {itemOffers.length === 0 ? (
-              <Typography variant="body2" color="text.secondary">
-                Nenhuma oferta ainda
-              </Typography>
-            ) : (
-              <Box sx={{ mt: 2 }}>
-                {itemOffers.map((offer) => (
-                  <Card key={offer.id} sx={{ mb: 2 }}>
-                    <CardContent sx={{ p: 2 }}>
-                      <Typography variant="subtitle2" gutterBottom>
-                        Oferta #{offer.id}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary" gutterBottom>
-                        Status: {offer.status}
-                    </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                        Por: {offer.offerer?.name || 'Usuário'}
-                  </Typography>
-                      
-                      {offer.status === 'pendente' && (
-                        <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
-                          <Button
-                            size="small"
-                            startIcon={<CheckIcon />}
-                            color="success"
-                            onClick={() => handleAcceptOffer(offer.id)}
-                          >
-                            Aceitar
-                </Button>
-                          <Button
-                            size="small"
-                            startIcon={<CancelIcon />}
-                            color="error"
-                            onClick={() => handleRefuseOffer(offer.id)}
-                          >
-                            Recusar
-                </Button>
-                        </Box>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
-              </Box>
-            )}
-          </Paper>
-        </Grid>
       </Grid>
 
       {/* Dialog para Fazer Oferta */}
@@ -477,6 +392,7 @@ const ItemDetails = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
     </Container>
   );
 };

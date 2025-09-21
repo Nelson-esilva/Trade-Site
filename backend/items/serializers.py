@@ -8,4 +8,4 @@ class ItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Item
-        fields = ['id', 'title', 'description', 'category', 'owner', 'status', 'created_at', 'updated_at']
+        fields = ['id', 'title', 'description', 'category', 'location', 'address', 'image_url', 'owner', 'status', 'created_at', 'updated_at']

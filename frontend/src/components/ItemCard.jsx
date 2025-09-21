@@ -89,7 +89,7 @@ const ItemCard = ({
     if (onMakeOffer) {
       onMakeOffer(item);
     } else {
-      navigate(`/item/${item.id}#offer`);
+      navigate(`/item/${item.id}`);
     }
   };
 
@@ -115,7 +115,7 @@ const ItemCard = ({
         <CardMedia
           component="img"
           height={compact ? 120 : 160}
-          image={item.image || '/api/placeholder/300/200'}
+          image={item.image_url || '/api/placeholder/300/200'}
           alt={item.title}
           sx={{
             objectFit: 'cover',

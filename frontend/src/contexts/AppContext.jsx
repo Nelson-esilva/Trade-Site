@@ -265,15 +265,16 @@ export const AppProvider = ({ children }) => {
     try {
       const token = apiService.getAuthToken();
       if (token) {
-        console.log('Token encontrado:', token);
         const user = await apiService.getCurrentUser();
         dispatch({ type: ActionTypes.SET_USER, payload: user });
       } else {
-        console.log('Nenhum token encontrado');
+        // Se não há token, limpar usuário
+        dispatch({ type: ActionTypes.SET_USER, payload: null });
       }
     } catch (error) {
-      // Se não conseguir carregar usuário, não é erro crítico
-      console.log('Usuário não autenticado:', error);
+      // Se não conseguir carregar usuário, limpar estado
+      console.log('Erro ao carregar usuário:', error);
+      dispatch({ type: ActionTypes.SET_USER, payload: null });
     }
   }, []);
 
@@ -284,6 +285,7 @@ export const AppProvider = ({ children }) => {
       const items = response.results || response || [];
       dispatch({ type: ActionTypes.SET_ITEMS, payload: items });
     } catch (error) {
+      console.error('Erro ao carregar itens:', error);
       dispatch({ type: ActionTypes.SET_ERROR, payload: 'Erro ao carregar itens' });
     } finally {
       dispatch({ type: ActionTypes.SET_LOADING_ITEMS, payload: false });
@@ -305,29 +307,27 @@ export const AppProvider = ({ children }) => {
 
   const loadInitialData = useCallback(async () => {
     try {
-      dispatch({ type: ActionTypes.SET_LOADING, payload: true });
-      
-      // Carregar usuário atual
-      await loadCurrentUser();
-      
-      // Carregar itens
+      // Carregar itens primeiro (sempre funciona)
       await loadItems();
       
-      // Carregar ofertas
-      await loadOffers();
+      // Carregar usuário atual (pode falhar se não autenticado)
+      await loadCurrentUser();
+      
+      // Carregar ofertas apenas se autenticado
+      const token = apiService.getAuthToken();
+      if (token) {
+        await loadOffers();
+      }
       
     } catch (error) {
       console.error('Erro ao carregar dados iniciais:', error);
-      dispatch({ type: ActionTypes.SET_ERROR, payload: 'Erro ao carregar dados iniciais' });
-    } finally {
-      dispatch({ type: ActionTypes.SET_LOADING, payload: false });
     }
   }, [loadCurrentUser, loadItems, loadOffers]);
 
   // Carregar dados iniciais
   useEffect(() => {
     loadInitialData();
-  }, [loadInitialData]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
 
 
@@ -388,6 +388,7 @@ export const AppProvider = ({ children }) => {
       dispatch({ type: ActionTypes.REMOVE_ITEM, payload: id });
       addNotification('Item removido com sucesso!', 'success');
     } catch (error) {
+      console.error('Erro ao excluir item:', error);
       dispatch({ type: ActionTypes.SET_ERROR, payload: 'Erro ao remover item' });
       throw error;
     } finally {
@@ -418,9 +419,13 @@ export const AppProvider = ({ children }) => {
       const offer = await apiService.acceptOffer(id);
       dispatch({ type: ActionTypes.UPDATE_OFFER, payload: offer });
       
-      // Recarregar ofertas e itens para atualizar a interface
-      await loadOffers();
-      await loadItems();
+      // Atualizar itens relacionados se necessário
+      if (offer.item_desired_data) {
+        dispatch({ type: ActionTypes.UPDATE_ITEM, payload: { id: offer.item_desired_data.id, status: 'indisponível' } });
+      }
+      if (offer.item_offered_data) {
+        dispatch({ type: ActionTypes.UPDATE_ITEM, payload: { id: offer.item_offered_data.id, status: 'indisponível' } });
+      }
       
       addNotification('Oferta aceita com sucesso!', 'success');
       return offer;
@@ -437,10 +442,6 @@ export const AppProvider = ({ children }) => {
       dispatch({ type: ActionTypes.SET_LOADING, payload: true });
       const offer = await apiService.refuseOffer(id);
       dispatch({ type: ActionTypes.UPDATE_OFFER, payload: offer });
-      
-      // Recarregar ofertas e itens para atualizar a interface
-      await loadOffers();
-      await loadItems();
       
       addNotification('Oferta recusada!', 'info');
       return offer;

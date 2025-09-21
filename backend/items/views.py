@@ -43,10 +43,38 @@ class IsTradeAdminOrReadOnly(permissions.BasePermission):
         # Para outros métodos, apenas administradores
         return False
 
+class IsOwnerOrTradeAdminOrReadOnly(permissions.BasePermission):
+    """
+    Permissão que permite:
+    - Leitura para todos (incluindo usuários não autenticados)
+    - Escrita apenas para donos do item ou administradores
+    """
+    def has_permission(self, request, view):
+        # Para métodos seguros (GET, HEAD, OPTIONS), todos podem acessar
+        if request.method in permissions.SAFE_METHODS:
+            return True
+            
+        # Para outros métodos, requer autenticação
+        return request.user and request.user.is_authenticated
+    
+    def has_object_permission(self, request, view, obj):
+        # Para métodos seguros, todos podem ver
+        if request.method in permissions.SAFE_METHODS:
+            return True
+            
+        # Superusuários e administradores de troca têm acesso total
+        if hasattr(request.user, 'is_trade_admin') and request.user.is_trade_admin:
+            return True
+        if request.user.is_superuser:
+            return True
+            
+        # Para outros métodos, apenas o dono pode editar
+        return obj.owner == request.user
+
 class ItemViewSet(viewsets.ModelViewSet):
     queryset = Item.objects.all()
     serializer_class = ItemSerializer
-    permission_classes = [IsOwnerOrTradeAdmin]
+    permission_classes = [IsOwnerOrTradeAdminOrReadOnly]
     
     # Filtros
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -77,7 +105,7 @@ class ItemViewSet(viewsets.ModelViewSet):
         if user.is_superuser:
             return Item.objects.all()
             
-        # Usuários comuns veem apenas itens disponíveis
+        # Usuários comuns veem apenas itens disponíveis (não trocados)
         return Item.objects.filter(status='disponivel')
 
     @action(detail=True, methods=['patch'], permission_classes=[IsOwnerOrTradeAdmin])

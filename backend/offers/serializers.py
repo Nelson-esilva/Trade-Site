@@ -2,13 +2,16 @@
 
 from rest_framework import serializers
 from .models import Offer
+from items.serializers import ItemSerializer
 
 class OfferSerializer(serializers.ModelSerializer):
     offerer = serializers.ReadOnlyField(source='offerer.username')
+    item_desired_data = ItemSerializer(source='item_desired', read_only=True)
+    item_offered_data = ItemSerializer(source='item_offered', read_only=True)
 
     class Meta:
         model = Offer
-        fields = ['id', 'item_desired', 'item_offered', 'offerer', 'offer_type', 'money_amount', 'status', 'created_at']
+        fields = ['id', 'item_desired', 'item_offered', 'offerer', 'offer_type', 'money_amount', 'status', 'created_at', 'item_desired_data', 'item_offered_data']
 
     def validate(self, data):
         """

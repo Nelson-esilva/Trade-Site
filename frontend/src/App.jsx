@@ -5,6 +5,8 @@ import { CssBaseline } from '@mui/material';
 import theme from './theme';
 import { AppProvider } from './contexts/AppContext';
 import Layout from './components/Layout/Layout';
+import ProtectedRoute from './components/ProtectedRoute';
+import ProfileProtection from './components/ProfileProtection';
 
 // Pages
 import Home from './pages/Home';
@@ -13,8 +15,11 @@ import Register from './pages/auth/Register';
 import ItemDetails from './pages/items/ItemDetails';
 import CreateItem from './pages/items/CreateItem';
 import Offers from './pages/offers/Offers';
+// eslint-disable-next-line no-unused-vars
 import Profile from './pages/Profile';
+// eslint-disable-next-line no-unused-vars
 import MyItems from './pages/MyItems';
+// eslint-disable-next-line no-unused-vars
 import MyOffers from './pages/MyOffers';
 
 import './App.css';
@@ -27,16 +32,59 @@ function App() {
         <Router>
           <Layout>
             <Routes>
+              {/* Rotas públicas */}
               <Route path="/" element={<Home />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/item/:id" element={<ItemDetails />} />
-              <Route path="/create-item" element={<CreateItem />} />
-              <Route path="/offers" element={<Offers />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/my-items" element={<MyItems />} />
-              <Route path="/my-offers" element={<MyOffers />} />
-              {/* Adicionar mais rotas conforme necessário */}
+              <Route path="/login" element={
+                <ProtectedRoute requireAuth={false}>
+                  <Login />
+                </ProtectedRoute>
+              } />
+              <Route path="/register" element={
+                <ProtectedRoute requireAuth={false}>
+                  <Register />
+                </ProtectedRoute>
+              } />
+              
+              {/* Rotas protegidas - requerem autenticação */}
+              <Route path="/item/:id" element={
+                <ProtectedRoute>
+                  <ItemDetails />
+                </ProtectedRoute>
+              } />
+              <Route path="/create-item" element={
+                <ProtectedRoute>
+                  <CreateItem />
+                </ProtectedRoute>
+              } />
+              <Route path="/offers" element={
+                <ProtectedRoute>
+                  <Offers />
+                </ProtectedRoute>
+              } />
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              } />
+              <Route path="/my-items" element={
+                <ProtectedRoute>
+                  <MyItems />
+                </ProtectedRoute>
+              } />
+              <Route path="/my-offers" element={
+                <ProtectedRoute>
+                  <MyOffers />
+                </ProtectedRoute>
+              } />
+              
+              {/* Rota para perfil específico com proteção adicional */}
+              <Route path="/profile/:username" element={
+                <ProtectedRoute>
+                  <ProfileProtection>
+                    <Profile />
+                  </ProfileProtection>
+                </ProtectedRoute>
+              } />
             </Routes>
           </Layout>
         </Router>

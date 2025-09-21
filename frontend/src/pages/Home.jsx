@@ -34,7 +34,7 @@ const Home = () => {
     loadItems,
     clearError 
   } = useApp();
-  
+
   const [searchTerm, setSearchTerm] = useState('');
   const [searchFilters, setSearchFilters] = useState({
     category: '',
@@ -102,7 +102,7 @@ const Home = () => {
   };
 
   const handleMakeOffer = (item) => {
-    navigate(`/item/${item.id}#offer`);
+    navigate(`/item/${item.id}`);
   };
 
   return (
@@ -236,9 +236,13 @@ const Home = () => {
           </Box>
         ) : (
           <Grid container spacing={2}>
-            {Array.isArray(items) && items.map((item, index) => {
+            {Array.isArray(items) && items.filter(item => item && item.title).map((item, index) => {
               // Imagens de exemplo baseadas no título do item
               const getExampleImage = (title) => {
+                if (!title || typeof title !== 'string') {
+                  return 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=300&h=200&fit=crop';
+                }
+                
                 const lowerTitle = title.toLowerCase();
                 if (lowerTitle.includes('livro') || lowerTitle.includes('cálculo')) {
                   return 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&h=200&fit=crop';

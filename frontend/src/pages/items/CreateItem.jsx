@@ -29,6 +29,9 @@ const CreateItem = () => {
     title: '',
     description: '',
     category: 'livros',
+    location: '',
+    address: '',
+    image_url: '',
     status: 'disponivel',
   });
   
@@ -180,6 +183,53 @@ const CreateItem = () => {
                     <MenuItem value="tecnologia">Tecnologia</MenuItem>
                   </Select>
                 </FormControl>
+              </Grid>
+
+              {/* Localização */}
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  required
+                  fullWidth
+                  id="location"
+                  label="Cidade/Estado"
+                  name="location"
+                  value={formData.location}
+                  onChange={handleChange}
+                  error={!!formErrors.location}
+                  helperText={formErrors.location}
+                  placeholder="Ex: São Paulo, SP"
+                />
+              </Grid>
+
+              {/* Endereço */}
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  required
+                  fullWidth
+                  id="address"
+                  label="Endereço Completo"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  error={!!formErrors.address}
+                  helperText={formErrors.address}
+                  placeholder="Ex: Rua das Flores, 123 - Centro"
+                />
+              </Grid>
+
+              {/* URL da Imagem */}
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  id="image_url"
+                  label="URL da Imagem (opcional)"
+                  name="image_url"
+                  value={formData.image_url}
+                  onChange={handleChange}
+                  error={!!formErrors.image_url}
+                  helperText={formErrors.image_url || "Cole aqui o link de uma imagem do produto"}
+                  placeholder="https://exemplo.com/imagem.jpg"
+                />
               </Grid>
 
               {/* Status */}

@@ -42,9 +42,9 @@ class OfferViewSet(viewsets.ModelViewSet):
             
             if offer_type == 'item':
                 item_offered = serializer.validated_data.get('item_offered')
-                if item_offered and item_offered.owner == offerer:
+                if item_offered and item_offered.owner != offerer:
                     from rest_framework.exceptions import ValidationError
-                    raise ValidationError("Você não pode fazer uma oferta com seu próprio item.")
+                    raise ValidationError("Você só pode oferecer seus próprios itens.")
             
             if item_desired.owner == offerer:
                 from rest_framework.exceptions import ValidationError
@@ -93,16 +93,19 @@ class OfferViewSet(viewsets.ModelViewSet):
 
         # Lógica para aceitar a oferta
         offer.status = 'aceita'
-        offer.item_desired.status = 'trocado'
+        offer.item_desired.status = 'indisponível'
         
-        # Se for oferta de item, marcar o item oferecido como trocado
+        # Se for oferta de item, marcar o item oferecido como indisponível
         if offer.offer_type == 'item' and offer.item_offered:
-            offer.item_offered.status = 'trocado'
+            offer.item_offered.status = 'indisponível'
             offer.item_offered.save()
         
         offer.item_desired.save()
         offer.save()
-        return Response({'status': 'oferta aceita'})
+        
+        # Retornar a oferta atualizada
+        serializer = self.get_serializer(offer)
+        return Response(serializer.data)
 
     @action(detail=True, methods=['post'], permission_classes=[IsOffererOrOwnerOrTradeAdmin])
     def refuse(self, request, pk=None):
@@ -120,4 +123,7 @@ class OfferViewSet(viewsets.ModelViewSet):
         
         offer.status = 'recusada'
         offer.save()
-        return Response({'status': 'oferta recusada'})
+        
+        # Retornar a oferta atualizada
+        serializer = self.get_serializer(offer)
+        return Response(serializer.data)
