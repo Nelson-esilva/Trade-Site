@@ -3,9 +3,9 @@ FROM python:3.11-slim
 # Instalar dependências do sistema
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        postgresql-client \
-        build-essential \
-        libpq-dev \
+       postgresql-client \
+       build-essential \
+       libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Criar usuário não-root
@@ -22,6 +22,12 @@ RUN pip install --no-cache-dir --upgrade pip \
 # Copiar código da aplicação
 COPY . .
 
+# --- LINHAS NOVAS ADICIONADAS ABAIXO ---
+# Copia o script de entrypoint para dentro do container
+COPY ./entrypoint.sh /app/entrypoint.sh
+# Dá permissão de execução ao script
+RUN chmod +x /app/entrypoint.sh
+
 # Criar diretórios necessários
 RUN mkdir -p /app/static /app/media \
     && chown -R appuser:appuser /app
@@ -32,5 +38,6 @@ USER appuser
 # Expor porta
 EXPOSE 8000
 
-# Comando para executar a aplicação
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "core.wsgi:application"]
+# --- LINHA CMD ALTERADA ---
+# Define o entrypoint para executar o nosso script
+CMD ["/app/entrypoint.sh"]
