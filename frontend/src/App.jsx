@@ -30,63 +30,76 @@ function App() {
       <CssBaseline />
       <AppProvider>
         <Router>
-          <Layout>
-            <Routes>
-              {/* Rotas públicas */}
-              <Route path="/" element={<Home />} />
-              <Route path="/login" element={
-                <ProtectedRoute requireAuth={false}>
-                  <Login />
-                </ProtectedRoute>
-              } />
-              <Route path="/register" element={
-                <ProtectedRoute requireAuth={false}>
-                  <Register />
-                </ProtectedRoute>
-              } />
-              
-              {/* Rotas protegidas - requerem autenticação */}
-              <Route path="/item/:id" element={
-                <ProtectedRoute>
-                  <ItemDetails />
-                </ProtectedRoute>
-              } />
-              <Route path="/create-item" element={
-                <ProtectedRoute>
-                  <CreateItem />
-                </ProtectedRoute>
-              } />
-              <Route path="/offers" element={
-                <ProtectedRoute>
-                  <Offers />
-                </ProtectedRoute>
-              } />
-              <Route path="/profile" element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              } />
-              <Route path="/my-items" element={
-                <ProtectedRoute>
-                  <MyItems />
-                </ProtectedRoute>
-              } />
-              <Route path="/my-offers" element={
-                <ProtectedRoute>
-                  <MyOffers />
-                </ProtectedRoute>
-              } />
-              
-              {/* Rota para perfil específico com proteção adicional */}
-              <Route path="/profile/:username" element={
-                <ProtectedRoute>
-                  <ProfileProtection>
-                    <Profile />
-                  </ProfileProtection>
-                </ProtectedRoute>
-              } />
-            </Routes>
-          </Layout>
+          <Routes>
+            {/* Rotas de autenticação - sem Layout */}
+            <Route path="/login" element={
+              <ProtectedRoute requireAuth={false}>
+                <Login />
+              </ProtectedRoute>
+            } />
+            <Route path="/register" element={
+              <ProtectedRoute requireAuth={false}>
+                <Register />
+              </ProtectedRoute>
+            } />
+            
+            {/* Rota padrão - redireciona para login se não autenticado */}
+            <Route path="/" element={
+              <ProtectedRoute>
+                <Layout>
+                  <Home />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            
+            {/* Rotas com Layout - todas protegidas */}
+            <Route path="/*" element={
+              <Layout>
+                <Routes>
+                  {/* Rotas protegidas - requerem autenticação */}
+                  <Route path="/item/:id" element={
+                    <ProtectedRoute>
+                      <ItemDetails />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/create-item" element={
+                    <ProtectedRoute>
+                      <CreateItem />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/offers" element={
+                    <ProtectedRoute>
+                      <Offers />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/profile" element={
+                    <ProtectedRoute>
+                      <Profile />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/my-items" element={
+                    <ProtectedRoute>
+                      <MyItems />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/my-offers" element={
+                    <ProtectedRoute>
+                      <MyOffers />
+                    </ProtectedRoute>
+                  } />
+                  
+                  {/* Rota para perfil específico com proteção adicional */}
+                  <Route path="/profile/:username" element={
+                    <ProtectedRoute>
+                      <ProfileProtection>
+                        <Profile />
+                      </ProfileProtection>
+                    </ProtectedRoute>
+                  } />
+                </Routes>
+              </Layout>
+            } />
+          </Routes>
         </Router>
       </AppProvider>
     </ThemeProvider>

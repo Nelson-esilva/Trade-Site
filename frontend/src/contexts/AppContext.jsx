@@ -250,7 +250,8 @@ export const AppProvider = ({ children }) => {
     try {
       dispatch({ type: ActionTypes.SET_LOADING, payload: true });
       const response = await apiService.registerUser(userData);
-      dispatch({ type: ActionTypes.LOGIN_SUCCESS, payload: { user: response.user } });
+      // Não faz login automático - apenas registra o usuário
+      dispatch({ type: ActionTypes.SET_LOADING, payload: false });
       return response;
     } catch (error) {
       dispatch({ type: ActionTypes.SET_ERROR, payload: 'Erro ao registrar usuário' });

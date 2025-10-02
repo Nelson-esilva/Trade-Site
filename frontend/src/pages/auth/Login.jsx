@@ -17,17 +17,21 @@ import {
   Email as EmailIcon,
   Lock as LockIcon,
 } from '@mui/icons-material';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '../../contexts/AppContext';
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login, loading, error, clearError } = useApp();
   const [formData, setFormData] = useState({
     username: '',
     password: '',
   });
   const [showPassword, setShowPassword] = useState(false);
+  
+  // Verificar se veio do registro
+  const fromRegister = location.state?.fromRegister;
 
   const handleChange = (e) => {
     setFormData({
@@ -75,6 +79,12 @@ const Login = () => {
               Acesse sua conta para trocar materiais didáticos
             </Typography>
           </Box>
+
+          {fromRegister && (
+            <Alert severity="success" sx={{ mb: 2 }}>
+              Cadastro realizado com sucesso! Faça login para continuar.
+            </Alert>
+          )}
 
           {error && (
             <Alert severity="error" sx={{ mb: 2 }}>

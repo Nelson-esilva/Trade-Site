@@ -111,7 +111,8 @@ const Register = () => {
         password: formData.password,
         confirmPassword: formData.confirmPassword,
       });
-      navigate('/');
+      // Redireciona para login após cadastro bem-sucedido
+      navigate('/login', { state: { fromRegister: true } });
     } catch (error) {
       console.error('Erro ao registrar usuário:', error);
     }

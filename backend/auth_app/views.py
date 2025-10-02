@@ -20,17 +20,15 @@ class RegisterView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         
-        # Criar token para o usuário
-        token, created = Token.objects.get_or_create(user=user)
-        
+        # Não criar token - usuário deve fazer login manualmente
         return Response({
+            'message': 'Usuário criado com sucesso. Faça login para continuar.',
             'user': {
                 'id': user.id,
                 'username': user.username,
                 'email': user.email,
                 'name': user.name,
-            },
-            'token': token.key
+            }
         }, status=status.HTTP_201_CREATED)
 
 class LoginView(generics.GenericAPIView):
