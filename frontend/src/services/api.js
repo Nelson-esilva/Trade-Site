@@ -26,9 +26,13 @@ class ApiService {
     const url = `${this.baseURL}${endpoint}`;
     const token = this.getAuthToken();
     
+    // Detectar se é FormData para não adicionar Content-Type
+    const isFormData = options.body instanceof FormData;
+    
     const config = {
       headers: {
-        'Content-Type': 'application/json',
+        // Só adicionar Content-Type se não for FormData
+        ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
         ...(token && { 'Authorization': `Token ${token}` }),
         ...options.headers,
       },
@@ -39,6 +43,11 @@ class ApiService {
       const response = await fetch(url, config);
       
       if (!response.ok) {
+        // Se for erro 401 (Unauthorized), limpar token inválido
+        if (response.status === 401 && token) {
+          console.log('Token inválido detectado, limpando...');
+          this.setAuthToken(null);
+        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
@@ -63,7 +72,7 @@ class ApiService {
   async post(endpoint, data) {
     return this.request(endpoint, {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: data instanceof FormData ? data : JSON.stringify(data),
     });
   }
 

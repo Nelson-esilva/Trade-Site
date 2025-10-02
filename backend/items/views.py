@@ -86,7 +86,7 @@ class ItemViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         # Usuário deve estar autenticado para criar itens
         if self.request.user.is_authenticated:
-            serializer.save(owner=self.request.user)
+            item = serializer.save(owner=self.request.user)
         else:
             from rest_framework.exceptions import PermissionDenied
             raise PermissionDenied("Usuário deve estar autenticado para criar itens")

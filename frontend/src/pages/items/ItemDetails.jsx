@@ -58,7 +58,7 @@ const ItemDetails = () => {
     if (id) {
       loadItem(id);
     }
-  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [id, loadItem]);
 
   const handleMakeOffer = () => {
     setShowOfferDialog(true);
@@ -188,7 +188,7 @@ const ItemDetails = () => {
             <CardMedia
               component="img"
               height="400"
-              image={currentItem.image_url || 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=400&fit=crop'}
+              image={currentItem.image_url_or_upload || currentItem.image_url || 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=400&fit=crop'}
               alt={currentItem.title}
               sx={{
                 objectFit: 'cover',

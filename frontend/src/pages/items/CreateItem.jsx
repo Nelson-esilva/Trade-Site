@@ -17,6 +17,8 @@ import {
 import {
   Save as SaveIcon,
   ArrowBack as ArrowBackIcon,
+  CloudUpload as UploadIcon,
+  Delete as DeleteIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../contexts/AppContext';
@@ -30,11 +32,12 @@ const CreateItem = () => {
     description: '',
     category: 'livros',
     location: '',
-    address: '',
     image_url: '',
     status: 'disponivel',
   });
   
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [formErrors, setFormErrors] = useState({});
 
   const handleChange = (e) => {
@@ -51,6 +54,31 @@ const CreateItem = () => {
         [name]: '',
       });
     }
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedImage(file);
+      
+      // Criar preview da imagem
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+      
+      // Limpar URL de imagem se um arquivo foi selecionado
+      setFormData({
+        ...formData,
+        image_url: '',
+      });
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
   };
 
   const validateForm = () => {
@@ -80,7 +108,22 @@ const CreateItem = () => {
     }
     
     try {
-      await createItem(formData);
+      // Criar FormData para enviar arquivo
+      const submitData = new FormData();
+      
+      // Adicionar campos do formulário
+      Object.keys(formData).forEach(key => {
+        if (formData[key]) {
+          submitData.append(key, formData[key]);
+        }
+      });
+      
+      // Adicionar arquivo de imagem se selecionado
+      if (selectedImage) {
+        submitData.append('image', selectedImage);
+      }
+      
+      await createItem(submitData);
       navigate('/');
     } catch (error) {
       console.error('Erro ao criar item:', error);
@@ -201,34 +244,72 @@ const CreateItem = () => {
                 />
               </Grid>
 
-              {/* Endereço */}
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  fullWidth
-                  id="address"
-                  label="Endereço Completo"
-                  name="address"
-                  value={formData.address}
-                  onChange={handleChange}
-                  error={!!formErrors.address}
-                  helperText={formErrors.address}
-                  placeholder="Ex: Rua das Flores, 123 - Centro"
-                />
-              </Grid>
 
-              {/* URL da Imagem */}
+              {/* Upload de Imagem */}
               <Grid item xs={12}>
+                <Typography variant="h6" gutterBottom>
+                  Imagem do Produto
+                </Typography>
+                
+                {/* Preview da Imagem */}
+                {imagePreview && (
+                  <Box sx={{ mb: 2, textAlign: 'center' }}>
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      style={{
+                        maxWidth: '100%',
+                        maxHeight: '200px',
+                        borderRadius: '8px',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                      }}
+                    />
+                    <Button
+                      startIcon={<DeleteIcon />}
+                      onClick={handleRemoveImage}
+                      color="error"
+                      size="small"
+                      sx={{ mt: 1 }}
+                    >
+                      Remover Imagem
+                    </Button>
+                  </Box>
+                )}
+                
+                {/* Upload de Arquivo */}
+                <Box sx={{ mb: 2 }}>
+                  <input
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    id="image-upload"
+                    type="file"
+                    onChange={handleImageChange}
+                  />
+                  <label htmlFor="image-upload">
+                    <Button
+                      variant="outlined"
+                      component="span"
+                      startIcon={<UploadIcon />}
+                      fullWidth
+                      sx={{ py: 2 }}
+                    >
+                      {selectedImage ? 'Trocar Imagem' : 'Selecionar Imagem do Computador'}
+                    </Button>
+                  </label>
+                </Box>
+                
+                {/* URL da Imagem (alternativa) */}
                 <TextField
                   fullWidth
                   id="image_url"
-                  label="URL da Imagem (opcional)"
+                  label="Ou cole uma URL de imagem (opcional)"
                   name="image_url"
                   value={formData.image_url}
                   onChange={handleChange}
                   error={!!formErrors.image_url}
-                  helperText={formErrors.image_url || "Cole aqui o link de uma imagem do produto"}
+                  helperText={formErrors.image_url || "Alternativa: cole aqui o link de uma imagem"}
                   placeholder="https://exemplo.com/imagem.jpg"
+                  disabled={!!selectedImage}
                 />
               </Grid>
 

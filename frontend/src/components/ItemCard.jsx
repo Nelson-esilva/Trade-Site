@@ -35,6 +35,7 @@ const ItemCard = ({
   const navigate = useNavigate();
   const [isFavorite, setIsFavorite] = useState(item.isFavorite || false);
 
+
   const getCategoryLabel = (category) => {
     const categoryLabels = {
       'livros': 'Livros',
@@ -43,6 +44,16 @@ const ItemCard = ({
       'tecnologia': 'Tecnologia',
     };
     return categoryLabels[category] || category;
+  };
+
+  const getCategoryIcon = (category) => {
+    const categoryIcons = {
+      'livros': '📚',
+      'apostilas': '📄',
+      'equipamentos': '🔧',
+      'tecnologia': '💻',
+    };
+    return categoryIcons[category] || '📦';
   };
 
   const getStatusInfo = (status) => {
@@ -110,21 +121,25 @@ const ItemCard = ({
       }}
       onClick={handleCardClick}
     >
-      {/* Imagem do Item */}
-      <Box sx={{ position: 'relative' }}>
-        <CardMedia
-          component="img"
-          height={compact ? 120 : 160}
-          image={item.image_url || '/api/placeholder/300/200'}
-          alt={item.title}
-          sx={{
-            objectFit: 'cover',
-            transition: 'transform 0.3s ease',
-            '&:hover': {
-              transform: 'scale(1.05)',
-            },
-          }}
-        />
+      {/* Placeholder do Item */}
+      <Box sx={{ 
+        position: 'relative',
+        height: compact ? 120 : 160,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'grey.100',
+        borderBottom: '1px solid',
+        borderColor: 'grey.300'
+      }}>
+        <Box sx={{ textAlign: 'center' }}>
+          <Typography variant="h2" color="grey.400" sx={{ mb: 1 }}>
+            {getCategoryIcon(item.category)}
+          </Typography>
+          <Typography variant="caption" color="grey.500">
+            {getCategoryLabel(item.category)}
+          </Typography>
+        </Box>
         
         {/* Ações de Overlay */}
         <Box

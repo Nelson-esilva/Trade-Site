@@ -222,12 +222,81 @@ const AppContext = createContext();
 export const AppProvider = ({ children }) => {
   const [state, dispatch] = useReducer(appReducer, initialState);
 
+  // === FUNÇÕES AUXILIARES ===
+  const loadCurrentUser = useCallback(async () => {
+    try {
+      const token = apiService.getAuthToken();
+      if (token) {
+        const user = await apiService.getCurrentUser();
+        dispatch({ type: ActionTypes.SET_USER, payload: user });
+      } else {
+        // Se não há token, limpar usuário
+        dispatch({ type: ActionTypes.SET_USER, payload: null });
+      }
+    } catch (error) {
+      // Se não conseguir carregar usuário, limpar estado e token
+      console.log('Erro ao carregar usuário:', error);
+      apiService.setAuthToken(null);
+      dispatch({ type: ActionTypes.LOGOUT });
+    }
+  }, []);
+
+  const loadItems = useCallback(async () => {
+    try {
+      dispatch({ type: ActionTypes.SET_LOADING_ITEMS, payload: true });
+      const response = await apiService.getItems();
+      const items = response.results || response || [];
+      dispatch({ type: ActionTypes.SET_ITEMS, payload: items });
+    } catch (error) {
+      console.error('Erro ao carregar itens:', error);
+      // Não exibir erro se não estiver autenticado
+      const token = apiService.getAuthToken();
+      if (token) {
+        dispatch({ type: ActionTypes.SET_ERROR, payload: 'Erro ao carregar itens' });
+      }
+    } finally {
+      dispatch({ type: ActionTypes.SET_LOADING_ITEMS, payload: false });
+    }
+  }, []);
+
+  const loadOffers = useCallback(async () => {
+    try {
+      dispatch({ type: ActionTypes.SET_LOADING_OFFERS, payload: true });
+      const response = await apiService.getOffers();
+      const offers = response.results || response || [];
+      dispatch({ type: ActionTypes.SET_OFFERS, payload: offers });
+    } catch (error) {
+      // Não exibir erro se não estiver autenticado
+      const token = apiService.getAuthToken();
+      if (token) {
+        dispatch({ type: ActionTypes.SET_ERROR, payload: 'Erro ao carregar ofertas' });
+      }
+    } finally {
+      dispatch({ type: ActionTypes.SET_LOADING_OFFERS, payload: false });
+    }
+  }, []);
+
+  const loadInitialData = useCallback(async () => {
+    try {
+      // Carregar todos os dados após autenticação
+      await loadCurrentUser();
+      await loadItems();
+      await loadOffers();
+    } catch (error) {
+      console.error('Erro ao carregar dados iniciais:', error);
+    }
+  }, [loadCurrentUser, loadItems, loadOffers]);
+
   // === AÇÕES DE AUTENTICAÇÃO ===
   const login = useCallback(async (username, password) => {
     try {
       dispatch({ type: ActionTypes.SET_LOADING, payload: true });
       const response = await apiService.login(username, password);
       dispatch({ type: ActionTypes.LOGIN_SUCCESS, payload: { user: response.user } });
+      
+      // Carregar dados após login bem-sucedido
+      await loadInitialData();
+      
       return response;
     } catch (error) {
       dispatch({ type: ActionTypes.SET_ERROR, payload: 'Erro ao fazer login' });
@@ -235,7 +304,7 @@ export const AppProvider = ({ children }) => {
     } finally {
       dispatch({ type: ActionTypes.SET_LOADING, payload: false });
     }
-  }, []);
+  }, [loadInitialData]);
 
   const logout = useCallback(async () => {
     try {
@@ -261,74 +330,38 @@ export const AppProvider = ({ children }) => {
     }
   }, []);
 
-  // === AÇÕES DE USUÁRIO ===
-  const loadCurrentUser = useCallback(async () => {
-    try {
-      const token = apiService.getAuthToken();
-      if (token) {
-        const user = await apiService.getCurrentUser();
-        dispatch({ type: ActionTypes.SET_USER, payload: user });
-      } else {
-        // Se não há token, limpar usuário
-        dispatch({ type: ActionTypes.SET_USER, payload: null });
-      }
-    } catch (error) {
-      // Se não conseguir carregar usuário, limpar estado
-      console.log('Erro ao carregar usuário:', error);
-      dispatch({ type: ActionTypes.SET_USER, payload: null });
-    }
-  }, []);
 
-  const loadItems = useCallback(async () => {
-    try {
-      dispatch({ type: ActionTypes.SET_LOADING_ITEMS, payload: true });
-      const response = await apiService.getItems();
-      const items = response.results || response || [];
-      dispatch({ type: ActionTypes.SET_ITEMS, payload: items });
-    } catch (error) {
-      console.error('Erro ao carregar itens:', error);
-      dispatch({ type: ActionTypes.SET_ERROR, payload: 'Erro ao carregar itens' });
-    } finally {
-      dispatch({ type: ActionTypes.SET_LOADING_ITEMS, payload: false });
-    }
-  }, []);
 
-  const loadOffers = useCallback(async () => {
-    try {
-      dispatch({ type: ActionTypes.SET_LOADING_OFFERS, payload: true });
-      const response = await apiService.getOffers();
-      const offers = response.results || response || [];
-      dispatch({ type: ActionTypes.SET_OFFERS, payload: offers });
-    } catch (error) {
-      dispatch({ type: ActionTypes.SET_ERROR, payload: 'Erro ao carregar ofertas' });
-    } finally {
-      dispatch({ type: ActionTypes.SET_LOADING_OFFERS, payload: false });
-    }
-  }, []);
-
-  const loadInitialData = useCallback(async () => {
-    try {
-      // Carregar itens primeiro (sempre funciona)
-      await loadItems();
-      
-      // Carregar usuário atual (pode falhar se não autenticado)
-      await loadCurrentUser();
-      
-      // Carregar ofertas apenas se autenticado
-      const token = apiService.getAuthToken();
-      if (token) {
-        await loadOffers();
-      }
-      
-    } catch (error) {
-      console.error('Erro ao carregar dados iniciais:', error);
-    }
-  }, [loadCurrentUser, loadItems, loadOffers]);
-
-  // Carregar dados iniciais
+  // Limpar erro e verificar token ao montar o componente
   useEffect(() => {
-    loadInitialData();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    dispatch({ type: ActionTypes.CLEAR_ERROR });
+    
+    // Verificar se há token e se é válido
+    const token = apiService.getAuthToken();
+    if (token) {
+      // Tentar validar o token fazendo uma requisição simples
+      apiService.getCurrentUser().catch((error) => {
+        console.log('Token inválido detectado na inicialização, limpando...');
+        apiService.setAuthToken(null);
+        dispatch({ type: ActionTypes.LOGOUT });
+      });
+    }
+  }, []);
+
+  // Carregar dados iniciais apenas uma vez
+  useEffect(() => {
+    const token = apiService.getAuthToken();
+    if (token) {
+      // Tentar carregar dados, se falhar, limpar token inválido
+      loadInitialData().catch((error) => {
+        console.error('Token inválido, limpando:', error);
+        apiService.setAuthToken(null);
+        dispatch({ type: ActionTypes.LOGOUT });
+      });
+    }
+    // Não carregar nada se não autenticado - dados serão carregados após login
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Dependências vazias para executar apenas uma vez
 
 
 
