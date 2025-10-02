@@ -272,7 +272,7 @@ const Home = () => {
                       category: item.category || 'livros',
                       location: item.location || 'Local não informado',
                       offerCount: item.offerCount || 0,
-                      image: item.image || getExampleImage(item.title),
+                      image: item.image_url || getExampleImage(item.title),
                       condition: item.condition || 'Bom estado',
                       status: item.status || 'disponivel',
                     }}

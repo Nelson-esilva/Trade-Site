@@ -109,6 +109,7 @@ const Register = () => {
         email: formData.email,
         name: formData.name,
         password: formData.password,
+        confirmPassword: formData.confirmPassword,
       });
       navigate('/');
     } catch (error) {

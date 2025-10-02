@@ -19,6 +19,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  CardMedia,
 } from '@mui/material';
 import {
   SwapHoriz as SwapIcon,
@@ -236,38 +237,48 @@ const MyOffers = () => {
                           <Typography variant="subtitle2" gutterBottom>
                             Seu Item:
                           </Typography>
-                          <Box display="flex" alignItems="center" mb={1}>
-                            {getCategoryIcon(offer.item_desired_data?.category)}
-                            <Typography variant="body1" sx={{ ml: 1 }}>
-                              {offer.item_desired_data?.title}
-                            </Typography>
+                          <Box display="flex" alignItems="flex-start" mb={1}>
+                            <CardMedia
+                              component="img"
+                              sx={{ width: 60, height: 60, borderRadius: 1, mr: 2, objectFit: 'cover' }}
+                              image={offer.item_desired_data?.image_url || 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=60&h=60&fit=crop'}
+                              alt={offer.item_desired_data?.title}
+                            />
+                            <Box>
+                              <Typography variant="body1">
+                                {offer.item_desired_data?.title}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                {offer.item_desired_data?.description}
+                              </Typography>
+                            </Box>
                           </Box>
-                          <Typography variant="body2" color="text.secondary">
-                            {offer.item_desired_data?.description}
-                          </Typography>
                         </Grid>
 
                         <Grid item xs={12} md={6}>
                           <Typography variant="subtitle2" gutterBottom>
                             {offer.offer_type === 'item' ? 'Item Oferecido:' : 'Valor Oferecido:'}
                           </Typography>
-                          <Box display="flex" alignItems="center" mb={1}>
-                            {offer.offer_type === 'item' ? (
-                              <>
-                                {getCategoryIcon(offer.item_offered_data?.category)}
-                                <Typography variant="body1" sx={{ ml: 1 }}>
+                          {offer.offer_type === 'item' ? (
+                            <Box display="flex" alignItems="flex-start" mb={1}>
+                              <CardMedia
+                                component="img"
+                                sx={{ width: 60, height: 60, borderRadius: 1, mr: 2, objectFit: 'cover' }}
+                                image={offer.item_offered_data?.image_url || 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=60&h=60&fit=crop'}
+                                alt={offer.item_offered_data?.title}
+                              />
+                              <Box>
+                                <Typography variant="body1">
                                   {offer.item_offered_data?.title}
                                 </Typography>
-                              </>
-                            ) : (
-                              <Typography variant="body1" sx={{ ml: 1 }}>
-                                R$ {offer.money_amount}
-                              </Typography>
-                            )}
-                          </Box>
-                          {offer.offer_type === 'item' && (
-                            <Typography variant="body2" color="text.secondary">
-                              {offer.item_offered_data?.description}
+                                <Typography variant="body2" color="text.secondary">
+                                  {offer.item_offered_data?.description}
+                                </Typography>
+                              </Box>
+                            </Box>
+                          ) : (
+                            <Typography variant="h6" color="primary">
+                              R$ {offer.money_amount?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                             </Typography>
                           )}
                         </Grid>

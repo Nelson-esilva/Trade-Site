@@ -20,6 +20,7 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  CardMedia,
 } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,
@@ -183,9 +184,25 @@ const ItemDetails = () => {
       </Box>
 
       <Grid container spacing={4}>
+        {/* Imagem do Item */}
+        <Grid item xs={12} md={6}>
+          <Paper elevation={3} sx={{ borderRadius: 2, overflow: 'hidden' }}>
+            <CardMedia
+              component="img"
+              height="400"
+              image={currentItem.image_url || 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=400&fit=crop'}
+              alt={currentItem.title}
+              sx={{
+                objectFit: 'cover',
+                width: '100%',
+              }}
+            />
+          </Paper>
+        </Grid>
+
         {/* Informações do Item */}
-        <Grid item xs={12}>
-          <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
+        <Grid item xs={12} md={6}>
+          <Paper elevation={3} sx={{ p: 4, borderRadius: 2, height: 'fit-content' }}>
             <Box sx={{ mb: 3 }}>
               <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
                 <Typography variant="h4" component="h1" gutterBottom>
