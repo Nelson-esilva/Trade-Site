@@ -23,9 +23,9 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
-const ItemCard = ({ 
-  item, 
-  showOwner = true, 
+const ItemCard = ({
+  item,
+  showOwner = true,
   compact = false,
   onFavorite,
   onShare,
@@ -121,26 +121,37 @@ const ItemCard = ({
       }}
       onClick={handleCardClick}
     >
-      {/* Placeholder do Item */}
-      <Box sx={{ 
-        position: 'relative',
-        height: compact ? 120 : 160,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'grey.100',
-        borderBottom: '1px solid',
-        borderColor: 'grey.300'
-      }}>
-        <Box sx={{ textAlign: 'center' }}>
-          <Typography variant="h2" color="grey.400" sx={{ mb: 1 }}>
-            {getCategoryIcon(item.category)}
-          </Typography>
-          <Typography variant="caption" color="grey.500">
-            {getCategoryLabel(item.category)}
-          </Typography>
-        </Box>
-        
+      {/* Área da Imagem e Overlay */}
+      <Box sx={{ position: 'relative' }}>
+        {item.image ? (
+          <CardMedia
+            component="img"
+            height={compact ? 120 : 160}
+            image={item.image}
+            alt={item.title}
+            sx={{ objectFit: 'cover', borderBottom: '1px solid', borderColor: 'grey.300' }}
+          />
+        ) : (
+          <Box sx={{
+            height: compact ? 120 : 160,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'grey.100',
+            borderBottom: '1px solid',
+            borderColor: 'grey.300'
+          }}>
+            <Box sx={{ textAlign: 'center' }}>
+              <Typography variant="h2" color="grey.400" sx={{ mb: 1 }}>
+                {getCategoryIcon(item.category)}
+              </Typography>
+              <Typography variant="caption" color="grey.500">
+                {getCategoryLabel(item.category)}
+              </Typography>
+            </Box>
+          </Box>
+        )}
+
         {/* Ações de Overlay */}
         <Box
           sx={{
@@ -170,7 +181,7 @@ const ItemCard = ({
               )}
             </IconButton>
           </Tooltip>
-          
+
           <Tooltip title="Compartilhar">
             <IconButton
               size="small"
@@ -278,13 +289,13 @@ const ItemCard = ({
         {showOwner && item.owner && (
           <Box display="flex" alignItems="center" mt={1}>
             <Avatar
-              src={item.owner.avatar}
+              src={typeof item.owner === 'object' ? item.owner.avatar : undefined}
               sx={{ width: 20, height: 20, mr: 0.5 }}
             >
               <PersonIcon fontSize="small" />
             </Avatar>
             <Typography variant="caption" color="text.secondary">
-              {item.owner.name || item.owner}
+              {typeof item.owner === 'object' ? (item.owner.name || item.owner.username || 'Usuário') : `Usuário ${item.owner}`}
             </Typography>
           </Box>
         )}
@@ -308,11 +319,11 @@ const ItemCard = ({
           color="secondary"
           startIcon={<SwapIcon />}
           onClick={handleMakeOfferClick}
-          sx={{ 
-            ml: 'auto', 
-            fontSize: '0.75rem', 
-            minWidth: 'auto', 
-            px: 1 
+          sx={{
+            ml: 'auto',
+            fontSize: '0.75rem',
+            minWidth: 'auto',
+            px: 1
           }}
         >
           Oferta
@@ -320,28 +331,30 @@ const ItemCard = ({
       </CardActions>
 
       {/* Indicador de Novo Item */}
-      {item.isNew && (
-        <Box
-          sx={{
-            position: 'absolute',
-            top: -8,
-            left: -8,
-            backgroundColor: 'error.main',
-            color: 'white',
-            borderRadius: '50%',
-            width: 24,
-            height: 24,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '0.75rem',
-            fontWeight: 'bold',
-          }}
-        >
-          N
-        </Box>
-      )}
-    </Card>
+      {
+        item.isNew && (
+          <Box
+            sx={{
+              position: 'absolute',
+              top: -8,
+              left: -8,
+              backgroundColor: 'error.main',
+              color: 'white',
+              borderRadius: '50%',
+              width: 24,
+              height: 24,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '0.75rem',
+              fontWeight: 'bold',
+            }}
+          >
+            N
+          </Box>
+        )
+      }
+    </Card >
   );
 };
 

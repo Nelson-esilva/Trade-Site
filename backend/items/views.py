@@ -95,7 +95,7 @@ class ItemViewSet(viewsets.ModelViewSet):
         """
         Retorna itens baseado nas permissões do usuário.
         - Superusuários e administradores: todos os itens
-        - Usuários comuns: apenas itens disponíveis
+        - Usuários comuns: itens disponíveis E seus próprios itens.
         """
         user = self.request.user
         
@@ -105,8 +105,13 @@ class ItemViewSet(viewsets.ModelViewSet):
         if user.is_superuser:
             return Item.objects.all()
             
-        # Usuários comuns veem apenas itens disponíveis (não trocados)
-        return Item.objects.filter(status='disponivel')
+        # Se o usuário não estiver autenticado, vê apenas itens disponíveis
+        if not user.is_authenticated:
+            return Item.objects.filter(status='disponivel')
+            
+        from django.db.models import Q
+        # Usuários comuns veem itens disponíveis OU os seus próprios itens
+        return Item.objects.filter(Q(status='disponivel') | Q(owner=user))
 
     @action(detail=True, methods=['patch'], permission_classes=[IsOwnerOrTradeAdmin])
     def change_status(self, request, pk=None):
