@@ -993,4 +993,14 @@ chore: tarefas de manutenção
 
 ---
 
-**Documentação do Frontend atualizada em: Janeiro 2024**
+## 🆕 Atualizações de Hoje (20/03/2026)
+
+- Redesign amplo da interface com foco em consistência visual (tema, cards, header, grids e estados vazios).
+- Correção de textos com caracteres UTF-8 em toda a aplicação.
+- `ItemDetails`: proteção contra loop de carregamento em detalhe de item.
+- `ItemDetails`: botão de oferta oculto quando o item pertence ao usuário logado.
+- `MyOffers`: ação de cancelar oferta pendente enviada.
+- `services/api.js` e `AppContext.jsx`: integração da ação `cancelOffer`.
+- `CreateItem`: reformulação visual para formulário mais limpo, centralizado e responsivo.
+
+**Documentação do Frontend atualizada em: Março 2026**

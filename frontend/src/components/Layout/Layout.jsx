@@ -88,9 +88,9 @@ const Footer = () => (
   </Box>
 );
 
-const Layout = ({ children }) => (
+const Layout = ({ children, themeMode, onToggleTheme }) => (
   <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-    <Header />
+    <Header themeMode={themeMode} onToggleTheme={onToggleTheme} />
     <Box component="main" sx={{ flexGrow: 1 }}>
       {children}
     </Box>

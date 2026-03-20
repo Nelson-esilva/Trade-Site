@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
-import theme from './theme';
+import createAppTheme from './theme';
 import { AppProvider } from './contexts/AppContext';
 import Layout from './components/Layout/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -23,6 +23,18 @@ import MyOffers from './pages/MyOffers';
 import './App.css';
 
 function App() {
+  const [themeMode, setThemeMode] = useState(() => localStorage.getItem('themeMode') || 'dark');
+
+  const theme = useMemo(() => createAppTheme(themeMode), [themeMode]);
+
+  const toggleTheme = () => {
+    setThemeMode((prev) => {
+      const next = prev === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('themeMode', next);
+      return next;
+    });
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -44,7 +56,7 @@ function App() {
             {/* Rota padrão - redireciona para login se não autenticado */}
             <Route path="/" element={
               <ProtectedRoute>
-                <Layout>
+                <Layout themeMode={themeMode} onToggleTheme={toggleTheme}>
                   <Home />
                 </Layout>
               </ProtectedRoute>
@@ -52,7 +64,7 @@ function App() {
             
             {/* Rotas com Layout - todas protegidas */}
             <Route path="/*" element={
-              <Layout>
+              <Layout themeMode={themeMode} onToggleTheme={toggleTheme}>
                 <Routes>
                   {/* Rotas protegidas - requerem autenticação */}
                   <Route path="/item/:id" element={

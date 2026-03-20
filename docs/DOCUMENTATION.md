@@ -1,8 +1,6 @@
-# 📚 Trade Site - Documentação Completa
+# 📚 Documentação Completa - Trade Site
 
-**Sistema de Troca de Itens Acadêmicos**
-
----
+> Última atualização: 20/03/2026
 
 ## 📋 Índice
 
@@ -30,7 +28,19 @@ O **Trade Site** é uma aplicação web para troca de itens acadêmicos (livros,
 - **Ofertas em Dinheiro**: Possibilidade de fazer ofertas monetárias
 - **Sistema de Permissões**: Administradores com controle total
 - **Interface Responsiva**: Design moderno com Material-UI
-- **Autenticação Segura**: Sistema de tokens para autenticação
+- **Autenticação Segura**: JWT (access + refresh token)
+
+### 🆕 Atualizações de Hoje (20/03/2026)
+
+- Fluxo de autenticação reforçado e correções de navegação pós-cadastro.
+- Integração de storage com Cloudinary (opcional por variável de ambiente).
+- Endpoints de health check para deploy (`/` e `/healthz/`).
+- Correção de paginação de ofertas com ordenação explícita.
+- Novas regras de negócio:
+  - usuário não pode ofertar no próprio item;
+  - usuário pode cancelar oferta pendente enviada.
+- Reforma visual do frontend e refinamento de UX/UI.
+- Redesign do formulário de cadastro de item para layout centralizado e mais consistente.
 
 ---
 
@@ -119,9 +129,6 @@ class Item(models.Model):
     status = models.CharField(max_length=255, choices=STATUS_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return self.title
 ```
 
 #### Offer Model (offers/models.py)
@@ -146,9 +153,6 @@ class Offer(models.Model):
     money_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Oferta de {self.offerer.username} por {self.item_desired.title}"
 ```
 
 ### Permissões Customizadas
@@ -156,11 +160,6 @@ class Offer(models.Model):
 #### IsOwnerOrTradeAdminOrReadOnly
 ```python
 class IsOwnerOrTradeAdminOrReadOnly(permissions.BasePermission):
-    """
-    Permissão que permite:
-    - Leitura para todos (incluindo usuários não autenticados)
-    - Escrita apenas para donos do item ou administradores
-    """
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
             return True
@@ -352,6 +351,7 @@ Item (1) ──► (N) Offer (item_offered)
 - `GET /api/offers/{id}/` - Detalhes da oferta
 - `POST /api/offers/{id}/accept/` - Aceita oferta
 - `POST /api/offers/{id}/refuse/` - Recusa oferta
+- `POST /api/offers/{id}/cancel/` - Cancela oferta pendente (ofertante/admin)
 
 ### Usuários
 - `GET /api/users/` - Lista usuários (admin)
@@ -364,9 +364,9 @@ Item (1) ──► (N) Offer (item_offered)
 
 ### Sistema de Tokens
 
-- **Token Authentication** para API
+- **JWT Authentication** para API
 - **Session Authentication** para admin
-- Tokens armazenados no localStorage
+- Access/refresh token armazenados no frontend
 
 ### Níveis de Permissão
 
@@ -447,12 +447,27 @@ SECRET_KEY=django-insecure-...
 DEBUG=False
 ALLOWED_HOSTS=localhost,127.0.0.1
 DATABASE_URL=postgresql://user:password@db:5432/tradesite
+SITE_URL=http://localhost:8000
+USE_CLOUDINARY=false
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
 
 # Database
 POSTGRES_DB=tradesite
 POSTGRES_USER=user
 POSTGRES_PASSWORD=password
 ```
+
+### Deploy Render + Vercel (produção)
+
+- **Render (backend)**:
+  - definir health check para `/healthz/`;
+  - configurar `USE_CLOUDINARY=true` e credenciais Cloudinary;
+  - configurar `SITE_URL` com URL pública do backend.
+- **Vercel (frontend)**:
+  - garantir variável de URL da API apontando para o backend em produção;
+  - fazer novo build/deploy após alterações de autenticação e formulário.
 
 ---
 
@@ -627,139 +642,3 @@ Para dúvidas ou problemas:
 ---
 
 **Desenvolvido com ❤️ para facilitar a troca de materiais acadêmicos**
-
----
-
-## 📋 Anexos
-
-### A. Comandos Úteis
-
-#### Docker
-```bash
-# Iniciar aplicação
-./start.sh
-
-# Parar aplicação
-./stop.sh
-
-# Ver logs
-docker compose logs -f
-
-# Rebuild
-docker compose up --build -d
-```
-
-#### Backend
-```bash
-# Migrações
-python manage.py makemigrations
-python manage.py migrate
-
-# Superusuário
-python manage.py createsuperuser
-
-# Testes
-python manage.py test
-```
-
-#### Frontend
-```bash
-# Desenvolvimento
-npm start
-
-# Build
-npm run build
-
-# Lint
-npm run lint
-```
-
-### B. Exemplos de API
-
-#### Login
-```bash
-curl -X POST http://localhost:8000/api/auth/login/ \
-  -H "Content-Type: application/json" \
-  -d '{"username": "usuario", "password": "senha"}'
-```
-
-#### Listar Itens
-```bash
-curl -X GET http://localhost:8000/api/items/ \
-  -H "Authorization: Token abc123def456ghi789"
-```
-
-#### Criar Item
-```bash
-curl -X POST http://localhost:8000/api/items/ \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Token abc123def456ghi789" \
-  -d '{
-    "title": "Livro de Cálculo",
-    "description": "Livro de cálculo diferencial",
-    "category": "livros",
-    "location": "São Paulo, SP",
-    "status": "disponivel"
-  }'
-```
-
-### C. Configuração de Produção
-
-#### Variáveis de Ambiente
-```env
-# Backend
-SECRET_KEY=your-secret-key-here
-DEBUG=False
-ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com
-DATABASE_URL=postgresql://user:password@db:5432/tradesite
-
-# Database
-POSTGRES_DB=tradesite
-POSTGRES_USER=user
-POSTGRES_PASSWORD=strong-password
-
-# CORS
-CORS_ALLOWED_ORIGINS=https://yourdomain.com
-```
-
-#### Docker Compose para Produção
-```yaml
-version: '3.8'
-
-services:
-  db:
-    image: postgres:15
-    environment:
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    restart: unless-stopped
-
-  backend:
-    build: ./backend
-    environment:
-      - SECRET_KEY=${SECRET_KEY}
-      - DEBUG=${DEBUG}
-      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
-      - DATABASE_URL=${DATABASE_URL}
-    depends_on:
-      - db
-    restart: unless-stopped
-
-  frontend:
-    build: ./frontend
-    environment:
-      - REACT_APP_API_URL=${REACT_APP_API_URL}
-    depends_on:
-      - backend
-    restart: unless-stopped
-
-volumes:
-  postgres_data:
-```
-
----
-
-**Documentação consolidada em: Janeiro 2024**

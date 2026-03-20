@@ -28,11 +28,13 @@ import {
   Inventory2 as InventoryIcon,
   AccountCircle as AccountCircleIcon,
   Close as CloseIcon,
+  DarkMode as DarkModeIcon,
+  LightMode as LightModeIcon,
 } from '@mui/icons-material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '../../contexts/AppContext';
 
-const Header = () => {
+const Header = ({ themeMode, onToggleTheme }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, isAuthenticated, logout, offers } = useApp();
@@ -144,6 +146,20 @@ const Header = () => {
           </Box>
 
           <Box sx={{ flexGrow: 1 }} />
+
+          <IconButton
+            color="inherit"
+            onClick={onToggleTheme}
+            title={themeMode === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro'}
+            sx={{
+              mr: { xs: 0.5, md: 1 },
+              color: 'rgba(255,255,255,0.8)',
+              border: '1px solid rgba(255,255,255,0.12)',
+              '&:hover': { bgcolor: 'rgba(255,255,255,0.1)', color: '#fff' },
+            }}
+          >
+            {themeMode === 'dark' ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
+          </IconButton>
 
           {/* Desktop nav */}
           {isAuthenticated && (

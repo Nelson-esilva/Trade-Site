@@ -10,8 +10,6 @@
 
 ### 🐳 Deploy e Infraestrutura
 - **[🐳 Docker Setup](DOCKER_SETUP.md)** - Configuração e uso do Docker
-- **[🔧 Backend Docker](backend/DOCKER_README.md)** - Configuração Docker do backend
-- **[⚙️ Development Config](backend/DEVELOPMENT_CONFIG.md)** - Configuração de desenvolvimento
 
 ---
 
@@ -29,8 +27,7 @@
 
 ### 🚀 Para Deploy
 1. **[🐳 Docker Setup](DOCKER_SETUP.md)** - Deploy com Docker
-2. **[🔧 Backend Docker](backend/DOCKER_README.md)** - Configuração específica do backend
-3. **[📋 Documentação Completa](DOCUMENTATION.md)** - Seção de deploy
+2. **[📋 Documentação Completa](DOCUMENTATION.md)** - Seção de deploy
 
 ---
 
@@ -99,7 +96,6 @@
 
 ### 🐳 Docker
 - **[Docker Setup](DOCKER_SETUP.md)** - Configuração completa
-- **[Backend Docker](backend/DOCKER_README.md)** - Backend específico
 - **[Documentação Completa](DOCUMENTATION.md#-deploy-com-docker)** - Deploy geral
 
 ---

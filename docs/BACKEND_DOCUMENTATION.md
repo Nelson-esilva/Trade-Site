@@ -1206,4 +1206,20 @@ class Command(BaseCommand):
 
 ---
 
-**Documentação do Backend atualizada em: Janeiro 2024**
+## 🆕 Atualizações de Hoje (20/03/2026)
+
+- Migração para autenticação JWT com fluxo mais robusto no frontend/backend.
+- Integração opcional com Cloudinary:
+  - novas dependências em `requirements.txt`;
+  - configuração condicional por `USE_CLOUDINARY`;
+  - suporte a `SITE_URL` para URLs absolutas quando necessário.
+- Inclusão de endpoints de health check:
+  - `GET /`
+  - `GET /healthz/`
+- `OfferViewSet` com ordenação explícita por `created_at` para paginação estável.
+- Nova ação em ofertas: `POST /api/offers/{id}/cancel/`
+  - cancela apenas ofertas pendentes;
+  - permitido para ofertante/admin/superuser.
+- Status adicional em oferta: `cancelada` (com migração aplicada no app `offers`).
+
+**Documentação do Backend atualizada em: Março 2026**

@@ -86,7 +86,7 @@ const CreateItem = () => {
   };
 
   return (
-    <Box sx={{ bgcolor: '#e8eef4', minHeight: '100vh' }}>
+    <Box sx={{ bgcolor: 'background.default', minHeight: '100vh' }}>
       {/* Cabeçalho destacado */}
       <Box
         sx={{
@@ -130,7 +130,8 @@ const CreateItem = () => {
             p: { xs: 3, md: 4 },
             borderRadius: 3,
             border: '1px solid',
-            borderColor: 'rgba(15, 23, 42, 0.08)',
+            borderColor: 'divider',
+            bgcolor: 'background.paper',
           }}
         >
           <Box component="form" onSubmit={handleSubmit}>
@@ -281,7 +282,7 @@ const CreateItem = () => {
             <Divider sx={{ mb: 4 }} />
 
             {/* Dicas */}
-            <Box sx={{ bgcolor: '#f0f7ff', p: 2.5, borderRadius: 2, border: '1px solid', borderColor: 'rgba(37,99,235,0.15)', mb: 4 }}>
+            <Box sx={{ bgcolor: 'action.hover', p: 2.5, borderRadius: 2, border: '1px solid', borderColor: 'divider', mb: 4 }}>
               <Typography variant="body2" fontWeight={600} sx={{ mb: 0.5, color: 'primary.dark' }}>
                 Dicas para um bom anúncio
               </Typography>

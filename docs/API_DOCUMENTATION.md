@@ -21,20 +21,26 @@ A API do Trade Site é baseada em REST e utiliza Django REST Framework. Todas as
 
 **Content-Type:** `application/json`
 
+### Health checks
+
+- `GET /` → status simples da API
+- `GET /healthz/` → endpoint recomendado para monitoramento/deploy
+
 ---
 
 ## 🔐 Autenticação
 
-A API utiliza **Token Authentication**. Para autenticar, inclua o token no header:
+A API utiliza **JWT Authentication**. Para autenticar, inclua o token no header:
 
 ```
-Authorization: Token <seu_token_aqui>
+Authorization: Bearer <access_token>
 ```
 
-### Como obter um token:
+### Como obter tokens:
 
 1. **Login:** `POST /api/auth/login/`
 2. **Registro:** `POST /api/auth/register/`
+3. **Refresh:** `POST /api/auth/token/refresh/`
 
 ---
 
@@ -575,6 +581,27 @@ Authorization: Token <token>
     "created_at": "2024-01-15T09:00:00Z",
     "updated_at": "2024-01-15T09:00:00Z"
   }
+}
+```
+
+### POST /api/offers/{id}/cancel/
+
+Cancela uma oferta pendente.
+
+**Regras:**
+- Apenas o ofertante (ou admin/superuser) pode cancelar
+- Apenas ofertas com status `pendente` podem ser canceladas
+
+**Headers:**
+```
+Authorization: Bearer <access_token>
+```
+
+**Response (200):**
+```json
+{
+  "id": 10,
+  "status": "cancelada"
 }
 ```
 

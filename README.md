@@ -32,7 +32,7 @@ docker-compose down
 ### **Backend (Django)**
 - **Framework**: Django 4.x + Django REST Framework
 - **Banco**: PostgreSQL
-- **Autenticação**: Sistema customizado (desenvolvimento)
+- **Autenticação**: JWT (Simple JWT com refresh token)
 - **APIs**: RESTful para itens, ofertas e usuários
 
 ### **Frontend (React)**
@@ -59,6 +59,13 @@ Trade-Site/
 │   │   ├── contexts/       # Gerenciamento de estado
 │   │   └── services/       # Comunicação com API
 │   └── package.json        # Dependências Node.js
+├── docs/                   # Documentação consolidada
+│   ├── DOCS_INDEX.md
+│   ├── DOCUMENTATION.md
+│   ├── API_DOCUMENTATION.md
+│   ├── FRONTEND_DOCUMENTATION.md
+│   ├── BACKEND_DOCUMENTATION.md
+│   └── DOCKER_SETUP.md
 ├── docker-compose.yml      # Orquestração Docker
 ├── start.sh               # Script de inicialização
 └── stop.sh                # Script de parada
@@ -69,17 +76,35 @@ Trade-Site/
 ### **✅ Implementadas**
 - **Gestão de Itens**: Criar, listar, visualizar itens
 - **Sistema de Ofertas**: Fazer, aceitar, recusar ofertas
+- **Cancelamento de Oferta**: Usuário pode cancelar oferta pendente enviada
 - **Busca e Filtros**: Buscar itens por texto e categoria
 - **Interface Responsiva**: Design adaptável para mobile
-- **Autenticação**: Sistema de login/registro
+- **Autenticação**: Login/registro com JWT e fluxo robusto
+- **Upload de Imagem**: Suporte a Cloudinary em produção
 - **API RESTful**: Endpoints completos para todas as operações
 
 ### **🔄 Em Desenvolvimento**
-- Upload de imagens
 - Sistema de mensagens
 - Notificações em tempo real
 - Geolocalização
 - Sistema de avaliações
+
+## 🆕 **Atualizações de Hoje (20/03/2026)**
+
+- **Autenticação robusta**: fluxo com JWT reforçado e pós-cadastro redirecionando para login.
+- **Regras de negócio em ofertas**:
+  - usuário não consegue ofertar no próprio item;
+  - usuário pode cancelar oferta com status `pendente`.
+- **Backend mais estável**:
+  - adição dos endpoints `/` e `/healthz/` para health checks;
+  - ordenação em ofertas para evitar `UnorderedObjectListWarning` na paginação;
+  - correção de loop de requisições no detalhe de item.
+- **Mídia em produção**:
+  - integração opcional com Cloudinary via `USE_CLOUDINARY=true`;
+  - fallback local quando `USE_CLOUDINARY=false`.
+- **Frontend/UI**:
+  - revisão visual ampla (header/menu superior, grid e cards mais consistentes, textos corrigidos UTF-8);
+  - formulário de cadastro de item (`CreateItem`) redesenhado com melhor hierarquia visual, centralização e espaçamento.
 
 ## 🛠️ **Desenvolvimento**
 
@@ -111,23 +136,21 @@ docker-compose exec frontend npm install
 ## 📚 **Documentação Completa**
 
 ### 📖 Índice da Documentação
-- **[📚 Índice da Documentação](DOCS_INDEX.md)** - Navegação completa da documentação
+- **[📚 Índice da Documentação](docs/DOCS_INDEX.md)** - Navegação completa da documentação
 
 ### 📖 Documentação Principal
-- **[📋 Documentação Completa](DOCUMENTATION.md)** - Visão geral completa do projeto
-- **[🔌 API Documentation](API_DOCUMENTATION.md)** - Documentação detalhada da API
-- **[⚛️ Frontend Documentation](FRONTEND_DOCUMENTATION.md)** - Documentação do React
-- **[🔧 Backend Documentation](BACKEND_DOCUMENTATION.md)** - Documentação do Django
+- **[📋 Documentação Completa](docs/DOCUMENTATION.md)** - Visão geral completa do projeto
+- **[🔌 API Documentation](docs/API_DOCUMENTATION.md)** - Documentação detalhada da API
+- **[⚛️ Frontend Documentation](docs/FRONTEND_DOCUMENTATION.md)** - Documentação do React
+- **[🔧 Backend Documentation](docs/BACKEND_DOCUMENTATION.md)** - Documentação do Django
 
 ### 🐳 Deploy e Infraestrutura
-- **[🐳 Docker Setup](DOCKER_SETUP.md)** - Configuração e uso do Docker
-- [Backend - Configuração Docker](backend/DOCKER_README.md)
-- [Configuração de Desenvolvimento](backend/DEVELOPMENT_CONFIG.md)
+- **[🐳 Docker Setup](docs/DOCKER_SETUP.md)** - Configuração e uso do Docker
 
 ## 🎯 **Próximos Passos**
 
-1. **Autenticação Real**: Implementar JWT
-2. **Upload de Imagens**: Sistema de upload de fotos
+1. **Cobertura de Testes**: Regras de negócio de oferta (incluindo cancelamento)
+2. **Observabilidade**: Monitoramento de erros e métricas de API
 3. **Chat**: Sistema de mensagens entre usuários
 4. **Notificações**: Alertas em tempo real
 5. **Mobile App**: Aplicativo nativo
