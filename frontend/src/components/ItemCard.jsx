@@ -114,10 +114,12 @@ const ItemCard = ({
         cursor: 'pointer',
         transition: 'all 0.3s ease',
         '&:hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: (theme) => theme.shadows[8],
+          transform: 'translateY(-6px)',
+          boxShadow: '0 18px 35px rgba(15,23,42,0.15)',
         },
         position: 'relative',
+        border: '1px solid',
+        borderColor: 'rgba(148,163,184,0.22)',
       }}
       onClick={handleCardClick}
     >
@@ -129,7 +131,7 @@ const ItemCard = ({
             height={compact ? 120 : 160}
             image={item.image}
             alt={item.title}
-            sx={{ objectFit: 'cover', borderBottom: '1px solid', borderColor: 'grey.300' }}
+            sx={{ objectFit: 'cover', borderBottom: '1px solid', borderColor: 'rgba(148,163,184,0.22)' }}
           />
         ) : (
           <Box sx={{
@@ -137,9 +139,9 @@ const ItemCard = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'grey.100',
+            backgroundColor: 'rgba(148,163,184,0.10)',
             borderBottom: '1px solid',
-            borderColor: 'grey.300'
+            borderColor: 'rgba(148,163,184,0.22)',
           }}>
             <Box sx={{ textAlign: 'center' }}>
               <Typography variant="h2" color="grey.400" sx={{ mb: 1 }}>
@@ -211,7 +213,7 @@ const ItemCard = ({
             label={getCategoryLabel(item.category)}
             size="small"
             color="primary"
-            sx={{ backgroundColor: 'rgba(25, 118, 210, 0.9)' }}
+            sx={{ backgroundColor: 'rgba(37,99,235,0.92)' }}
           />
         </Box>
 
@@ -235,7 +237,7 @@ const ItemCard = ({
       </Box>
 
       {/* Conteúdo do Card */}
-      <CardContent sx={{ flexGrow: 1, pb: 1, pt: 1.5 }}>
+      <CardContent sx={{ flexGrow: 1, pb: 1, pt: 1.8 }}>
         <Typography
           variant="subtitle2"
           component="h3"

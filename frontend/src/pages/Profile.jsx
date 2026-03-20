@@ -10,7 +10,6 @@ import {
   Card,
   CardContent,
   Divider,
-  Chip,
   IconButton,
   Dialog,
   DialogTitle,
@@ -24,43 +23,30 @@ import {
   Edit as EditIcon,
   Person as PersonIcon,
   Email as EmailIcon,
-  LocationOn as LocationIcon,
-  Phone as PhoneIcon,
-  School as SchoolIcon,
-  Work as WorkIcon,
-  CalendarToday as CalendarIcon,
   Save as SaveIcon,
   Cancel as CancelIcon,
 } from '@mui/icons-material';
 import { useApp } from '../contexts/AppContext';
 
 const Profile = () => {
-  const { user, isAuthenticated } = useApp();
+  const { user, isAuthenticated, updateProfile } = useApp();
   const [editDialog, setEditDialog] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
+    first_name: '',
+    last_name: '',
     name: '',
     email: '',
-    bio: '',
-    location: '',
-    phone: '',
-    university: '',
-    course: '',
-    year: '',
   });
 
   useEffect(() => {
     if (isAuthenticated && user) {
       setFormData({
+        first_name: user.first_name || '',
+        last_name: user.last_name || '',
         name: user.name || '',
         email: user.email || '',
-        bio: user.bio || '',
-        location: user.location || '',
-        phone: user.phone || '',
-        university: user.university || '',
-        course: user.course || '',
-        year: user.year || '',
       });
     }
   }, [user, isAuthenticated]);
@@ -74,12 +60,7 @@ const Profile = () => {
     setError('');
 
     try {
-      // TODO: Implementar atualização do perfil via API
-      console.log('Salvando perfil:', formData);
-      
-      // Simular salvamento
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await updateProfile(formData);
       setEditDialog(false);
     } catch (err) {
       setError('Erro ao salvar perfil');
@@ -90,14 +71,10 @@ const Profile = () => {
 
   const handleCancelEdit = () => {
     setFormData({
+      first_name: user.first_name || '',
+      last_name: user.last_name || '',
       name: user.name || '',
       email: user.email || '',
-      bio: user.bio || '',
-      location: user.location || '',
-      phone: user.phone || '',
-      university: user.university || '',
-      course: user.course || '',
-      year: user.year || '',
     });
     setEditDialog(false);
     setError('');
@@ -150,15 +127,6 @@ const Profile = () => {
               {user?.email || 'email@exemplo.com'}
             </Typography>
 
-            <Box sx={{ mt: 2 }}>
-              <Chip
-                label="Membro desde 2024"
-                color="primary"
-                variant="outlined"
-                size="small"
-              />
-            </Box>
-
             <Button
               variant="outlined"
               startIcon={<EditIcon />}
@@ -185,10 +153,10 @@ const Profile = () => {
                   <PersonIcon sx={{ mr: 1, color: 'text.secondary' }} />
                   <Box>
                     <Typography variant="body2" color="text.secondary">
-                      Nome
+                      Nome de usuário
                     </Typography>
                     <Typography variant="body1">
-                      {user?.name || 'Não informado'}
+                      {user?.username || 'Não informado'}
                     </Typography>
                   </Box>
                 </Box>
@@ -208,96 +176,7 @@ const Profile = () => {
                 </Box>
               </Grid>
 
-              <Grid item xs={12} sm={6}>
-                <Box display="flex" alignItems="center" mb={2}>
-                  <LocationIcon sx={{ mr: 1, color: 'text.secondary' }} />
-                  <Box>
-                    <Typography variant="body2" color="text.secondary">
-                      Localização
-                    </Typography>
-                    <Typography variant="body1">
-                      {user?.location || 'Não informado'}
-                    </Typography>
-                  </Box>
-                </Box>
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <Box display="flex" alignItems="center" mb={2}>
-                  <PhoneIcon sx={{ mr: 1, color: 'text.secondary' }} />
-                  <Box>
-                    <Typography variant="body2" color="text.secondary">
-                      Telefone
-                    </Typography>
-                    <Typography variant="body1">
-                      {user?.phone || 'Não informado'}
-                    </Typography>
-                  </Box>
-                </Box>
-              </Grid>
             </Grid>
-
-            <Divider sx={{ my: 2 }} />
-
-            <Typography variant="h6" gutterBottom>
-              Informações Acadêmicas
-            </Typography>
-
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <Box display="flex" alignItems="center" mb={2}>
-                  <SchoolIcon sx={{ mr: 1, color: 'text.secondary' }} />
-                  <Box>
-                    <Typography variant="body2" color="text.secondary">
-                      Universidade
-                    </Typography>
-                    <Typography variant="body1">
-                      {user?.university || 'Não informado'}
-                    </Typography>
-                  </Box>
-                </Box>
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <Box display="flex" alignItems="center" mb={2}>
-                  <WorkIcon sx={{ mr: 1, color: 'text.secondary' }} />
-                  <Box>
-                    <Typography variant="body2" color="text.secondary">
-                      Curso
-                    </Typography>
-                    <Typography variant="body1">
-                      {user?.course || 'Não informado'}
-                    </Typography>
-                  </Box>
-                </Box>
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <Box display="flex" alignItems="center" mb={2}>
-                  <CalendarIcon sx={{ mr: 1, color: 'text.secondary' }} />
-                  <Box>
-                    <Typography variant="body2" color="text.secondary">
-                      Ano de Ingresso
-                    </Typography>
-                    <Typography variant="body1">
-                      {user?.year || 'Não informado'}
-                    </Typography>
-                  </Box>
-                </Box>
-              </Grid>
-            </Grid>
-
-            {user?.bio && (
-              <>
-                <Divider sx={{ my: 2 }} />
-                <Typography variant="h6" gutterBottom>
-                  Sobre Mim
-                </Typography>
-                <Typography variant="body1">
-                  {user.bio}
-                </Typography>
-              </>
-            )}
           </Paper>
         </Grid>
       </Grid>
@@ -366,6 +245,26 @@ const Profile = () => {
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
+                label="Primeiro Nome"
+                value={formData.first_name}
+                onChange={handleInputChange('first_name')}
+                variant="outlined"
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Sobrenome"
+                value={formData.last_name}
+                onChange={handleInputChange('last_name')}
+                variant="outlined"
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
                 label="Nome"
                 value={formData.name}
                 onChange={handleInputChange('name')}
@@ -381,69 +280,6 @@ const Profile = () => {
                 value={formData.email}
                 onChange={handleInputChange('email')}
                 variant="outlined"
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Localização"
-                value={formData.location}
-                onChange={handleInputChange('location')}
-                variant="outlined"
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Telefone"
-                value={formData.phone}
-                onChange={handleInputChange('phone')}
-                variant="outlined"
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Universidade"
-                value={formData.university}
-                onChange={handleInputChange('university')}
-                variant="outlined"
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Curso"
-                value={formData.course}
-                onChange={handleInputChange('course')}
-                variant="outlined"
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Ano de Ingresso"
-                value={formData.year}
-                onChange={handleInputChange('year')}
-                variant="outlined"
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Sobre Mim"
-                multiline
-                rows={4}
-                value={formData.bio}
-                onChange={handleInputChange('bio')}
-                variant="outlined"
-                placeholder="Conte um pouco sobre você..."
               />
             </Grid>
           </Grid>

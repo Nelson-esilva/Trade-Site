@@ -46,14 +46,20 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
             self.permission_classes = [permissions.IsAuthenticated]
         return super().get_permissions()
 
-    @action(detail=False, methods=['get'], url_path='me')
+    @action(detail=False, methods=['get', 'patch'], url_path='me')
     def me(self, request):
         """
-        Endpoint customizado que retorna os dados do usuário logado.
+        Endpoint customizado que retorna e atualiza os dados do usuário logado.
         Acessível em /api/users/me/
         """
-        if request.user.is_authenticated:
-            serializer = self.get_serializer(request.user)
-            return Response(serializer.data)
-        else:
+        if not request.user.is_authenticated:
             return Response({'error': 'Usuário não autenticado'}, status=401)
+
+        if request.method.lower() == 'patch':
+            serializer = self.get_serializer(request.user, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data)

@@ -332,6 +332,20 @@ export const AppProvider = ({ children }) => {
     }
   }, []);
 
+  const updateProfile = useCallback(async (profileData) => {
+    try {
+      dispatch({ type: ActionTypes.SET_LOADING, payload: true });
+      const updatedUser = await apiService.updateCurrentUser(profileData);
+      dispatch({ type: ActionTypes.SET_USER, payload: updatedUser });
+      return updatedUser;
+    } catch (error) {
+      dispatch({ type: ActionTypes.SET_ERROR, payload: 'Erro ao atualizar perfil' });
+      throw error;
+    } finally {
+      dispatch({ type: ActionTypes.SET_LOADING, payload: false });
+    }
+  }, []);
+
 
 
   // Limpar erro e verificar token ao montar o componente
@@ -526,6 +540,7 @@ export const AppProvider = ({ children }) => {
     login,
     loadCurrentUser,
     registerUser,
+    updateProfile,
     logout,
     
     // Ações de itens

@@ -119,15 +119,25 @@ const Home = () => {
       )}
 
       {/* Hero Section */}
-      <Box textAlign="center" mb={6} sx={{ backgroundColor: 'primary.main', color: 'white', py: 8, borderRadius: 2 }}>
+      <Box
+        textAlign="center"
+        mb={6}
+        sx={{
+          background: 'linear-gradient(130deg, #0f172a 0%, #1e293b 55%, #2563eb 100%)',
+          color: 'white',
+          py: { xs: 5, md: 7 },
+          borderRadius: 3,
+          boxShadow: '0 20px 40px rgba(15,23,42,0.22)',
+        }}
+      >
         <Typography variant="h2" component="h1" gutterBottom>
-          Descubra, participe, conecte-se.
+          Troque materiais com mais agilidade.
         </Typography>
-        <Typography variant="h5" gutterBottom>
-          Encontre os materiais didáticos mais relevantes para você
+        <Typography variant="h5" gutterBottom sx={{ opacity: 0.92 }}>
+          Catálogo universitário com foco em confiança, clareza e velocidade
         </Typography>
-        <Typography variant="body1" mb={4}>
-          Troque livros, apostilas e equipamentos educacionais ou ofereça os seus
+        <Typography variant="body1" mb={4} sx={{ opacity: 0.82 }}>
+          Publique itens, receba propostas e gerencie ofertas em um único fluxo.
         </Typography>
 
         {/* Search Bar */}

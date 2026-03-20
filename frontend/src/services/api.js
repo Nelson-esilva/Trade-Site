@@ -133,6 +133,10 @@ class ApiService {
     return this.get('/users/me/');
   }
 
+  async updateCurrentUser(userData) {
+    return this.patch('/users/me/', userData);
+  }
+
   // === ITENS ===
   async getItems() {
     return this.get('/items/');

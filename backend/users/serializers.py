@@ -9,3 +9,4 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         # Lista de campos que serão retornados na API.
         fields = ['id', 'username', 'email', 'first_name', 'last_name', 'name', 'is_superuser', 'is_trade_admin']
+        read_only_fields = ['id', 'username', 'is_superuser', 'is_trade_admin']
