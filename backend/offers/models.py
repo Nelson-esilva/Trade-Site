@@ -8,6 +8,7 @@ class Offer(models.Model):
         ('aceita', 'Aceita'),
         ('recusada', 'Recusada'),
         ('trocado', 'Trocado'),
+        ('cancelada', 'Cancelada'),
     ]
 
     OFFER_TYPE_CHOICES = [

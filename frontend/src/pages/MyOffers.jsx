@@ -50,7 +50,7 @@ const statusMap = {
 };
 
 const MyOffers = () => {
-  const { user, isAuthenticated, offers, loadOffers, acceptOffer, refuseOffer } = useApp();
+  const { user, isAuthenticated, offers, loadOffers, acceptOffer, refuseOffer, cancelOffer } = useApp();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [tabValue, setTabValue] = useState(0);
@@ -69,7 +69,7 @@ const MyOffers = () => {
   const historicalOffers = Array.isArray(offers)
     ? offers.filter(o =>
         (o.item_desired_data?.owner === user?.username || o.offerer === user?.username) &&
-        ['aceita', 'recusada', 'trocado'].includes(o.status)
+        ['aceita', 'recusada', 'trocado', 'cancelada'].includes(o.status)
       )
     : [];
 
@@ -78,10 +78,19 @@ const MyOffers = () => {
     setLoading(true);
     try {
       if (confirmDialog.type === 'accept') await acceptOffer(confirmDialog.offer.id);
-      else await refuseOffer(confirmDialog.offer.id);
+      else if (confirmDialog.type === 'reject') await refuseOffer(confirmDialog.offer.id);
+      else await cancelOffer(confirmDialog.offer.id);
       setConfirmDialog({ open: false, type: '', offer: null });
     } catch (err) {
-      setError(`Erro ao ${confirmDialog.type === 'accept' ? 'aceitar' : 'recusar'} oferta`);
+      setError(
+        `Erro ao ${
+          confirmDialog.type === 'accept'
+            ? 'aceitar'
+            : confirmDialog.type === 'reject'
+              ? 'recusar'
+              : 'cancelar'
+        } oferta`
+      );
     } finally {
       setLoading(false);
     }
@@ -195,6 +204,19 @@ const MyOffers = () => {
               </Button>
             </CardActions>
           )}
+          {offer.status === 'pendente' && type === 'sent' && (
+            <CardActions sx={{ px: 2, pb: 2 }}>
+              <Button
+                size="small"
+                color="warning"
+                variant="outlined"
+                startIcon={<RejectIcon />}
+                onClick={() => setConfirmDialog({ open: true, type: 'cancel', offer })}
+              >
+                Cancelar Oferta
+              </Button>
+            </CardActions>
+          )}
         </Card>
       </Grid>
     );
@@ -241,22 +263,52 @@ const MyOffers = () => {
 
       {/* Confirm dialog */}
       <Dialog open={confirmDialog.open} onClose={() => setConfirmDialog({ open: false, type: '', offer: null })}>
-        <DialogTitle>{confirmDialog.type === 'accept' ? 'Aceitar Oferta' : 'Recusar Oferta'}</DialogTitle>
+        <DialogTitle>
+          {confirmDialog.type === 'accept'
+            ? 'Aceitar Oferta'
+            : confirmDialog.type === 'reject'
+              ? 'Recusar Oferta'
+              : 'Cancelar Oferta'}
+        </DialogTitle>
         <DialogContent>
           <Typography>
-            Tem certeza que deseja {confirmDialog.type === 'accept' ? 'aceitar' : 'recusar'} esta oferta?
+            Tem certeza que deseja {
+              confirmDialog.type === 'accept'
+                ? 'aceitar'
+                : confirmDialog.type === 'reject'
+                  ? 'recusar'
+                  : 'cancelar'
+            } esta oferta?
           </Typography>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button onClick={() => setConfirmDialog({ open: false, type: '', offer: null })}>Cancelar</Button>
           <Button
             onClick={handleConfirmAction}
-            color={confirmDialog.type === 'accept' ? 'success' : 'error'}
+            color={
+              confirmDialog.type === 'accept'
+                ? 'success'
+                : confirmDialog.type === 'reject'
+                  ? 'error'
+                  : 'warning'
+            }
             variant="contained"
             disabled={loading}
-            startIcon={loading ? <CircularProgress size={16} /> : (confirmDialog.type === 'accept' ? <AcceptIcon /> : <RejectIcon />)}
+            startIcon={
+              loading
+                ? <CircularProgress size={16} />
+                : (confirmDialog.type === 'accept' ? <AcceptIcon /> : <RejectIcon />)
+            }
           >
-            {loading ? 'Processando…' : (confirmDialog.type === 'accept' ? 'Aceitar' : 'Recusar')}
+            {loading
+              ? 'Processando…'
+              : (
+                confirmDialog.type === 'accept'
+                  ? 'Aceitar'
+                  : confirmDialog.type === 'reject'
+                    ? 'Recusar'
+                    : 'Cancelar'
+              )}
           </Button>
         </DialogActions>
       </Dialog>

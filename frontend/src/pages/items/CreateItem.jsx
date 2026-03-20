@@ -62,6 +62,7 @@ const CreateItem = () => {
     else if (formData.title.trim().length < 3) errors.title = 'Mínimo 3 caracteres';
     if (!formData.description.trim()) errors.description = 'Descrição é obrigatória';
     else if (formData.description.trim().length < 10) errors.description = 'Mínimo 10 caracteres';
+    if (!formData.location.trim()) errors.location = 'Cidade/Estado é obrigatório';
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -83,7 +84,7 @@ const CreateItem = () => {
   };
 
   return (
-    <Container maxWidth="md" sx={{ py: { xs: 4, md: 6 } }}>
+    <Container maxWidth="lg" sx={{ py: { xs: 4, md: 6 } }}>
       <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/')} sx={{ mb: 3, color: 'text.secondary' }}>
         Voltar
       </Button>
@@ -100,9 +101,9 @@ const CreateItem = () => {
 
       {error && <Alert severity="error" onClose={clearError} sx={{ mb: 3 }}>{error}</Alert>}
 
-      <Paper variant="outlined" sx={{ p: { xs: 3, sm: 4 }, borderColor: 'divider' }}>
+      <Paper variant="outlined" sx={{ p: { xs: 3, md: 5 }, borderColor: 'divider' }}>
         <Box component="form" onSubmit={handleSubmit}>
-          <Grid container spacing={3}>
+          <Grid container spacing={2.5}>
             <Grid item xs={12}>
               <TextField
                 required fullWidth name="title" label="Título do Item"
@@ -119,8 +120,8 @@ const CreateItem = () => {
                 placeholder="Descreva o item, sua condição, como foi usado, etc."
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
+            <Grid item xs={12} md={4}>
+              <FormControl fullWidth sx={{ '& .MuiInputBase-root': { minHeight: 56 } }}>
                 <InputLabel>Categoria</InputLabel>
                 <Select name="category" value={formData.category} label="Categoria" onChange={handleChange}>
                   <MenuItem value="livros">Livros</MenuItem>
@@ -130,12 +131,23 @@ const CreateItem = () => {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} md={4}>
               <TextField
                 required fullWidth name="location" label="Cidade/Estado"
                 value={formData.location} onChange={handleChange}
+                error={!!formErrors.location}
+                helperText={formErrors.location || ' '}
                 placeholder="Ex: São Paulo, SP"
               />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <FormControl fullWidth sx={{ '& .MuiInputBase-root': { minHeight: 56 } }}>
+                <InputLabel>Status</InputLabel>
+                <Select name="status" value={formData.status} label="Status" onChange={handleChange}>
+                  <MenuItem value="disponivel">Disponível</MenuItem>
+                  <MenuItem value="indisponível">Indisponível</MenuItem>
+                </Select>
+              </FormControl>
             </Grid>
 
             {/* Image upload */}
@@ -172,16 +184,6 @@ const CreateItem = () => {
                 disabled={!!selectedImage}
                 helperText="Alternativa ao upload de arquivo"
               />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
-                <InputLabel>Status</InputLabel>
-                <Select name="status" value={formData.status} label="Status" onChange={handleChange}>
-                  <MenuItem value="disponivel">Disponível</MenuItem>
-                  <MenuItem value="indisponível">Indisponível</MenuItem>
-                </Select>
-              </FormControl>
             </Grid>
 
             <Grid item xs={12}>

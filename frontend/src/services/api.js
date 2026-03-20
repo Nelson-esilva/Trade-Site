@@ -259,6 +259,10 @@ class ApiService {
     return this.post(`/offers/${id}/refuse/`);
   }
 
+  async cancelOffer(id) {
+    return this.post(`/offers/${id}/cancel/`);
+  }
+
   // === BUSCA E FILTROS ===
   async searchItems(query, filters = {}) {
     const params = new URLSearchParams();

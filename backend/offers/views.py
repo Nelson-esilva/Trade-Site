@@ -127,3 +127,34 @@ class OfferViewSet(viewsets.ModelViewSet):
         # Retornar a oferta atualizada
         serializer = self.get_serializer(offer)
         return Response(serializer.data)
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def cancel(self, request, pk=None):
+        """
+        Cancela uma oferta pendente.
+        Apenas o ofertante (ou admin/superuser) pode cancelar.
+        """
+        offer = self.get_object()
+
+        can_cancel = (
+            offer.offerer == request.user or
+            (hasattr(request.user, 'is_trade_admin') and request.user.is_trade_admin) or
+            request.user.is_superuser
+        )
+        if not can_cancel:
+            return Response(
+                {'error': 'Você não tem permissão para cancelar esta oferta.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        if offer.status != 'pendente':
+            return Response(
+                {'error': 'Só é possível cancelar ofertas pendentes.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        offer.status = 'cancelada'
+        offer.save()
+
+        serializer = self.get_serializer(offer)
+        return Response(serializer.data)

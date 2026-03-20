@@ -501,6 +501,21 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  const cancelOffer = async (id) => {
+    try {
+      dispatch({ type: ActionTypes.SET_LOADING, payload: true });
+      const offer = await apiService.cancelOffer(id);
+      dispatch({ type: ActionTypes.UPDATE_OFFER, payload: offer });
+      addNotification('Oferta cancelada com sucesso!', 'info');
+      return offer;
+    } catch (error) {
+      dispatch({ type: ActionTypes.SET_ERROR, payload: 'Erro ao cancelar oferta' });
+      throw error;
+    } finally {
+      dispatch({ type: ActionTypes.SET_LOADING, payload: false });
+    }
+  };
+
   // === AÇÕES DE UI ===
   const addNotification = useCallback((message, type = 'info') => {
     const notification = {
@@ -559,6 +574,7 @@ export const AppProvider = ({ children }) => {
     createOffer,
     acceptOffer,
     refuseOffer,
+    cancelOffer,
     
     // Ações de UI
     addNotification,

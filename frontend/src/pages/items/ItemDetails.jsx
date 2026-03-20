@@ -49,6 +49,7 @@ const ItemDetails = () => {
   const [offerData, setOfferData] = useState({ offer_type: 'item', item_offered: '', money_amount: '' });
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [newStatus, setNewStatus] = useState('');
+  const isOwnItem = currentItem?.owner === user?.username;
 
   useEffect(() => {
     if (!id) return;
@@ -195,15 +196,17 @@ const ItemDetails = () => {
                   Alterar Status
                 </Button>
               )}
-              <Button
-                variant="contained"
-                size="large"
-                startIcon={<SwapIcon />}
-                onClick={() => setShowOfferDialog(true)}
-                disabled={currentItem.status !== 'disponivel'}
-              >
-                Fazer Oferta
-              </Button>
+              {!isOwnItem && (
+                <Button
+                  variant="contained"
+                  size="large"
+                  startIcon={<SwapIcon />}
+                  onClick={() => setShowOfferDialog(true)}
+                  disabled={currentItem.status !== 'disponivel'}
+                >
+                  Fazer Oferta
+                </Button>
+              )}
               <Button variant="outlined" onClick={() => navigate('/')}>
                 Ver Outros Itens
               </Button>
