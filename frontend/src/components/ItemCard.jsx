@@ -9,354 +9,195 @@ import {
   Box,
   Chip,
   IconButton,
-  Avatar,
   Tooltip,
 } from '@mui/material';
 import {
   LocationOn as LocationIcon,
   Favorite as FavoriteIcon,
   FavoriteBorder as FavoriteBorderIcon,
-  Share as ShareIcon,
   Visibility as ViewIcon,
   SwapHoriz as SwapIcon,
-  Person as PersonIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
-const ItemCard = ({
-  item,
-  showOwner = true,
-  compact = false,
-  onFavorite,
-  onShare,
-  onViewDetails,
-  onMakeOffer,
-}) => {
+const IMAGE_HEIGHT = 200;
+
+const categoryLabels = {
+  livros: 'Livros',
+  apostilas: 'Apostilas',
+  equipamentos: 'Equipamentos',
+  tecnologia: 'Tecnologia',
+};
+
+const categoryIcons = {
+  livros: '\u{1F4DA}',
+  apostilas: '\u{1F4C4}',
+  equipamentos: '\u{1F527}',
+  tecnologia: '\u{1F4BB}',
+};
+
+const statusMap = {
+  disponivel: { label: 'Dispon\u00EDvel', color: 'success' },
+  'indispon\u00EDvel': { label: 'Indispon\u00EDvel', color: 'error' },
+  trocado: { label: 'Trocado', color: 'info' },
+};
+
+const ItemCard = ({ item, onViewDetails, onMakeOffer }) => {
   const navigate = useNavigate();
-  const [isFavorite, setIsFavorite] = useState(item.isFavorite || false);
+  const [isFavorite, setIsFavorite] = useState(false);
 
-
-  const getCategoryLabel = (category) => {
-    const categoryLabels = {
-      'livros': 'Livros',
-      'apostilas': 'Apostilas',
-      'equipamentos': 'Equipamentos',
-      'tecnologia': 'Tecnologia',
-    };
-    return categoryLabels[category] || category;
-  };
-
-  const getCategoryIcon = (category) => {
-    const categoryIcons = {
-      'livros': '📚',
-      'apostilas': '📄',
-      'equipamentos': '🔧',
-      'tecnologia': '💻',
-    };
-    return categoryIcons[category] || '📦';
-  };
-
-  const getStatusInfo = (status) => {
-    const statusInfo = {
-      'disponivel': { label: 'Disponível', color: 'success' },
-      'indisponível': { label: 'Indisponível', color: 'error' },
-      'trocado': { label: 'Trocado', color: 'info' },
-    };
-    return statusInfo[status] || { label: status, color: 'default' };
-  };
-
-  const handleFavoriteClick = (e) => {
-    e.stopPropagation();
-    setIsFavorite(!isFavorite);
-    if (onFavorite) {
-      onFavorite(item.id, !isFavorite);
-    }
-  };
-
-  const handleShareClick = (e) => {
-    e.stopPropagation();
-    if (onShare) {
-      onShare(item);
-    } else {
-      // Implementação padrão de compartilhamento
-      navigator.share?.({
-        title: item.title,
-        text: item.description,
-        url: window.location.origin + `/item/${item.id}`,
-      });
-    }
-  };
+  const status = statusMap[item.status] || { label: item.status, color: 'default' };
 
   const handleCardClick = () => {
-    if (onViewDetails) {
-      onViewDetails(item);
-    } else {
-      navigate(`/item/${item.id}`);
-    }
+    if (onViewDetails) onViewDetails(item);
+    else navigate(`/item/${item.id}`);
   };
 
-  const handleMakeOfferClick = (e) => {
+  const handleOfferClick = (e) => {
     e.stopPropagation();
-    if (onMakeOffer) {
-      onMakeOffer(item);
-    } else {
-      navigate(`/item/${item.id}`);
-    }
+    if (onMakeOffer) onMakeOffer(item);
+    else navigate(`/item/${item.id}`);
   };
-
 
   return (
     <Card
+      onClick={handleCardClick}
       sx={{
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
         cursor: 'pointer',
-        transition: 'all 0.3s ease',
+        overflow: 'hidden',
         '&:hover': {
-          transform: 'translateY(-6px)',
-          boxShadow: '0 18px 35px rgba(15,23,42,0.15)',
+          transform: 'translateY(-4px)',
+          boxShadow: '0 12px 32px rgba(15, 23, 42, 0.10)',
         },
-        position: 'relative',
-        border: '1px solid',
-        borderColor: 'rgba(148,163,184,0.22)',
       }}
-      onClick={handleCardClick}
     >
-      {/* Área da Imagem e Overlay */}
-      <Box sx={{ position: 'relative' }}>
+      {/* Image */}
+      <Box sx={{ position: 'relative', flexShrink: 0 }}>
         {item.image ? (
           <CardMedia
             component="img"
-            height={compact ? 120 : 160}
+            height={IMAGE_HEIGHT}
             image={item.image}
             alt={item.title}
-            sx={{ objectFit: 'cover', borderBottom: '1px solid', borderColor: 'rgba(148,163,184,0.22)' }}
+            sx={{ objectFit: 'cover' }}
           />
         ) : (
-          <Box sx={{
-            height: compact ? 120 : 160,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: 'rgba(148,163,184,0.10)',
-            borderBottom: '1px solid',
-            borderColor: 'rgba(148,163,184,0.22)',
-          }}>
+          <Box
+            sx={{
+              height: IMAGE_HEIGHT,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              bgcolor: '#f1f5f9',
+            }}
+          >
             <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="h2" color="grey.400" sx={{ mb: 1 }}>
-                {getCategoryIcon(item.category)}
+              <Typography sx={{ fontSize: '2.5rem', lineHeight: 1 }}>
+                {categoryIcons[item.category] || '\u{1F4E6}'}
               </Typography>
-              <Typography variant="caption" color="grey.500">
-                {getCategoryLabel(item.category)}
+              <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+                {categoryLabels[item.category] || item.category}
               </Typography>
             </Box>
           </Box>
         )}
 
-        {/* Ações de Overlay */}
-        <Box
+        <Chip
+          label={categoryLabels[item.category] || item.category}
+          size="small"
           sx={{
             position: 'absolute',
-            top: 4,
-            right: 4,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 0.5,
+            top: 10,
+            left: 10,
+            bgcolor: 'rgba(15, 23, 42, 0.7)',
+            color: '#fff',
+            backdropFilter: 'blur(4px)',
+            fontWeight: 600,
+            fontSize: '0.68rem',
           }}
-        >
-          <Tooltip title="Favoritar">
-            <IconButton
-              size="small"
-              onClick={handleFavoriteClick}
-              sx={{
-                backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                '&:hover': { backgroundColor: 'rgba(255, 255, 255, 1)' },
-                width: 28,
-                height: 28,
-              }}
-            >
-              {isFavorite ? (
-                <FavoriteIcon color="error" fontSize="small" />
-              ) : (
-                <FavoriteBorderIcon fontSize="small" />
-              )}
-            </IconButton>
-          </Tooltip>
+        />
 
-          <Tooltip title="Compartilhar">
-            <IconButton
-              size="small"
-              onClick={handleShareClick}
-              sx={{
-                backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                '&:hover': { backgroundColor: 'rgba(255, 255, 255, 1)' },
-                width: 28,
-                height: 28,
-              }}
-            >
-              <ShareIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-
-        </Box>
-
-        {/* Badge de Categoria */}
-        <Box
-          sx={{
-            position: 'absolute',
-            top: 8,
-            left: 8,
-          }}
-        >
-          <Chip
-            label={getCategoryLabel(item.category)}
+        <Tooltip title="Favoritar">
+          <IconButton
             size="small"
-            color="primary"
-            sx={{ backgroundColor: 'rgba(37,99,235,0.92)' }}
-          />
-        </Box>
-
-        {/* Badge de Ofertas */}
-        {item.offerCount > 0 && (
-          <Box
+            onClick={(e) => { e.stopPropagation(); setIsFavorite(!isFavorite); }}
             sx={{
               position: 'absolute',
-              bottom: 8,
+              top: 8,
               right: 8,
+              bgcolor: 'rgba(255,255,255,0.85)',
+              backdropFilter: 'blur(4px)',
+              width: 32,
+              height: 32,
+              '&:hover': { bgcolor: '#fff' },
             }}
           >
-            <Chip
-              label={`${item.offerCount} ofertas`}
-              size="small"
-              color="secondary"
-              sx={{ backgroundColor: 'rgba(220, 0, 78, 0.9)', color: 'white' }}
-            />
-          </Box>
-        )}
+            {isFavorite ? (
+              <FavoriteIcon sx={{ fontSize: 16 }} color="error" />
+            ) : (
+              <FavoriteBorderIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+            )}
+          </IconButton>
+        </Tooltip>
       </Box>
 
-      {/* Conteúdo do Card */}
-      <CardContent sx={{ flexGrow: 1, pb: 1, pt: 1.8 }}>
+      {/* Content - fixed structure */}
+      <CardContent sx={{ flexGrow: 1, p: 2, pb: 1, display: 'flex', flexDirection: 'column' }}>
         <Typography
-          variant="subtitle2"
-          component="h3"
-          gutterBottom
+          variant="h6"
           sx={{
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             display: '-webkit-box',
             WebkitLineClamp: 2,
             WebkitBoxOrient: 'vertical',
-            lineHeight: 1.2,
-            minHeight: '2.4em',
-            fontSize: '0.875rem',
-            fontWeight: 600,
+            lineHeight: 1.35,
+            minHeight: '2.7em',
+            mb: 1,
           }}
         >
           {item.title}
         </Typography>
 
-        {/* Status e Estado */}
-        <Box display="flex" gap={0.5} mb={1} flexWrap="wrap">
-          {item.status && (
-            <Chip
-              label={getStatusInfo(item.status).label}
-              size="small"
-              variant="outlined"
-              color={getStatusInfo(item.status).color}
-              sx={{ fontSize: '0.7rem', height: 20 }}
-            />
-          )}
+        <Box sx={{ display: 'flex', gap: 0.5, mb: 1, flexWrap: 'wrap' }}>
+          <Chip label={status.label} size="small" color={status.color} variant="outlined" />
           {item.condition && (
-            <Chip
-              label={item.condition}
-              size="small"
-              variant="outlined"
-              color="success"
-              sx={{ fontSize: '0.7rem', height: 20 }}
-            />
+            <Chip label={item.condition} size="small" variant="outlined" />
           )}
         </Box>
 
-        {/* Localização */}
-        <Box display="flex" alignItems="center" mb={1}>
-          <LocationIcon fontSize="small" color="action" sx={{ mr: 0.5 }} />
-          <Typography variant="caption" color="text.secondary">
-            {item.location}
+        <Box sx={{ display: 'flex', alignItems: 'center', mt: 'auto' }}>
+          <LocationIcon sx={{ fontSize: 14, color: 'text.secondary', mr: 0.5 }} />
+          <Typography variant="caption" color="text.secondary" noWrap>
+            {item.location || 'Local n\u00E3o informado'}
           </Typography>
         </Box>
-
-        {/* Informações do Proprietário */}
-        {showOwner && item.owner && (
-          <Box display="flex" alignItems="center" mt={1}>
-            <Avatar
-              src={typeof item.owner === 'object' ? item.owner.avatar : undefined}
-              sx={{ width: 20, height: 20, mr: 0.5 }}
-            >
-              <PersonIcon fontSize="small" />
-            </Avatar>
-            <Typography variant="caption" color="text.secondary">
-              {typeof item.owner === 'object' ? (item.owner.name || item.owner.username || 'Usuário') : `Usuário ${item.owner}`}
-            </Typography>
-          </Box>
-        )}
       </CardContent>
 
-      {/* Ações do Card */}
-      <CardActions sx={{ px: 1.5, pb: 1.5, pt: 0 }}>
+      {/* Actions */}
+      <CardActions sx={{ px: 2, pb: 2, pt: 0 }}>
         <Button
           size="small"
-          startIcon={<ViewIcon />}
-          onClick={(e) => {
-            e.stopPropagation();
-            handleCardClick();
-          }}
-          sx={{ fontSize: '0.75rem', minWidth: 'auto', px: 1 }}
+          startIcon={<ViewIcon sx={{ fontSize: 16 }} />}
+          onClick={(e) => { e.stopPropagation(); handleCardClick(); }}
+          sx={{ color: 'text.secondary' }}
         >
-          Ver
+          Detalhes
         </Button>
         <Button
           size="small"
-          color="secondary"
-          startIcon={<SwapIcon />}
-          onClick={handleMakeOfferClick}
-          sx={{
-            ml: 'auto',
-            fontSize: '0.75rem',
-            minWidth: 'auto',
-            px: 1
-          }}
+          variant="contained"
+          startIcon={<SwapIcon sx={{ fontSize: 16 }} />}
+          onClick={handleOfferClick}
+          sx={{ ml: 'auto' }}
         >
           Oferta
         </Button>
       </CardActions>
-
-      {/* Indicador de Novo Item */}
-      {
-        item.isNew && (
-          <Box
-            sx={{
-              position: 'absolute',
-              top: -8,
-              left: -8,
-              backgroundColor: 'error.main',
-              color: 'white',
-              borderRadius: '50%',
-              width: 24,
-              height: 24,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '0.75rem',
-              fontWeight: 'bold',
-            }}
-          >
-            N
-          </Box>
-        )
-      }
-    </Card >
+    </Card>
   );
 };
 

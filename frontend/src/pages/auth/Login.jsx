@@ -14,7 +14,7 @@ import {
 import {
   Visibility,
   VisibilityOff,
-  Email as EmailIcon,
+  Person as PersonIcon,
   Lock as LockIcon,
 } from '@mui/icons-material';
 import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
@@ -24,153 +24,166 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { login, loading, error, clearError } = useApp();
-  const [formData, setFormData] = useState({
-    username: '',
-    password: '',
-  });
+  const [formData, setFormData] = useState({ username: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
-  
-  // Verificar se veio do registro
+
   const fromRegister = location.state?.fromRegister;
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     clearError();
-
     try {
       await login(formData.username, formData.password);
       navigate('/');
     } catch (err) {
-      // Erro já é tratado pelo contexto
       console.error('Erro no login:', err);
     }
   };
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
   return (
-    <Container component="main" maxWidth="sm">
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        bgcolor: '#f8fafc',
+      }}
+    >
+      {/* Left branding panel */}
       <Box
         sx={{
-          marginTop: 8,
-          display: 'flex',
+          display: { xs: 'none', md: 'flex' },
+          width: '45%',
+          background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #1d4ed8 100%)',
           flexDirection: 'column',
-          alignItems: 'center',
+          justifyContent: 'center',
+          px: 8,
+          color: '#fff',
         }}
       >
-        <Paper elevation={3} sx={{ padding: 4, width: '100%', borderRadius: 2 }}>
-          <Box sx={{ textAlign: 'center', mb: 3 }}>
-            <Typography component="h1" variant="h4" color="primary" gutterBottom>
+        <Typography variant="h2" sx={{ mb: 2, color: '#fff' }}>
+          TrocaMat
+        </Typography>
+        <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.65)', maxWidth: 400, lineHeight: 1.7 }}>
+          Plataforma universit\u00E1ria para troca segura de materiais did\u00E1ticos.
+          Conecte-se com outros estudantes e compartilhe conhecimento.
+        </Typography>
+      </Box>
+
+      {/* Right form panel */}
+      <Box
+        sx={{
+          flex: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          p: { xs: 3, sm: 6 },
+        }}
+      >
+        <Container maxWidth="sm" disableGutters>
+          <Box sx={{ mb: 4 }}>
+            <Typography
+              variant="h6"
+              sx={{ display: { xs: 'block', md: 'none' }, mb: 3, fontWeight: 800, color: 'primary.main' }}
+            >
               TrocaMat
             </Typography>
-            <Typography variant="h5" component="h2">
+            <Typography variant="h3" gutterBottom>
               Entrar na sua conta
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              Acesse sua conta para trocar materiais didáticos
+            <Typography variant="body2" color="text.secondary">
+              Acesse para trocar materiais did\u00E1ticos
             </Typography>
           </Box>
 
           {fromRegister && (
-            <Alert severity="success" sx={{ mb: 2 }}>
-              Cadastro realizado com sucesso! Faça login para continuar.
+            <Alert severity="success" sx={{ mb: 3 }}>
+              Cadastro realizado com sucesso! Fa\u00E7a login para continuar.
             </Alert>
           )}
 
           {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
+            <Alert severity="error" sx={{ mb: 3 }}>
               {error}
             </Alert>
           )}
 
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="username"
-              label="Usuário"
-              name="username"
-              autoComplete="username"
-              autoFocus
-              value={formData.username}
-              onChange={handleChange}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <EmailIcon color="action" />
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Senha"
-              type={showPassword ? 'text' : 'password'}
-              id="password"
-              autoComplete="current-password"
-              value={formData.password}
-              onChange={handleChange}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <LockIcon color="action" />
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="toggle password visibility"
-                      onClick={togglePasswordVisibility}
-                      edge="end"
-                    >
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-            
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2, py: 1.5 }}
-              disabled={loading}
-            >
-              {loading ? 'Entrando...' : 'Entrar'}
-            </Button>
+          <Paper
+            variant="outlined"
+            sx={{ p: { xs: 3, sm: 4 }, borderColor: 'divider' }}
+          >
+            <Box component="form" onSubmit={handleSubmit}>
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                name="username"
+                label="Usu\u00E1rio"
+                autoComplete="username"
+                autoFocus
+                value={formData.username}
+                onChange={handleChange}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <PersonIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                name="password"
+                label="Senha"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
+                value={formData.password}
+                onChange={handleChange}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <LockIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" size="small">
+                        {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
 
-            <Box sx={{ textAlign: 'center' }}>
-              <Link component={RouterLink} to="/forgot-password" variant="body2">
-                Esqueceu sua senha?
-              </Link>
-            </Box>
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                size="large"
+                sx={{ mt: 3, mb: 1 }}
+                disabled={loading}
+              >
+                {loading ? 'Entrando\u2026' : 'Entrar'}
+              </Button>
 
-            <Box sx={{ textAlign: 'center', mt: 2 }}>
-              <Typography variant="body2">
-                Não tem uma conta?{' '}
-                <Link component={RouterLink} to="/register" variant="body2">
-                  Cadastre-se aqui
-                </Link>
-              </Typography>
+              <Box sx={{ textAlign: 'center', mt: 2 }}>
+                <Typography variant="body2" color="text.secondary">
+                  N\u00E3o tem uma conta?{' '}
+                  <Link component={RouterLink} to="/register" fontWeight={600}>
+                    Cadastre-se
+                  </Link>
+                </Typography>
+              </Box>
             </Box>
-          </Box>
-        </Paper>
+          </Paper>
+        </Container>
       </Box>
-    </Container>
+    </Box>
   );
 };
 

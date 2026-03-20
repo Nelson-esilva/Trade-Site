@@ -5,24 +5,71 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api
 class ApiService {
   constructor() {
     this.baseURL = API_BASE_URL;
+    this.isRefreshing = false;
+    this.refreshPromise = null;
   }
 
   // Método para obter o token de autenticação
   getAuthToken() {
-    return localStorage.getItem('token');
+    return localStorage.getItem('access_token') || localStorage.getItem('token');
+  }
+
+  getRefreshToken() {
+    return localStorage.getItem('refresh_token');
   }
 
   // Método para definir o token de autenticação
-  setAuthToken(token) {
-    if (token) {
-      localStorage.setItem('token', token);
+  setAuthToken(accessToken, refreshToken = null) {
+    if (accessToken) {
+      localStorage.setItem('access_token', accessToken);
+      // Compatibilidade com código legado.
+      localStorage.setItem('token', accessToken);
     } else {
+      localStorage.removeItem('access_token');
       localStorage.removeItem('token');
+    }
+
+    if (refreshToken) {
+      localStorage.setItem('refresh_token', refreshToken);
+    } else if (accessToken === null) {
+      localStorage.removeItem('refresh_token');
     }
   }
 
+  async refreshAccessToken() {
+    const refresh = this.getRefreshToken();
+    if (!refresh) {
+      throw new Error('No refresh token available');
+    }
+
+    if (this.isRefreshing && this.refreshPromise) {
+      return this.refreshPromise;
+    }
+
+    this.isRefreshing = true;
+    this.refreshPromise = fetch(`${this.baseURL}/auth/refresh/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh }),
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error(`Token refresh failed: ${response.status}`);
+        }
+        const data = await response.json();
+        this.setAuthToken(data.access, data.refresh || refresh);
+        return data.access;
+      })
+      .finally(() => {
+        this.isRefreshing = false;
+        this.refreshPromise = null;
+      });
+
+    return this.refreshPromise;
+  }
+
   // Método genérico para fazer requisições
-  async request(endpoint, options = {}) {
+  async request(endpoint, options = {}, retry = true) {
     const url = `${this.baseURL}${endpoint}`;
     const token = this.getAuthToken();
     
@@ -33,7 +80,7 @@ class ApiService {
       headers: {
         // Só adicionar Content-Type se não for FormData
         ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
-        ...(token && { 'Authorization': `Token ${token}` }),
+        ...(token && { 'Authorization': `Bearer ${token}` }),
         ...options.headers,
       },
       ...options,
@@ -43,10 +90,20 @@ class ApiService {
       const response = await fetch(url, config);
       
       if (!response.ok) {
-        // Se for erro 401 (Unauthorized), limpar token inválido
-        if (response.status === 401 && token) {
-          console.log('Token inválido detectado, limpando...');
-          this.setAuthToken(null);
+        if (
+          response.status === 401 &&
+          retry &&
+          !endpoint.includes('/auth/login/') &&
+          !endpoint.includes('/auth/register/') &&
+          !endpoint.includes('/auth/refresh/')
+        ) {
+          try {
+            await this.refreshAccessToken();
+            return this.request(endpoint, options, false);
+          } catch (refreshError) {
+            this.setAuthToken(null, null);
+            throw refreshError;
+          }
         }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -102,14 +159,25 @@ class ApiService {
   // === AUTENTICAÇÃO ===
   async login(username, password) {
     const response = await this.post('/auth/login/', { username, password });
-    if (response.token) {
+    if (response.access && response.refresh) {
+      this.setAuthToken(response.access, response.refresh);
+    } else if (response.token) {
+      // fallback legado
       this.setAuthToken(response.token);
     }
     return response;
   }
 
   async logout() {
-    this.setAuthToken(null);
+    const refresh = this.getRefreshToken();
+    if (refresh) {
+      try {
+        await this.post('/auth/logout/', { refresh });
+      } catch (error) {
+        console.warn('Falha ao invalidar refresh token no logout:', error);
+      }
+    }
+    this.setAuthToken(null, null);
   }
 
   async registerUser(userData) {

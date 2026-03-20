@@ -25,6 +25,9 @@ import {
   Email as EmailIcon,
   Save as SaveIcon,
   Cancel as CancelIcon,
+  Inventory2 as ItemsIcon,
+  SwapHoriz as OffersIcon,
+  CheckCircle as TradesIcon,
 } from '@mui/icons-material';
 import { useApp } from '../contexts/AppContext';
 
@@ -51,14 +54,9 @@ const Profile = () => {
     }
   }, [user, isAuthenticated]);
 
-  const handleEditClick = () => {
-    setEditDialog(true);
-  };
-
   const handleSaveProfile = async () => {
     setLoading(true);
     setError('');
-
     try {
       await updateProfile(formData);
       setEditDialog(false);
@@ -80,222 +78,174 @@ const Profile = () => {
     setError('');
   };
 
-  const handleInputChange = (field) => (event) => {
-    setFormData({
-      ...formData,
-      [field]: event.target.value,
-    });
-  };
-
   if (!isAuthenticated) {
     return (
-      <Container maxWidth="md" sx={{ py: 4 }}>
-        <Alert severity="warning">
-          Você precisa estar logado para acessar seu perfil.
-        </Alert>
+      <Container maxWidth="lg" sx={{ py: 6 }}>
+        <Alert severity="warning">Voc\u00EA precisa estar logado para acessar seu perfil.</Alert>
       </Container>
     );
   }
 
+  const stats = [
+    { label: 'Itens Publicados', value: 0, icon: <ItemsIcon />, color: 'primary.main' },
+    { label: 'Ofertas Recebidas', value: 0, icon: <OffersIcon />, color: 'warning.main' },
+    { label: 'Trocas Realizadas', value: 0, icon: <TradesIcon />, color: 'success.main' },
+  ];
+
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h4" gutterBottom>
+    <Container maxWidth="lg" sx={{ py: { xs: 4, md: 6 } }}>
+      <Typography variant="overline" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+        Conta
+      </Typography>
+      <Typography variant="h3" sx={{ mb: 4 }}>
         Meu Perfil
       </Typography>
 
       <Grid container spacing={3}>
-        {/* Informações Principais */}
+        {/* Profile card */}
         <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 3, textAlign: 'center' }}>
+          <Paper variant="outlined" sx={{ p: 4, textAlign: 'center', borderColor: 'divider' }}>
             <Avatar
               sx={{
-                width: 120,
-                height: 120,
+                width: 96,
+                height: 96,
                 mx: 'auto',
                 mb: 2,
-                fontSize: '3rem',
+                bgcolor: 'primary.main',
+                fontSize: '2rem',
               }}
             >
-              <PersonIcon fontSize="large" />
+              {user?.name?.charAt(0) || user?.username?.charAt(0) || 'U'}
             </Avatar>
-            
-            <Typography variant="h5" gutterBottom>
-              {user?.name || 'Usuário'}
+            <Typography variant="h5" sx={{ mb: 0.5 }}>
+              {user?.name || user?.username || 'Usu\u00E1rio'}
             </Typography>
-            
-            <Typography variant="body2" color="text.secondary" gutterBottom>
-              {user?.email || 'email@exemplo.com'}
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              @{user?.username}
             </Typography>
-
             <Button
               variant="outlined"
               startIcon={<EditIcon />}
-              onClick={handleEditClick}
-              sx={{ mt: 2 }}
+              onClick={() => setEditDialog(true)}
+              size="small"
+              fullWidth
             >
               Editar Perfil
             </Button>
           </Paper>
         </Grid>
 
-        {/* Detalhes do Perfil */}
+        {/* Details */}
         <Grid item xs={12} md={8}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Informações Pessoais
+          <Paper variant="outlined" sx={{ p: 4, borderColor: 'divider' }}>
+            <Typography variant="h5" sx={{ mb: 2 }}>
+              Informa\u00E7\u00F5es Pessoais
             </Typography>
-            
-            <Divider sx={{ mb: 2 }} />
+            <Divider sx={{ mb: 3 }} />
 
-            <Grid container spacing={2}>
+            <Grid container spacing={3}>
               <Grid item xs={12} sm={6}>
-                <Box display="flex" alignItems="center" mb={2}>
-                  <PersonIcon sx={{ mr: 1, color: 'text.secondary' }} />
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+                  <PersonIcon sx={{ color: 'text.secondary', mt: 0.25 }} />
                   <Box>
-                    <Typography variant="body2" color="text.secondary">
-                      Nome de usuário
-                    </Typography>
-                    <Typography variant="body1">
-                      {user?.username || 'Não informado'}
-                    </Typography>
+                    <Typography variant="caption" color="text.secondary">Nome de usu\u00E1rio</Typography>
+                    <Typography variant="body1">{user?.username || 'N\u00E3o informado'}</Typography>
                   </Box>
                 </Box>
               </Grid>
-
               <Grid item xs={12} sm={6}>
-                <Box display="flex" alignItems="center" mb={2}>
-                  <EmailIcon sx={{ mr: 1, color: 'text.secondary' }} />
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+                  <EmailIcon sx={{ color: 'text.secondary', mt: 0.25 }} />
                   <Box>
-                    <Typography variant="body2" color="text.secondary">
-                      Email
-                    </Typography>
-                    <Typography variant="body1">
-                      {user?.email || 'Não informado'}
-                    </Typography>
+                    <Typography variant="caption" color="text.secondary">Email</Typography>
+                    <Typography variant="body1">{user?.email || 'N\u00E3o informado'}</Typography>
                   </Box>
                 </Box>
               </Grid>
-
+              {user?.first_name && (
+                <Grid item xs={12} sm={6}>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+                    <PersonIcon sx={{ color: 'text.secondary', mt: 0.25 }} />
+                    <Box>
+                      <Typography variant="caption" color="text.secondary">Primeiro Nome</Typography>
+                      <Typography variant="body1">{user.first_name}</Typography>
+                    </Box>
+                  </Box>
+                </Grid>
+              )}
+              {user?.last_name && (
+                <Grid item xs={12} sm={6}>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+                    <PersonIcon sx={{ color: 'text.secondary', mt: 0.25 }} />
+                    <Box>
+                      <Typography variant="caption" color="text.secondary">Sobrenome</Typography>
+                      <Typography variant="body1">{user.last_name}</Typography>
+                    </Box>
+                  </Box>
+                </Grid>
+              )}
             </Grid>
           </Paper>
         </Grid>
       </Grid>
 
-      {/* Estatísticas */}
-      <Grid container spacing={3} sx={{ mt: 2 }}>
-        <Grid item xs={12} sm={4}>
-          <Card>
-            <CardContent sx={{ textAlign: 'center' }}>
-              <Typography variant="h4" color="primary">
-                0
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Itens Publicados
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        
-        <Grid item xs={12} sm={4}>
-          <Card>
-            <CardContent sx={{ textAlign: 'center' }}>
-              <Typography variant="h4" color="secondary">
-                0
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Ofertas Recebidas
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        
-        <Grid item xs={12} sm={4}>
-          <Card>
-            <CardContent sx={{ textAlign: 'center' }}>
-              <Typography variant="h4" color="success.main">
-                0
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Trocas Realizadas
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
+      {/* Stats */}
+      <Grid container spacing={3} sx={{ mt: 1 }}>
+        {stats.map((stat) => (
+          <Grid item xs={12} sm={4} key={stat.label}>
+            <Card sx={{ '&:hover': { transform: 'none' } }}>
+              <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 3 }}>
+                <Box sx={{ color: stat.color, display: 'flex' }}>
+                  {stat.icon}
+                </Box>
+                <Box>
+                  <Typography variant="h4" sx={{ lineHeight: 1 }}>
+                    {stat.value}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {stat.label}
+                  </Typography>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
       </Grid>
 
-      {/* Modal de Edição */}
-      <Dialog open={editDialog} onClose={handleCancelEdit} maxWidth="md" fullWidth>
-        <DialogTitle>
-          <Box display="flex" alignItems="center" justifyContent="space-between">
-            <Typography variant="h6">Editar Perfil</Typography>
-            <IconButton onClick={handleCancelEdit} size="small">
-              <CancelIcon />
-            </IconButton>
-          </Box>
+      {/* Edit dialog */}
+      <Dialog open={editDialog} onClose={handleCancelEdit} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="h5">Editar Perfil</Typography>
+          <IconButton onClick={handleCancelEdit} size="small">
+            <CancelIcon />
+          </IconButton>
         </DialogTitle>
-
         <DialogContent>
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
-          )}
-
-          <Grid container spacing={2} sx={{ mt: 1 }}>
+          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+          <Grid container spacing={2} sx={{ mt: 0.5 }}>
             <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Primeiro Nome"
-                value={formData.first_name}
-                onChange={handleInputChange('first_name')}
-                variant="outlined"
-              />
+              <TextField fullWidth label="Primeiro Nome" value={formData.first_name} onChange={(e) => setFormData({ ...formData, first_name: e.target.value })} />
             </Grid>
-
             <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Sobrenome"
-                value={formData.last_name}
-                onChange={handleInputChange('last_name')}
-                variant="outlined"
-              />
+              <TextField fullWidth label="Sobrenome" value={formData.last_name} onChange={(e) => setFormData({ ...formData, last_name: e.target.value })} />
             </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Nome"
-                value={formData.name}
-                onChange={handleInputChange('name')}
-                variant="outlined"
-              />
+            <Grid item xs={12}>
+              <TextField fullWidth label="Nome" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
             </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Email"
-                type="email"
-                value={formData.email}
-                onChange={handleInputChange('email')}
-                variant="outlined"
-              />
+            <Grid item xs={12}>
+              <TextField fullWidth label="Email" type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
             </Grid>
           </Grid>
         </DialogContent>
-
-        <DialogActions sx={{ p: 2 }}>
-          <Button onClick={handleCancelEdit} disabled={loading}>
-            Cancelar
-          </Button>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={handleCancelEdit} disabled={loading}>Cancelar</Button>
           <Button
             onClick={handleSaveProfile}
             variant="contained"
             startIcon={loading ? <CircularProgress size={16} /> : <SaveIcon />}
             disabled={loading}
           >
-            {loading ? 'Salvando...' : 'Salvar'}
+            {loading ? 'Salvando\u2026' : 'Salvar'}
           </Button>
         </DialogActions>
       </Dialog>

@@ -11,13 +11,13 @@ import {
   Box,
   Badge,
   InputBase,
-  alpha,
   Drawer,
   List,
   ListItemButton,
   ListItemIcon,
   ListItemText,
   Divider,
+  Container,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -27,51 +27,10 @@ import {
   Home as HomeIcon,
   Inventory2 as InventoryIcon,
   AccountCircle as AccountCircleIcon,
+  Close as CloseIcon,
 } from '@mui/icons-material';
-import { styled } from '@mui/material/styles';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '../../contexts/AppContext';
-
-const Search = styled('div')(({ theme }) => ({
-  position: 'relative',
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: alpha(theme.palette.common.white, 0.15),
-  '&:hover': {
-    backgroundColor: alpha(theme.palette.common.white, 0.25),
-  },
-  marginLeft: 0,
-  width: '100%',
-  [theme.breakpoints.up('sm')]: {
-    marginLeft: theme.spacing(1),
-    width: 'auto',
-  },
-}));
-
-const SearchIconWrapper = styled('div')(({ theme }) => ({
-  padding: theme.spacing(0, 2),
-  height: '100%',
-  position: 'absolute',
-  pointerEvents: 'none',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-}));
-
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: 'inherit',
-  width: '100%',
-  '& .MuiInputBase-input': {
-    padding: theme.spacing(1, 1, 1, 0),
-    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-    transition: theme.transitions.create('width'),
-    [theme.breakpoints.up('sm')]: {
-      width: '20ch',
-      '&:focus': {
-        width: '30ch',
-      },
-    },
-  },
-}));
 
 const Header = () => {
   const navigate = useNavigate();
@@ -80,9 +39,9 @@ const Header = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [mobileOpen, setMobileOpen] = useState(false);
-  
-  // Contar ofertas pendentes
+
   const pendingOffersCount = offers.filter(offer => offer.status === 'pendente').length;
+
   const navItems = useMemo(() => ([
     { label: 'Explorar', path: '/', icon: <HomeIcon fontSize="small" /> },
     { label: 'Criar Item', path: '/create-item', icon: <AddIcon fontSize="small" /> },
@@ -91,18 +50,14 @@ const Header = () => {
     { label: 'Perfil', path: '/profile', icon: <AccountCircleIcon fontSize="small" /> },
   ]), []);
 
-  const handleProfileMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
+  const isActivePath = (path) => {
+    if (path === '/') return location.pathname === '/';
+    return location.pathname.startsWith(path);
   };
 
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleLogout = () => {
-    logout();
-    handleMenuClose();
-    navigate('/login');
+  const handleNavigate = (path) => {
+    navigate(path);
+    setMobileOpen(false);
   };
 
   const handleSearch = (e) => {
@@ -111,148 +66,106 @@ const Header = () => {
     }
   };
 
-  const handleNavigate = (path) => {
-    navigate(path);
-    setMobileOpen(false);
+  const handleLogout = () => {
+    logout();
+    setAnchorEl(null);
+    navigate('/login');
   };
-
-  const isActivePath = (path) => {
-    if (path === '/') {
-      return location.pathname === '/';
-    }
-    return location.pathname.startsWith(path);
-  };
-
-  const menuId = 'primary-search-account-menu';
-  const renderMenu = (
-    <Menu
-      anchorEl={anchorEl}
-      anchorOrigin={{
-        vertical: 'top',
-        horizontal: 'right',
-      }}
-      id={menuId}
-      keepMounted
-      transformOrigin={{
-        vertical: 'top',
-        horizontal: 'right',
-      }}
-      open={Boolean(anchorEl)}
-      onClose={handleMenuClose}
-    >
-      <MenuItem onClick={() => { navigate('/profile'); handleMenuClose(); }}>
-        Meu Perfil
-      </MenuItem>
-      <MenuItem onClick={() => { navigate('/my-items'); handleMenuClose(); }}>
-        Meus Itens
-      </MenuItem>
-      <MenuItem onClick={() => { navigate('/my-offers'); handleMenuClose(); }}>
-        Minhas Ofertas
-      </MenuItem>
-      <MenuItem onClick={handleLogout}>Sair</MenuItem>
-    </Menu>
-  );
-
-  const mobileDrawer = (
-    <Box sx={{ width: 280, py: 1 }}>
-      <Box sx={{ px: 2, py: 1.5 }}>
-        <Typography variant="h6" fontWeight={700}>
-          TrocaMat
-        </Typography>
-      </Box>
-      <Divider />
-      <List sx={{ py: 1 }}>
-        {navItems.map((item) => (
-          <ListItemButton
-            key={item.path}
-            selected={isActivePath(item.path)}
-            onClick={() => handleNavigate(item.path)}
-            sx={{ mx: 1, borderRadius: 2 }}
-          >
-            <ListItemIcon sx={{ minWidth: 34 }}>{item.icon}</ListItemIcon>
-            <ListItemText primary={item.label} />
-          </ListItemButton>
-        ))}
-      </List>
-    </Box>
-  );
 
   return (
     <AppBar
       position="sticky"
-      elevation={0}
       sx={{
-        background: 'linear-gradient(90deg, #0f172a 0%, #1e293b 55%, #0f172a 100%)',
-        borderBottom: '1px solid rgba(255,255,255,0.08)',
+        bgcolor: '#0f172a',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
       }}
     >
-      <Toolbar sx={{ gap: 1 }}>
-        <IconButton
-          color="inherit"
-          edge="start"
-          onClick={() => setMobileOpen(true)}
-          sx={{ display: { xs: 'inline-flex', md: 'none' } }}
-        >
-          <MenuIcon />
-        </IconButton>
+      <Container maxWidth="lg" disableGutters>
+        <Toolbar sx={{ gap: 1, minHeight: { xs: 56, sm: 64 }, px: { xs: 1, sm: 2 } }}>
+          {/* Mobile menu */}
+          <IconButton
+            color="inherit"
+            edge="start"
+            onClick={() => setMobileOpen(true)}
+            sx={{ display: { md: 'none' } }}
+          >
+            <MenuIcon />
+          </IconButton>
 
-        {/* Logo */}
-        <Typography
-          variant="h6"
-          noWrap
-          component="div"
-          sx={{ 
-            cursor: 'pointer',
-            fontWeight: 'bold',
-            flexGrow: { xs: 1, sm: 0 },
-            mr: { sm: 3 },
-            color: 'white',
-          }}
-          onClick={() => navigate('/')}
-        >
-          TrocaMat
-        </Typography>
+          {/* Logo */}
+          <Typography
+            variant="h6"
+            noWrap
+            onClick={() => navigate('/')}
+            sx={{
+              cursor: 'pointer',
+              fontWeight: 800,
+              fontSize: '1.15rem',
+              letterSpacing: '-0.02em',
+              mr: 3,
+              flexShrink: 0,
+            }}
+          >
+            TrocaMat
+          </Typography>
 
-        {/* Search Bar - Desktop */}
-        <Search
-          sx={{
-            display: { xs: 'none', sm: 'block' },
-            flexGrow: 1,
-            maxWidth: 360,
-            border: '1px solid rgba(255,255,255,0.16)',
-          }}
-        >
-          <SearchIconWrapper>
-            <SearchIcon sx={{ color: 'white' }} />
-          </SearchIconWrapper>
-          <StyledInputBase
-            placeholder="Buscar materiais..."
-            inputProps={{ 'aria-label': 'search' }}
-            sx={{ color: 'white' }}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyPress={handleSearch}
-          />
-        </Search>
+          {/* Search */}
+          <Box
+            sx={{
+              display: { xs: 'none', sm: 'flex' },
+              alignItems: 'center',
+              bgcolor: 'rgba(255,255,255,0.08)',
+              borderRadius: 2.5,
+              px: 1.5,
+              py: 0.5,
+              flexGrow: 1,
+              maxWidth: 400,
+              border: '1px solid rgba(255,255,255,0.06)',
+              transition: 'border-color 0.15s',
+              '&:focus-within': {
+                borderColor: 'rgba(255,255,255,0.2)',
+                bgcolor: 'rgba(255,255,255,0.1)',
+              },
+            }}
+          >
+            <SearchIcon sx={{ color: 'rgba(255,255,255,0.4)', fontSize: 20, mr: 1 }} />
+            <InputBase
+              placeholder="Buscar materiais\u2026"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyPress={handleSearch}
+              sx={{
+                color: '#fff',
+                flex: 1,
+                fontSize: '0.85rem',
+                '& ::placeholder': { color: 'rgba(255,255,255,0.4)', opacity: 1 },
+              }}
+            />
+          </Box>
 
-        <Box sx={{ flexGrow: 1 }} />
+          <Box sx={{ flexGrow: 1 }} />
 
-        {/* Desktop Menu */}
-        <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 0.5 }}>
+          {/* Desktop nav */}
           {isAuthenticated && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mr: 1 }}>
+            <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 0.25 }}>
               {navItems.map((item) => (
                 <Button
                   key={item.path}
                   color="inherit"
-                  startIcon={item.icon}
+                  size="small"
                   onClick={() => handleNavigate(item.path)}
                   sx={{
-                    px: 1.4,
-                    color: 'white',
+                    px: 1.5,
+                    py: 0.75,
                     borderRadius: 2,
-                    bgcolor: isActivePath(item.path) ? 'rgba(255,255,255,0.15)' : 'transparent',
-                    '&:hover': { bgcolor: 'rgba(255,255,255,0.12)' },
+                    fontSize: '0.82rem',
+                    fontWeight: isActivePath(item.path) ? 600 : 400,
+                    color: isActivePath(item.path) ? '#fff' : 'rgba(255,255,255,0.65)',
+                    bgcolor: isActivePath(item.path) ? 'rgba(255,255,255,0.1)' : 'transparent',
+                    '&:hover': {
+                      bgcolor: 'rgba(255,255,255,0.08)',
+                      color: '#fff',
+                    },
                   }}
                 >
                   {item.label}
@@ -261,83 +174,158 @@ const Header = () => {
             </Box>
           )}
 
+          {/* Right actions */}
           {isAuthenticated ? (
-            <>
-              <IconButton 
-                color="inherit" 
-                sx={{ color: 'white' }}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, ml: 1 }}>
+              <IconButton
+                color="inherit"
                 onClick={() => navigate('/offers')}
+                sx={{ color: 'rgba(255,255,255,0.75)' }}
               >
                 <Badge badgeContent={pendingOffersCount} color="error">
-                  <SwapIcon />
+                  <SwapIcon sx={{ fontSize: 22 }} />
                 </Badge>
               </IconButton>
-              
               <IconButton
-                size="large"
-                edge="end"
-                aria-label="account of current user"
-                aria-controls={menuId}
-                aria-haspopup="true"
-                onClick={handleProfileMenuOpen}
-                color="inherit"
-                sx={{ color: 'white' }}
+                onClick={(e) => setAnchorEl(e.currentTarget)}
+                sx={{ ml: 0.5 }}
               >
-                <Avatar
-                  sx={{ width: 32, height: 32, backgroundColor: 'secondary.main' }}
-                >
-                  {user?.name?.charAt(0) || 'U'}
+                <Avatar sx={{ width: 32, height: 32, bgcolor: '#2563eb', fontSize: '0.85rem' }}>
+                  {user?.name?.charAt(0) || user?.username?.charAt(0) || 'U'}
                 </Avatar>
               </IconButton>
-            </>
+            </Box>
           ) : (
-            <>
-              <Button color="inherit" onClick={() => navigate('/login')} sx={{ color: 'white' }}>
+            <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 1 }}>
+              <Button color="inherit" onClick={() => navigate('/login')} sx={{ fontSize: '0.85rem' }}>
                 Entrar
               </Button>
               <Button
-                variant="outlined"
-                color="inherit"
+                variant="contained"
                 onClick={() => navigate('/register')}
-                sx={{ ml: 1, color: 'white', borderColor: 'white' }}
+                sx={{ fontSize: '0.85rem' }}
               >
                 Cadastrar
               </Button>
-            </>
+            </Box>
           )}
-        </Box>
+        </Toolbar>
+      </Container>
 
-        {/* Mobile Menu */}
-      </Toolbar>
-
-      {/* Search Bar - Mobile */}
-      <Box sx={{ display: { xs: 'block', sm: 'none' }, p: 1, backgroundColor: 'primary.main' }}>
-        <Search>
-          <SearchIconWrapper>
-            <SearchIcon sx={{ color: 'white' }} />
-          </SearchIconWrapper>
-          <StyledInputBase
-            placeholder="Buscar materiais..."
-            inputProps={{ 'aria-label': 'search' }}
-            fullWidth
-            sx={{ color: 'white' }}
+      {/* Mobile search */}
+      <Box sx={{ display: { xs: 'flex', sm: 'none' }, px: 2, pb: 1.5, alignItems: 'center' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            bgcolor: 'rgba(255,255,255,0.08)',
+            borderRadius: 2,
+            px: 1.5,
+            py: 0.5,
+            flex: 1,
+          }}
+        >
+          <SearchIcon sx={{ color: 'rgba(255,255,255,0.4)', fontSize: 18, mr: 1 }} />
+          <InputBase
+            placeholder="Buscar\u2026"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onKeyPress={handleSearch}
+            sx={{
+              color: '#fff',
+              flex: 1,
+              fontSize: '0.85rem',
+              '& ::placeholder': { color: 'rgba(255,255,255,0.4)', opacity: 1 },
+            }}
           />
-        </Search>
+        </Box>
       </Box>
 
+      {/* User menu */}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={() => setAnchorEl(null)}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        PaperProps={{
+          sx: { mt: 1, minWidth: 180, borderRadius: 3, border: '1px solid', borderColor: 'divider' },
+        }}
+      >
+        <MenuItem onClick={() => { navigate('/profile'); setAnchorEl(null); }}>
+          Meu Perfil
+        </MenuItem>
+        <MenuItem onClick={() => { navigate('/my-items'); setAnchorEl(null); }}>
+          Meus Itens
+        </MenuItem>
+        <MenuItem onClick={() => { navigate('/my-offers'); setAnchorEl(null); }}>
+          Minhas Ofertas
+        </MenuItem>
+        <Divider />
+        <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
+          Sair
+        </MenuItem>
+      </Menu>
+
+      {/* Mobile drawer */}
       <Drawer
         anchor="left"
         open={mobileOpen}
         onClose={() => setMobileOpen(false)}
-        PaperProps={{ sx: { backgroundColor: 'background.default' } }}
+        PaperProps={{ sx: { width: 280, bgcolor: '#fff' } }}
       >
-        {mobileDrawer}
+        <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Typography variant="h6" fontWeight={800} sx={{ letterSpacing: '-0.02em' }}>
+            TrocaMat
+          </Typography>
+          <IconButton onClick={() => setMobileOpen(false)} size="small">
+            <CloseIcon />
+          </IconButton>
+        </Box>
+        <Divider />
+        <List sx={{ py: 1 }}>
+          {navItems.map((item) => (
+            <ListItemButton
+              key={item.path}
+              selected={isActivePath(item.path)}
+              onClick={() => handleNavigate(item.path)}
+              sx={{
+                mx: 1,
+                borderRadius: 2,
+                mb: 0.25,
+                '&.Mui-selected': { bgcolor: 'rgba(37, 99, 235, 0.08)' },
+              }}
+            >
+              <ListItemIcon sx={{ minWidth: 36, color: isActivePath(item.path) ? 'primary.main' : 'text.secondary' }}>
+                {item.icon}
+              </ListItemIcon>
+              <ListItemText
+                primary={item.label}
+                primaryTypographyProps={{
+                  fontSize: '0.9rem',
+                  fontWeight: isActivePath(item.path) ? 600 : 400,
+                }}
+              />
+            </ListItemButton>
+          ))}
+        </List>
+        {isAuthenticated && (
+          <>
+            <Divider sx={{ mx: 2 }} />
+            <Box sx={{ p: 2 }}>
+              <Button
+                fullWidth
+                variant="outlined"
+                color="error"
+                onClick={handleLogout}
+                size="small"
+              >
+                Sair
+              </Button>
+            </Box>
+          </>
+        )}
       </Drawer>
-
-      {renderMenu}
     </AppBar>
   );
 };

@@ -20,6 +20,7 @@ import {
   DialogContent,
   DialogActions,
   CardMedia,
+  Paper,
 } from '@mui/material';
 import {
   SwapHoriz as SwapIcon,
@@ -33,69 +34,51 @@ import {
 } from '@mui/icons-material';
 import { useApp } from '../contexts/AppContext';
 
+const categoryIcons = {
+  livros: <BookIcon sx={{ fontSize: 18 }} />,
+  apostilas: <SchoolIcon sx={{ fontSize: 18 }} />,
+  equipamentos: <ScienceIcon sx={{ fontSize: 18 }} />,
+  tecnologia: <ComputerIcon sx={{ fontSize: 18 }} />,
+};
+
+const statusMap = {
+  pendente: { label: 'Pendente', color: 'warning' },
+  aceita: { label: 'Aceita', color: 'success' },
+  recusada: { label: 'Recusada', color: 'error' },
+  trocado: { label: 'Trocado', color: 'success' },
+  cancelada: { label: 'Cancelada', color: 'default' },
+};
+
 const MyOffers = () => {
   const { user, isAuthenticated, offers, loadOffers, acceptOffer, refuseOffer } = useApp();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [tabValue, setTabValue] = useState(0);
-  const [confirmDialog, setConfirmDialog] = useState({
-    open: false,
-    type: '',
-    offer: null,
-  });
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, type: '', offer: null });
 
   useEffect(() => {
-    if (isAuthenticated) {
-      loadOffers();
-    }
+    if (isAuthenticated) loadOffers();
   }, [isAuthenticated, loadOffers]);
 
-  // Filtrar ofertas recebidas e enviadas (apenas pendentes)
-  const receivedOffers = Array.isArray(offers) 
-    ? offers.filter(offer => offer.item_desired_data?.owner === user?.username && offer.status === 'pendente')
+  const receivedOffers = Array.isArray(offers)
+    ? offers.filter(o => o.item_desired_data?.owner === user?.username && o.status === 'pendente')
     : [];
-  
-  const sentOffers = Array.isArray(offers) 
-    ? offers.filter(offer => offer.offerer === user?.username && offer.status === 'pendente')
+  const sentOffers = Array.isArray(offers)
+    ? offers.filter(o => o.offerer === user?.username && o.status === 'pendente')
     : [];
-
-  const historicalOffers = Array.isArray(offers) 
-    ? offers.filter(offer => 
-        (offer.item_desired_data?.owner === user?.username || offer.offerer === user?.username) &&
-        (offer.status === 'aceita' || offer.status === 'recusada' || offer.status === 'trocado')
+  const historicalOffers = Array.isArray(offers)
+    ? offers.filter(o =>
+        (o.item_desired_data?.owner === user?.username || o.offerer === user?.username) &&
+        ['aceita', 'recusada', 'trocado'].includes(o.status)
       )
     : [];
 
-  const handleTabChange = (event, newValue) => {
-    setTabValue(newValue);
-  };
-
-  const handleAcceptOffer = (offer) => {
-    setConfirmDialog({
-      open: true,
-      type: 'accept',
-      offer: offer,
-    });
-  };
-
-  const handleRejectOffer = (offer) => {
-    setConfirmDialog({
-      open: true,
-      type: 'reject',
-      offer: offer,
-    });
-  };
-
   const handleConfirmAction = async () => {
     if (!confirmDialog.offer) return;
-
     setLoading(true);
     try {
-      if (confirmDialog.type === 'accept') {
-        await acceptOffer(confirmDialog.offer.id);
-      } else {
-        await refuseOffer(confirmDialog.offer.id);
-      }
+      if (confirmDialog.type === 'accept') await acceptOffer(confirmDialog.offer.id);
+      else await refuseOffer(confirmDialog.offer.id);
       setConfirmDialog({ open: false, type: '', offer: null });
     } catch (err) {
       setError(`Erro ao ${confirmDialog.type === 'accept' ? 'aceitar' : 'recusar'} oferta`);
@@ -104,433 +87,168 @@ const MyOffers = () => {
     }
   };
 
-  const getCategoryIcon = (category) => {
-    const icons = {
-      'livros': <BookIcon />,
-      'apostilas': <SchoolIcon />,
-      'equipamentos': <ScienceIcon />,
-      'tecnologia': <ComputerIcon />,
-    };
-    return icons[category] || <BookIcon />;
-  };
-
-  const getStatusColor = (status) => {
-    const colors = {
-      'pendente': 'warning',
-      'aceita': 'success',
-      'recusada': 'error',
-      'trocado': 'success',
-      'cancelada': 'default',
-    };
-    return colors[status] || 'default';
-  };
-
-  const getStatusLabel = (status) => {
-    const labels = {
-      'pendente': 'Pendente',
-      'aceita': 'Aceita',
-      'recusada': 'Recusada',
-      'trocado': 'Trocado',
-      'cancelada': 'Cancelada',
-    };
-    return labels[status] || status;
-  };
-
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
+  const formatDate = (dateString) =>
+    new Date(dateString).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
   if (!isAuthenticated) {
     return (
-      <Container maxWidth="md" sx={{ py: 4 }}>
-        <Alert severity="warning">
-          Você precisa estar logado para acessar suas ofertas.
-        </Alert>
+      <Container maxWidth="lg" sx={{ py: 6 }}>
+        <Alert severity="warning">Voc\u00EA precisa estar logado para acessar suas ofertas.</Alert>
       </Container>
     );
   }
 
+  const renderOfferCard = (offer, type) => {
+    const status = statusMap[offer.status] || { label: offer.status, color: 'default' };
+    return (
+      <Grid item xs={12} key={offer.id}>
+        <Card>
+          <CardContent>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Avatar sx={{ width: 36, height: 36, bgcolor: 'primary.main', fontSize: '0.85rem' }}>
+                  <PersonIcon sx={{ fontSize: 18 }} />
+                </Avatar>
+                <Box>
+                  <Typography variant="body2" fontWeight={600}>
+                    {type === 'received' ? `Oferta de ${offer.offerer}` :
+                     type === 'sent' ? `Oferta para ${offer.item_desired_data?.owner}` :
+                     (offer.offerer === user?.username ? `Oferta para ${offer.item_desired_data?.owner}` : `Oferta de ${offer.offerer}`)}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">{formatDate(offer.created_at)}</Typography>
+                </Box>
+              </Box>
+              <Chip label={status.label} color={status.color} size="small" />
+            </Box>
+
+            <Divider sx={{ my: 2 }} />
+
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={6}>
+                <Typography variant="overline" sx={{ fontSize: '0.65rem', color: 'text.secondary' }}>
+                  {type === 'received' ? 'Seu Item' : 'Item Desejado'}
+                </Typography>
+                {type === 'received' ? (
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, mt: 0.5 }}>
+                    <CardMedia
+                      component="img"
+                      sx={{ width: 48, height: 48, borderRadius: 1.5, objectFit: 'cover', flexShrink: 0 }}
+                      image={offer.item_desired_data?.image_url || 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=48&h=48&fit=crop'}
+                      alt={offer.item_desired_data?.title}
+                    />
+                    <Box>
+                      <Typography variant="body2" fontWeight={500}>{offer.item_desired_data?.title}</Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                        {offer.item_desired_data?.description}
+                      </Typography>
+                    </Box>
+                  </Box>
+                ) : (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+                    {categoryIcons[offer.item_desired_data?.category] || <BookIcon sx={{ fontSize: 18 }} />}
+                    <Typography variant="body2" fontWeight={500}>{offer.item_desired_data?.title}</Typography>
+                  </Box>
+                )}
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <Typography variant="overline" sx={{ fontSize: '0.65rem', color: 'text.secondary' }}>
+                  {offer.offer_type === 'item' ? (type === 'received' ? 'Item Oferecido' : 'Seu Item') : 'Valor Oferecido'}
+                </Typography>
+                {offer.offer_type === 'item' ? (
+                  type === 'received' ? (
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, mt: 0.5 }}>
+                      <CardMedia
+                        component="img"
+                        sx={{ width: 48, height: 48, borderRadius: 1.5, objectFit: 'cover', flexShrink: 0 }}
+                        image={offer.item_offered_data?.image_url || 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=48&h=48&fit=crop'}
+                        alt={offer.item_offered_data?.title}
+                      />
+                      <Box>
+                        <Typography variant="body2" fontWeight={500}>{offer.item_offered_data?.title}</Typography>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                          {offer.item_offered_data?.description}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  ) : (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+                      {categoryIcons[offer.item_offered_data?.category] || <BookIcon sx={{ fontSize: 18 }} />}
+                      <Typography variant="body2" fontWeight={500}>{offer.item_offered_data?.title}</Typography>
+                    </Box>
+                  )
+                ) : (
+                  <Typography variant="h6" color="primary" sx={{ mt: 0.5 }}>
+                    R$ {offer.money_amount?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </Typography>
+                )}
+              </Grid>
+            </Grid>
+          </CardContent>
+
+          {offer.status === 'pendente' && type === 'received' && (
+            <CardActions sx={{ px: 2, pb: 2 }}>
+              <Button size="small" color="success" variant="contained" startIcon={<AcceptIcon />} onClick={() => setConfirmDialog({ open: true, type: 'accept', offer })}>
+                Aceitar
+              </Button>
+              <Button size="small" color="error" variant="outlined" startIcon={<RejectIcon />} onClick={() => setConfirmDialog({ open: true, type: 'reject', offer })}>
+                Recusar
+              </Button>
+            </CardActions>
+          )}
+        </Card>
+      </Grid>
+    );
+  };
+
+  const renderEmptyState = (icon, title, subtitle) => (
+    <Box sx={{ textAlign: 'center', py: 10, px: 3, bgcolor: '#fff', borderRadius: 4, border: '1px solid', borderColor: 'divider' }}>
+      {icon}
+      <Typography variant="h5" sx={{ mb: 1 }}>{title}</Typography>
+      <Typography variant="body2" color="text.secondary">{subtitle}</Typography>
+    </Box>
+  );
+
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h4" gutterBottom>
+    <Container maxWidth="lg" sx={{ py: { xs: 4, md: 6 } }}>
+      <Typography variant="overline" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+        Negocia\u00E7\u00F5es
+      </Typography>
+      <Typography variant="h3" sx={{ mb: 4 }}>
         Minhas Ofertas
       </Typography>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError('')}>
-          {error}
-        </Alert>
-      )}
+      {error && <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError('')}>{error}</Alert>}
 
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-        <Tabs value={tabValue} onChange={handleTabChange}>
-          <Tab 
-            label={`Ofertas Recebidas (${receivedOffers.length})`} 
-            icon={<SwapIcon />}
-            iconPosition="start"
-          />
-          <Tab 
-            label={`Ofertas Enviadas (${sentOffers.length})`} 
-            icon={<SwapIcon />}
-            iconPosition="start"
-          />
-          <Tab 
-            label={`Histórico (${historicalOffers.length})`} 
-            icon={<AcceptIcon />}
-            iconPosition="start"
-          />
+      <Paper variant="outlined" sx={{ mb: 3, borderColor: 'divider', borderRadius: 3 }}>
+        <Tabs value={tabValue} onChange={(_, v) => setTabValue(v)} sx={{ minHeight: 48 }}>
+          <Tab label={`Recebidas (${receivedOffers.length})`} icon={<SwapIcon />} iconPosition="start" />
+          <Tab label={`Enviadas (${sentOffers.length})`} icon={<SwapIcon />} iconPosition="start" />
+          <Tab label={`Hist\u00F3rico (${historicalOffers.length})`} icon={<AcceptIcon />} iconPosition="start" />
         </Tabs>
-      </Box>
+      </Paper>
 
-      {/* Ofertas Recebidas */}
-      {tabValue === 0 && (
-        <Box>
-          {receivedOffers.length === 0 ? (
-            <Card>
-              <CardContent sx={{ textAlign: 'center', py: 6 }}>
-                <SwapIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
-                <Typography variant="h6" color="text.secondary" gutterBottom>
-                  Nenhuma oferta recebida
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Quando alguém fizer uma oferta para seus itens, ela aparecerá aqui.
-                </Typography>
-              </CardContent>
-            </Card>
-          ) : (
-            <Grid container spacing={3}>
-              {receivedOffers.map((offer) => (
-                <Grid item xs={12} key={offer.id}>
-                  <Card>
-                    <CardContent>
-                      <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
-                        <Box display="flex" alignItems="center">
-                          <Avatar sx={{ mr: 2 }}>
-                            <PersonIcon />
-                          </Avatar>
-                          <Box>
-                            <Typography variant="h6">
-                              Oferta de {offer.offerer}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              {formatDate(offer.created_at)}
-                            </Typography>
-                          </Box>
-                        </Box>
-                        <Chip
-                          label={getStatusLabel(offer.status)}
-                          color={getStatusColor(offer.status)}
-                          size="small"
-                        />
-                      </Box>
+      {tabValue === 0 && (receivedOffers.length === 0
+        ? renderEmptyState(<SwapIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />, 'Nenhuma oferta recebida', 'Quando algu\u00E9m fizer uma oferta para seus itens, ela aparecer\u00E1 aqui.')
+        : <Grid container spacing={2}>{receivedOffers.map(o => renderOfferCard(o, 'received'))}</Grid>)}
 
-                      <Divider sx={{ my: 2 }} />
+      {tabValue === 1 && (sentOffers.length === 0
+        ? renderEmptyState(<SwapIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />, 'Nenhuma oferta enviada', 'Quando voc\u00EA fizer uma oferta, ela aparecer\u00E1 aqui.')
+        : <Grid container spacing={2}>{sentOffers.map(o => renderOfferCard(o, 'sent'))}</Grid>)}
 
-                      <Grid container spacing={2}>
-                        <Grid item xs={12} md={6}>
-                          <Typography variant="subtitle2" gutterBottom>
-                            Seu Item:
-                          </Typography>
-                          <Box display="flex" alignItems="flex-start" mb={1}>
-                            <CardMedia
-                              component="img"
-                              sx={{ width: 60, height: 60, borderRadius: 1, mr: 2, objectFit: 'cover' }}
-                              image={offer.item_desired_data?.image_url || 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=60&h=60&fit=crop'}
-                              alt={offer.item_desired_data?.title}
-                            />
-                            <Box>
-                              <Typography variant="body1">
-                                {offer.item_desired_data?.title}
-                              </Typography>
-                              <Typography variant="body2" color="text.secondary">
-                                {offer.item_desired_data?.description}
-                              </Typography>
-                            </Box>
-                          </Box>
-                        </Grid>
+      {tabValue === 2 && (historicalOffers.length === 0
+        ? renderEmptyState(<AcceptIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />, 'Nenhuma oferta no hist\u00F3rico', 'Ofertas aceitas, recusadas ou trocadas aparecer\u00E3o aqui.')
+        : <Grid container spacing={2}>{historicalOffers.map(o => renderOfferCard(o, 'history'))}</Grid>)}
 
-                        <Grid item xs={12} md={6}>
-                          <Typography variant="subtitle2" gutterBottom>
-                            {offer.offer_type === 'item' ? 'Item Oferecido:' : 'Valor Oferecido:'}
-                          </Typography>
-                          {offer.offer_type === 'item' ? (
-                            <Box display="flex" alignItems="flex-start" mb={1}>
-                              <CardMedia
-                                component="img"
-                                sx={{ width: 60, height: 60, borderRadius: 1, mr: 2, objectFit: 'cover' }}
-                                image={offer.item_offered_data?.image_url || 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=60&h=60&fit=crop'}
-                                alt={offer.item_offered_data?.title}
-                              />
-                              <Box>
-                                <Typography variant="body1">
-                                  {offer.item_offered_data?.title}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                  {offer.item_offered_data?.description}
-                                </Typography>
-                              </Box>
-                            </Box>
-                          ) : (
-                            <Typography variant="h6" color="primary">
-                              R$ {offer.money_amount?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                            </Typography>
-                          )}
-                        </Grid>
-                      </Grid>
-
-                      {offer.message && (
-                        <>
-                          <Divider sx={{ my: 2 }} />
-                          <Typography variant="subtitle2" gutterBottom>
-                            Mensagem:
-                          </Typography>
-                          <Typography variant="body2">
-                            {offer.message}
-                          </Typography>
-                        </>
-                      )}
-                    </CardContent>
-
-                    {offer.status === 'pendente' && (
-                      <CardActions>
-                        <Button
-                          color="success"
-                          startIcon={<AcceptIcon />}
-                          onClick={() => handleAcceptOffer(offer)}
-                        >
-                          Aceitar
-                        </Button>
-                        <Button
-                          color="error"
-                          startIcon={<RejectIcon />}
-                          onClick={() => handleRejectOffer(offer)}
-                        >
-                          Recusar
-                        </Button>
-                      </CardActions>
-                    )}
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
-          )}
-        </Box>
-      )}
-
-      {/* Ofertas Enviadas */}
-      {tabValue === 1 && (
-        <Box>
-          {sentOffers.length === 0 ? (
-            <Card>
-              <CardContent sx={{ textAlign: 'center', py: 6 }}>
-                <SwapIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
-                <Typography variant="h6" color="text.secondary" gutterBottom>
-                  Nenhuma oferta enviada
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Quando você fizer uma oferta, ela aparecerá aqui.
-                </Typography>
-              </CardContent>
-            </Card>
-          ) : (
-            <Grid container spacing={3}>
-              {sentOffers.map((offer) => (
-                <Grid item xs={12} key={offer.id}>
-                  <Card>
-                    <CardContent>
-                      <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
-                        <Box display="flex" alignItems="center">
-                          <Avatar sx={{ mr: 2 }}>
-                            <PersonIcon />
-                          </Avatar>
-                          <Box>
-                            <Typography variant="h6">
-                              Oferta para {offer.item_desired_data?.owner}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              {formatDate(offer.created_at)}
-                            </Typography>
-                          </Box>
-                        </Box>
-                        <Chip
-                          label={getStatusLabel(offer.status)}
-                          color={getStatusColor(offer.status)}
-                          size="small"
-                        />
-                      </Box>
-
-                      <Divider sx={{ my: 2 }} />
-
-                      <Grid container spacing={2}>
-                        <Grid item xs={12} md={6}>
-                          <Typography variant="subtitle2" gutterBottom>
-                            Item Desejado:
-                          </Typography>
-                          <Box display="flex" alignItems="center" mb={1}>
-                            {getCategoryIcon(offer.item_desired_data?.category)}
-                            <Typography variant="body1" sx={{ ml: 1 }}>
-                              {offer.item_desired_data?.title}
-                            </Typography>
-                          </Box>
-                          <Typography variant="body2" color="text.secondary">
-                            {offer.item_desired_data?.description}
-                          </Typography>
-                        </Grid>
-
-                        <Grid item xs={12} md={6}>
-                          <Typography variant="subtitle2" gutterBottom>
-                            {offer.offer_type === 'item' ? 'Seu Item:' : 'Valor Oferecido:'}
-                          </Typography>
-                          <Box display="flex" alignItems="center" mb={1}>
-                            {offer.offer_type === 'item' ? (
-                              <>
-                                {getCategoryIcon(offer.item_offered_data?.category)}
-                                <Typography variant="body1" sx={{ ml: 1 }}>
-                                  {offer.item_offered_data?.title}
-                                </Typography>
-                              </>
-                            ) : (
-                              <Typography variant="body1" sx={{ ml: 1 }}>
-                                R$ {offer.money_amount}
-                              </Typography>
-                            )}
-                          </Box>
-                          {offer.offer_type === 'item' && (
-                            <Typography variant="body2" color="text.secondary">
-                              {offer.item_offered_data?.description}
-                            </Typography>
-                          )}
-                        </Grid>
-                      </Grid>
-
-                      {offer.message && (
-                        <>
-                          <Divider sx={{ my: 2 }} />
-                          <Typography variant="subtitle2" gutterBottom>
-                            Sua Mensagem:
-                          </Typography>
-                          <Typography variant="body2">
-                            {offer.message}
-                          </Typography>
-                        </>
-                      )}
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
-          )}
-        </Box>
-      )}
-
-      {/* Histórico de Ofertas */}
-      {tabValue === 2 && (
-        <Box>
-          {historicalOffers.length === 0 ? (
-            <Card>
-              <CardContent sx={{ textAlign: 'center', py: 6 }}>
-                <AcceptIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
-                <Typography variant="h6" color="text.secondary" gutterBottom>
-                  Nenhuma oferta no histórico
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Ofertas aceitas, recusadas ou trocadas aparecerão aqui.
-                </Typography>
-              </CardContent>
-            </Card>
-          ) : (
-            <Grid container spacing={3}>
-              {historicalOffers.map((offer) => (
-                <Grid item xs={12} key={offer.id}>
-                  <Card>
-                    <CardContent>
-                      <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
-                        <Box display="flex" alignItems="center">
-                          <Avatar sx={{ mr: 2 }}>
-                            <PersonIcon />
-                          </Avatar>
-                          <Box>
-                            <Typography variant="h6">
-                              {offer.offerer === user?.username ? 
-                                `Oferta para ${offer.item_desired_data?.owner}` : 
-                                `Oferta de ${offer.offerer}`
-                              }
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              {formatDate(offer.created_at)}
-                            </Typography>
-                          </Box>
-                        </Box>
-                        <Chip
-                          label={getStatusLabel(offer.status)}
-                          color={getStatusColor(offer.status)}
-                          size="small"
-                        />
-                      </Box>
-
-                      <Divider sx={{ my: 2 }} />
-
-                      <Grid container spacing={2}>
-                        <Grid item xs={12} md={6}>
-                          <Typography variant="subtitle2" gutterBottom>
-                            Item Desejado:
-                          </Typography>
-                          <Box display="flex" alignItems="center" mb={1}>
-                            {getCategoryIcon(offer.item_desired_data?.category)}
-                            <Typography variant="body2" sx={{ ml: 1 }}>
-                              {offer.item_desired_data?.title}
-                            </Typography>
-                          </Box>
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                          <Typography variant="subtitle2" gutterBottom>
-                            {offer.offer_type === 'item' ? 'Item Oferecido:' : 'Valor Oferecido:'}
-                          </Typography>
-                          <Box display="flex" alignItems="center" mb={1}>
-                            {offer.offer_type === 'item' ? (
-                              <>
-                                {getCategoryIcon(offer.item_offered_data?.category)}
-                                <Typography variant="body2" sx={{ ml: 1 }}>
-                                  {offer.item_offered_data?.title}
-                                </Typography>
-                              </>
-                            ) : (
-                              <Typography variant="body2" sx={{ ml: 1 }}>
-                                R$ {offer.money_amount}
-                              </Typography>
-                            )}
-                          </Box>
-                        </Grid>
-                      </Grid>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
-          )}
-        </Box>
-      )}
-
-      {/* Dialog de Confirmação */}
+      {/* Confirm dialog */}
       <Dialog open={confirmDialog.open} onClose={() => setConfirmDialog({ open: false, type: '', offer: null })}>
-        <DialogTitle>
-          {confirmDialog.type === 'accept' ? 'Aceitar Oferta' : 'Recusar Oferta'}
-        </DialogTitle>
+        <DialogTitle>{confirmDialog.type === 'accept' ? 'Aceitar Oferta' : 'Recusar Oferta'}</DialogTitle>
         <DialogContent>
           <Typography>
             Tem certeza que deseja {confirmDialog.type === 'accept' ? 'aceitar' : 'recusar'} esta oferta?
           </Typography>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setConfirmDialog({ open: false, type: '', offer: null })}>
-            Cancelar
-          </Button>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setConfirmDialog({ open: false, type: '', offer: null })}>Cancelar</Button>
           <Button
             onClick={handleConfirmAction}
             color={confirmDialog.type === 'accept' ? 'success' : 'error'}
@@ -538,7 +256,7 @@ const MyOffers = () => {
             disabled={loading}
             startIcon={loading ? <CircularProgress size={16} /> : (confirmDialog.type === 'accept' ? <AcceptIcon /> : <RejectIcon />)}
           >
-            {loading ? 'Processando...' : (confirmDialog.type === 'accept' ? 'Aceitar' : 'Recusar')}
+            {loading ? 'Processando\u2026' : (confirmDialog.type === 'accept' ? 'Aceitar' : 'Recusar')}
           </Button>
         </DialogActions>
       </Dialog>

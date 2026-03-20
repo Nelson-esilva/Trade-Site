@@ -321,6 +321,9 @@ export const AppProvider = ({ children }) => {
     try {
       dispatch({ type: ActionTypes.SET_LOADING, payload: true });
       const response = await apiService.registerUser(userData);
+      // Garante fluxo "cadastro -> login" sem sessão residual.
+      apiService.setAuthToken(null, null);
+      dispatch({ type: ActionTypes.LOGOUT });
       // Não faz login automático - apenas registra o usuário
       dispatch({ type: ActionTypes.SET_LOADING, payload: false });
       return response;
@@ -358,7 +361,7 @@ export const AppProvider = ({ children }) => {
       // Tentar validar o token fazendo uma requisição simples
       apiService.getCurrentUser().catch((error) => {
         console.log('Token inválido detectado na inicialização, limpando...');
-        apiService.setAuthToken(null);
+        apiService.setAuthToken(null, null);
         dispatch({ type: ActionTypes.LOGOUT });
       });
     }
@@ -371,7 +374,7 @@ export const AppProvider = ({ children }) => {
       // Tentar carregar dados, se falhar, limpar token inválido
       loadInitialData().catch((error) => {
         console.error('Token inválido, limpando:', error);
-        apiService.setAuthToken(null);
+        apiService.setAuthToken(null, null);
         dispatch({ type: ActionTypes.LOGOUT });
       });
     }

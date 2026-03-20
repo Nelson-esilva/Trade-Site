@@ -33,84 +33,46 @@ import apiService from '../../services/api';
 const ItemDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { 
-    currentItem, 
+  const {
+    currentItem,
     setCurrentItem,
-    items, 
-    loading, 
-    error, 
+    items,
+    loading,
+    error,
     user,
-    loadItem, 
+    loadItem,
     createOffer,
-    clearError 
+    clearError,
   } = useApp();
-  
+
   const [showOfferDialog, setShowOfferDialog] = useState(false);
-  const [offerData, setOfferData] = useState({
-    offer_type: 'item',
-    item_offered: '',
-    money_amount: '',
-  });
+  const [offerData, setOfferData] = useState({ offer_type: 'item', item_offered: '', money_amount: '' });
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [newStatus, setNewStatus] = useState('');
 
   useEffect(() => {
-    if (id) {
-      loadItem(id);
-    }
+    if (id) loadItem(id);
   }, [id, loadItem]);
 
-  const handleMakeOffer = () => {
-    setShowOfferDialog(true);
-  };
-
-  const handleCloseOfferDialog = () => {
-    setShowOfferDialog(false);
-    setOfferData({ 
-      offer_type: 'item',
-      item_offered: '',
-      money_amount: '',
-    });
-  };
-
   const handleSubmitOffer = async () => {
-    // Validação baseada no tipo de oferta
-    if (offerData.offer_type === 'item' && !offerData.item_offered) {
-      return;
-    }
-    if (offerData.offer_type === 'money' && !offerData.money_amount) {
-      return;
-    }
+    if (offerData.offer_type === 'item' && !offerData.item_offered) return;
+    if (offerData.offer_type === 'money' && !offerData.money_amount) return;
 
     try {
-      const offerPayload = {
+      const payload = {
         item_desired: parseInt(id),
         offer_type: offerData.offer_type,
         status: 'pendente',
       };
+      if (offerData.offer_type === 'item') payload.item_offered = parseInt(offerData.item_offered);
+      else if (offerData.offer_type === 'money') payload.money_amount = parseFloat(offerData.money_amount);
 
-      if (offerData.offer_type === 'item') {
-        offerPayload.item_offered = parseInt(offerData.item_offered);
-      } else if (offerData.offer_type === 'money') {
-        offerPayload.money_amount = parseFloat(offerData.money_amount);
-      }
-
-      await createOffer(offerPayload);
-      handleCloseOfferDialog();
-    } catch (error) {
-      console.error('Erro ao criar oferta:', error);
+      await createOffer(payload);
+      setShowOfferDialog(false);
+      setOfferData({ offer_type: 'item', item_offered: '', money_amount: '' });
+    } catch (err) {
+      console.error('Erro ao criar oferta:', err);
     }
-  };
-
-
-  const handleChangeStatus = () => {
-    setNewStatus(currentItem?.status || '');
-    setShowStatusDialog(true);
-  };
-
-  const handleCloseStatusDialog = () => {
-    setShowStatusDialog(false);
-    setNewStatus('');
   };
 
   const handleSubmitStatusChange = async () => {
@@ -119,198 +81,140 @@ const ItemDetails = () => {
         method: 'PATCH',
         body: JSON.stringify({ status: newStatus }),
       });
-
-      // Atualizar o item atual com o novo status
       setCurrentItem(updatedItem);
-      
-      handleCloseStatusDialog();
-    } catch (error) {
-      console.error('Erro ao alterar status:', error);
+      setShowStatusDialog(false);
+      setNewStatus('');
+    } catch (err) {
+      console.error('Erro ao alterar status:', err);
     }
   };
 
-
-
-  // Itens disponíveis para troca (excluindo o item atual e apenas itens do usuário logado)
-  const availableItems = items.filter(item => 
-    item.id !== parseInt(id) && 
-    item.status === 'disponivel' && 
-    item.owner === user?.username
+  const availableItems = items.filter(item =>
+    item.id !== parseInt(id) && item.status === 'disponivel' && item.owner === user?.username
   );
 
   if (loading) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Box display="flex" justifyContent="center" py={8}>
-          <CircularProgress />
-        </Box>
+      <Container maxWidth="lg" sx={{ py: 6 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>
       </Container>
     );
   }
 
   if (error) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Alert severity="error" onClose={clearError}>
-          {error}
-        </Alert>
+      <Container maxWidth="lg" sx={{ py: 6 }}>
+        <Alert severity="error" onClose={clearError}>{error}</Alert>
       </Container>
     );
   }
 
   if (!currentItem) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Alert severity="warning">
-          Item não encontrado
-        </Alert>
+      <Container maxWidth="lg" sx={{ py: 6 }}>
+        <Alert severity="warning">Item n\u00E3o encontrado</Alert>
       </Container>
     );
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      {/* Header */}
-      <Box sx={{ mb: 4 }}>
-        <Button
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate('/')}
-          sx={{ mb: 2 }}
-        >
-          Voltar
-        </Button>
-      </Box>
+    <Container maxWidth="lg" sx={{ py: { xs: 4, md: 6 } }}>
+      <Button
+        startIcon={<ArrowBackIcon />}
+        onClick={() => navigate('/')}
+        sx={{ mb: 3, color: 'text.secondary' }}
+      >
+        Voltar
+      </Button>
 
       <Grid container spacing={4}>
-        {/* Imagem do Item */}
+        {/* Image */}
         <Grid item xs={12} md={6}>
-          <Paper elevation={3} sx={{ borderRadius: 2, overflow: 'hidden' }}>
+          <Paper variant="outlined" sx={{ borderColor: 'divider', borderRadius: 3, overflow: 'hidden' }}>
             <CardMedia
               component="img"
               height="400"
-              image={currentItem.image_url_or_upload || currentItem.image_url || 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=400&fit=crop'}
+              image={currentItem.image_url_or_upload || currentItem.image_url || 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=600&h=400&fit=crop'}
               alt={currentItem.title}
-              sx={{
-                objectFit: 'cover',
-                width: '100%',
-              }}
+              sx={{ objectFit: 'cover', width: '100%' }}
             />
           </Paper>
         </Grid>
 
-        {/* Informações do Item */}
+        {/* Info */}
         <Grid item xs={12} md={6}>
-          <Paper elevation={3} sx={{ p: 4, borderRadius: 2, height: 'fit-content' }}>
-            <Box sx={{ mb: 3 }}>
-              <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
-                <Typography variant="h4" component="h1" gutterBottom>
-                  {currentItem.title}
-                </Typography>
-                <Chip
-                  label={currentItem.status === 'disponivel' ? 'Disponível' : 'Indisponível'}
-                  color={currentItem.status === 'disponivel' ? 'success' : 'default'}
-                  variant="outlined"
-                />
-          </Box>
-              
-              <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-                {currentItem.description}
-            </Typography>
+          <Paper variant="outlined" sx={{ p: 4, borderColor: 'divider', borderRadius: 3 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+              <Typography variant="h3" component="h1">
+                {currentItem.title}
+              </Typography>
+              <Chip
+                label={currentItem.status === 'disponivel' ? 'Dispon\u00EDvel' : 'Indispon\u00EDvel'}
+                color={currentItem.status === 'disponivel' ? 'success' : 'default'}
+                variant="outlined"
+                size="small"
+              />
             </Box>
+
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 3, lineHeight: 1.7 }}>
+              {currentItem.description}
+            </Typography>
 
             <Divider sx={{ my: 3 }} />
 
-            {/* Informações do Proprietário */}
             <Box sx={{ mb: 3 }}>
-              <Typography variant="h6" gutterBottom>
-                <PersonIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-                Proprietário
-              </Typography>
-              <Box sx={{ ml: 4 }}>
-                <Typography variant="body1">
-                  {currentItem.owner || 'Usuário não informado'}
-            </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                <PersonIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
+                <Box>
+                  <Typography variant="caption" color="text.secondary">Propriet\u00E1rio</Typography>
+                  <Typography variant="body2" fontWeight={500}>{currentItem.owner || 'N\u00E3o informado'}</Typography>
+                </Box>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <TimeIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
+                <Box>
+                  <Typography variant="caption" color="text.secondary">Publicado em</Typography>
+                  <Typography variant="body2" fontWeight={500}>
+                    {new Date(currentItem.created_at).toLocaleDateString('pt-BR', {
+                      day: '2-digit', month: '2-digit', year: 'numeric',
+                    })}
+                  </Typography>
+                </Box>
               </Box>
             </Box>
 
-            {/* Data de Criação */}
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="h6" gutterBottom>
-                <TimeIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-                Data de Publicação
-              </Typography>
-              <Box sx={{ ml: 4 }}>
-                <Typography variant="body2" color="text.secondary">
-                  {new Date(currentItem.created_at).toLocaleDateString('pt-BR', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </Typography>
-              </Box>
-            </Box>
-
-            {/* Ações */}
-            <Box sx={{ mt: 4 }}>
-              {/* Botões de Admin */}
+            {/* Actions */}
+            <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', mt: 4 }}>
               {user && (user.is_trade_admin || user.is_superuser) && (
-                <>
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    size="large"
-                    onClick={handleChangeStatus}
-                  >
-                    Alterar Status
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="warning"
-                    size="large"
-                    startIcon={<SwapIcon />}
-                    onClick={handleMakeOffer}
-                  >
-                    Fazer Oferta (Admin)
-                  </Button>
-                </>
+                <Button variant="outlined" color="secondary" onClick={() => { setNewStatus(currentItem?.status || ''); setShowStatusDialog(true); }}>
+                  Alterar Status
+                </Button>
               )}
-              
-              {/* Botões normais */}
               <Button
                 variant="contained"
                 size="large"
                 startIcon={<SwapIcon />}
-                onClick={handleMakeOffer}
+                onClick={() => setShowOfferDialog(true)}
                 disabled={currentItem.status !== 'disponivel'}
-                sx={{ mr: 2 }}
               >
                 Fazer Oferta
               </Button>
-              <Button
-                variant="outlined"
-                size="large"
-                onClick={() => navigate('/')}
-              >
+              <Button variant="outlined" onClick={() => navigate('/')}>
                 Ver Outros Itens
               </Button>
             </Box>
           </Paper>
         </Grid>
-
       </Grid>
 
-      {/* Dialog para Fazer Oferta */}
-      <Dialog open={showOfferDialog} onClose={handleCloseOfferDialog} maxWidth="sm" fullWidth>
+      {/* Offer dialog */}
+      <Dialog open={showOfferDialog} onClose={() => setShowOfferDialog(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Fazer Oferta</DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Faça uma oferta por "{currentItem.title}"
-            </Typography>
-          
-          {/* Tipo de Oferta */}
-          <FormControl fullWidth sx={{ mt: 2 }}>
+            Fa\u00E7a uma oferta por &ldquo;{currentItem.title}&rdquo;
+          </Typography>
+          <FormControl fullWidth sx={{ mt: 1 }}>
             <InputLabel>Tipo de Oferta</InputLabel>
             <Select
               value={offerData.offer_type}
@@ -322,19 +226,12 @@ const ItemDetails = () => {
             </Select>
           </FormControl>
 
-          {/* Campo condicional baseado no tipo */}
           {offerData.offer_type === 'item' && (
             <FormControl fullWidth sx={{ mt: 2 }}>
               <InputLabel>Seu Item</InputLabel>
-              <Select
-                value={offerData.item_offered}
-                label="Seu Item"
-                onChange={(e) => setOfferData({ ...offerData, item_offered: e.target.value })}
-              >
+              <Select value={offerData.item_offered} label="Seu Item" onChange={(e) => setOfferData({ ...offerData, item_offered: e.target.value })}>
                 {availableItems.map((item) => (
-                  <MenuItem key={item.id} value={item.id}>
-                    {item.title}
-                  </MenuItem>
+                  <MenuItem key={item.id} value={item.id}>{item.title}</MenuItem>
                 ))}
               </Select>
             </FormControl>
@@ -342,69 +239,49 @@ const ItemDetails = () => {
 
           {offerData.offer_type === 'money' && (
             <FormControl fullWidth sx={{ mt: 2 }}>
-              <InputLabel>Valor em Dinheiro (R$)</InputLabel>
+              <InputLabel shrink>Valor em Dinheiro (R$)</InputLabel>
               <input
-              type="number"
+                type="number"
                 step="0.01"
                 min="0"
                 value={offerData.money_amount}
                 onChange={(e) => setOfferData({ ...offerData, money_amount: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '16.5px 14px',
-                  border: '1px solid #c4c4c4',
-                  borderRadius: '4px',
-                  fontSize: '16px',
-                }}
+                style={{ width: '100%', padding: '16.5px 14px', border: '1px solid #e2e8f0', borderRadius: '10px', fontSize: '16px', marginTop: '8px' }}
                 placeholder="0,00"
               />
             </FormControl>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseOfferDialog}>Cancelar</Button>
-          <Button 
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setShowOfferDialog(false)}>Cancelar</Button>
+          <Button
             onClick={handleSubmitOffer}
             variant="contained"
-            disabled={
-              (offerData.offer_type === 'item' && !offerData.item_offered) ||
-              (offerData.offer_type === 'money' && !offerData.money_amount)
-            }
+            disabled={(offerData.offer_type === 'item' && !offerData.item_offered) || (offerData.offer_type === 'money' && !offerData.money_amount)}
           >
             Enviar Oferta
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Dialog para Alterar Status */}
-      <Dialog open={showStatusDialog} onClose={handleCloseStatusDialog}>
+      {/* Status dialog */}
+      <Dialog open={showStatusDialog} onClose={() => setShowStatusDialog(false)}>
         <DialogTitle>Alterar Status do Item</DialogTitle>
         <DialogContent>
           <FormControl fullWidth sx={{ mt: 2 }}>
             <InputLabel>Status</InputLabel>
-            <Select
-              value={newStatus}
-              label="Status"
-              onChange={(e) => setNewStatus(e.target.value)}
-            >
-              <MenuItem value="disponivel">Disponível</MenuItem>
-              <MenuItem value="indisponível">Indisponível</MenuItem>
+            <Select value={newStatus} label="Status" onChange={(e) => setNewStatus(e.target.value)}>
+              <MenuItem value="disponivel">Dispon\u00EDvel</MenuItem>
+              <MenuItem value="indispon\u00EDvel">Indispon\u00EDvel</MenuItem>
               <MenuItem value="trocado">Trocado</MenuItem>
             </Select>
           </FormControl>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseStatusDialog}>Cancelar</Button>
-          <Button 
-            onClick={handleSubmitStatusChange}
-            variant="contained"
-            disabled={!newStatus}
-          >
-            Alterar Status
-          </Button>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setShowStatusDialog(false)}>Cancelar</Button>
+          <Button onClick={handleSubmitStatusChange} variant="contained" disabled={!newStatus}>Alterar Status</Button>
         </DialogActions>
       </Dialog>
-
     </Container>
   );
 };
