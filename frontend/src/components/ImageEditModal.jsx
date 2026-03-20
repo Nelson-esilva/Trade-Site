@@ -19,7 +19,7 @@ import {
 } from '@mui/icons-material';
 
 const ImageEditModal = ({ open, onClose, item, onSave }) => {
-  const [imageUrl, setImageUrl] = useState(item?.image || '');
+  const [imageUrl, setImageUrl] = useState(item?.image_url || item?.image_url_or_upload || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -37,7 +37,7 @@ const ImageEditModal = ({ open, onClose, item, onSave }) => {
       const img = new Image();
       img.onload = async () => {
         try {
-          await onSave(item.id, { image: imageUrl });
+          await onSave(item.id, { image_url: imageUrl });
           onClose();
         } catch (err) {
           setError('Erro ao salvar a imagem');
@@ -57,7 +57,7 @@ const ImageEditModal = ({ open, onClose, item, onSave }) => {
   };
 
   const handleClose = () => {
-    setImageUrl(item?.image || '');
+    setImageUrl(item?.image_url || item?.image_url_or_upload || '');
     setError('');
     onClose();
   };

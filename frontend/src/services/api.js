@@ -88,7 +88,7 @@ class ApiService {
   async patch(endpoint, data) {
     return this.request(endpoint, {
       method: 'PATCH',
-      body: JSON.stringify(data),
+      body: data instanceof FormData ? data : JSON.stringify(data),
     });
   }
 
@@ -147,7 +147,7 @@ class ApiService {
   }
 
   async updateItem(id, itemData) {
-    return this.put(`/items/${id}/`, itemData);
+    return this.patch(`/items/${id}/`, itemData);
   }
 
   async deleteItem(id) {

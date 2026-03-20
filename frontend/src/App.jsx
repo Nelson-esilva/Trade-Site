@@ -14,12 +14,10 @@ import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import ItemDetails from './pages/items/ItemDetails';
 import CreateItem from './pages/items/CreateItem';
+import EditItem from './pages/items/EditItem';
 import Offers from './pages/offers/Offers';
-// eslint-disable-next-line no-unused-vars
 import Profile from './pages/Profile';
-// eslint-disable-next-line no-unused-vars
 import MyItems from './pages/MyItems';
-// eslint-disable-next-line no-unused-vars
 import MyOffers from './pages/MyOffers';
 
 import './App.css';
@@ -65,6 +63,11 @@ function App() {
                   <Route path="/create-item" element={
                     <ProtectedRoute>
                       <CreateItem />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/edit-item/:id" element={
+                    <ProtectedRoute>
+                      <EditItem />
                     </ProtectedRoute>
                   } />
                   <Route path="/offers" element={

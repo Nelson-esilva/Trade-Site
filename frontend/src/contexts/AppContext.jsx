@@ -118,9 +118,11 @@ const appReducer = (state, action) => {
       return {
         ...state,
         items: state.items.map(item =>
-          item.id === action.payload.id ? action.payload : item
+          item.id === action.payload.id ? { ...item, ...action.payload } : item
         ),
-        currentItem: state.currentItem?.id === action.payload.id ? action.payload : state.currentItem,
+        currentItem: state.currentItem?.id === action.payload.id
+          ? { ...state.currentItem, ...action.payload }
+          : state.currentItem,
       };
     
     case ActionTypes.REMOVE_ITEM:
@@ -452,14 +454,9 @@ export const AppProvider = ({ children }) => {
       dispatch({ type: ActionTypes.SET_LOADING, payload: true });
       const offer = await apiService.acceptOffer(id);
       dispatch({ type: ActionTypes.UPDATE_OFFER, payload: offer });
-      
-      // Atualizar itens relacionados se necessário
-      if (offer.item_desired_data) {
-        dispatch({ type: ActionTypes.UPDATE_ITEM, payload: { id: offer.item_desired_data.id, status: 'indisponível' } });
-      }
-      if (offer.item_offered_data) {
-        dispatch({ type: ActionTypes.UPDATE_ITEM, payload: { id: offer.item_offered_data.id, status: 'indisponível' } });
-      }
+
+      // Recarrega os itens para manter estado consistente após aceite.
+      await loadItems();
       
       addNotification('Oferta aceita com sucesso!', 'success');
       return offer;

@@ -126,7 +126,7 @@ const Offers = () => {
                   {desiredItem?.title || 'Item não encontrado'}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Por: {offer.offerer?.name || 'Usuário'}
+                  Por: {offer.offerer || 'Usuário'}
                 </Typography>
               </Box>
             </Grid>
@@ -141,7 +141,7 @@ const Offers = () => {
                   {offeredItem?.title || 'Item não encontrado'}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Por: {offer.offerer?.name || 'Usuário'}
+                  Por: {offer.offerer || 'Usuário'}
                 </Typography>
               </Box>
             </Grid>

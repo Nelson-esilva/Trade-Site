@@ -228,11 +228,8 @@ const ItemDetails = () => {
               </Typography>
               <Box sx={{ ml: 4 }}>
                 <Typography variant="body1">
-                  {currentItem.owner?.name || 'Usuário não informado'}
+                  {currentItem.owner || 'Usuário não informado'}
             </Typography>
-              <Typography variant="body2" color="text.secondary">
-                  @{currentItem.owner?.username || 'username'}
-                </Typography>
               </Box>
             </Box>
 

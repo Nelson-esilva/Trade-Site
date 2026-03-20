@@ -116,7 +116,7 @@ const MyItems = () => {
 
   const handleSaveImage = async (itemId, imageData) => {
     try {
-      await updateItem(itemId, { image_url: imageData.image_url });
+      await updateItem(itemId, imageData);
       handleCloseImageModal();
     } catch (error) {
       console.error('Erro ao salvar imagem:', error);
