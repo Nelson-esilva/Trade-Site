@@ -1,6 +1,5 @@
 from django.db import models
 from django.conf import settings
-import os
 
 class Item(models.Model):
     STATUS_CHOICES = [
@@ -29,14 +28,12 @@ class Item(models.Model):
 
     @property
     def image_url_or_upload(self):
-        """Retorna a URL da imagem uploadada ou a image_url se não houver upload"""
+        """Retorna URL da imagem uploadada (Cloudinary/local) ou image_url."""
         if self.image:
-            # Retornar URL absoluta da imagem uploadada
-            from django.conf import settings
-            # Usar o domínio do backend (localhost:8000 em desenvolvimento)
-            base_url = 'http://localhost:8000'
-            url = f"{base_url}{self.image.url}"
-            return url
+            image_url = self.image.url
+            if image_url.startswith('http://') or image_url.startswith('https://'):
+                return image_url
+            return f"{settings.SITE_URL}{image_url}"
         return self.image_url
 
     def __str__(self):

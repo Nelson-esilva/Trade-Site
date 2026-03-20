@@ -24,6 +24,8 @@ services:
       - SECRET_KEY=django-insecure-88kl-y8-rj-5281cv29d_wdw-a-h-lrh-wo9_5t3-o-4-k
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/trade_site_db
       - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
+      - SITE_URL=http://localhost:8000
+      - USE_CLOUDINARY=false
     depends_on:
       - db
     command: >
