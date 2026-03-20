@@ -1,11 +1,7 @@
 import { createTheme } from '@mui/material/styles';
 
-const createAppTheme = (mode = 'dark') => {
-  const isDark = mode === 'dark';
-
-  return createTheme({
+const theme = createTheme({
   palette: {
-    mode,
     primary: {
       main: '#2563eb',
       light: '#60a5fa',
@@ -31,14 +27,14 @@ const createAppTheme = (mode = 'dark') => {
       main: '#10b981',
     },
     background: {
-      default: isDark ? '#0b1220' : '#f8fafc',
-      paper: isDark ? '#111827' : '#ffffff',
+      default: '#f8fafc',
+      paper: '#ffffff',
     },
     text: {
-      primary: isDark ? '#e5e7eb' : '#0f172a',
-      secondary: isDark ? '#94a3b8' : '#64748b',
+      primary: '#0f172a',
+      secondary: '#64748b',
     },
-    divider: isDark ? 'rgba(148, 163, 184, 0.2)' : 'rgba(15, 23, 42, 0.08)',
+    divider: 'rgba(15, 23, 42, 0.08)',
   },
   shape: {
     borderRadius: 12,
@@ -114,7 +110,7 @@ const createAppTheme = (mode = 'dark') => {
     MuiCssBaseline: {
       styleOverrides: {
         body: {
-          backgroundColor: isDark ? '#0b1220' : '#f8fafc',
+          backgroundColor: '#f8fafc',
         },
       },
     },
@@ -135,10 +131,9 @@ const createAppTheme = (mode = 'dark') => {
         },
         outlinedPrimary: {
           borderWidth: '1.5px',
-          borderColor: isDark ? 'rgba(148, 163, 184, 0.35)' : 'rgba(37, 99, 235, 0.35)',
           '&:hover': {
             borderWidth: '1.5px',
-            backgroundColor: isDark ? 'rgba(37, 99, 235, 0.14)' : 'rgba(37, 99, 235, 0.04)',
+            backgroundColor: 'rgba(37, 99, 235, 0.04)',
           },
         },
         sizeSmall: {
@@ -158,11 +153,10 @@ const createAppTheme = (mode = 'dark') => {
       styleOverrides: {
         root: {
           borderRadius: 16,
-          border: isDark ? '1px solid rgba(148, 163, 184, 0.2)' : '1px solid rgba(15, 23, 42, 0.08)',
-          backgroundColor: isDark ? '#111827' : '#ffffff',
+          border: '1px solid rgba(15, 23, 42, 0.08)',
           transition: 'box-shadow 0.2s ease, transform 0.2s ease',
           '&:hover': {
-            boxShadow: isDark ? '0 10px 30px rgba(2, 6, 23, 0.45)' : '0 8px 30px rgba(15, 23, 42, 0.08)',
+            boxShadow: '0 8px 30px rgba(15, 23, 42, 0.08)',
           },
         },
       },
@@ -174,27 +168,23 @@ const createAppTheme = (mode = 'dark') => {
       styleOverrides: {
         root: {
           borderRadius: 16,
-          backgroundImage: 'none',
-          backgroundColor: isDark ? '#111827' : '#ffffff',
         },
         outlined: {
-          borderColor: isDark ? 'rgba(148, 163, 184, 0.2)' : 'rgba(15, 23, 42, 0.08)',
+          borderColor: 'rgba(15, 23, 42, 0.08)',
         },
       },
     },
-    MuiOutlinedInput: {
+    MuiTextField: {
       styleOverrides: {
         root: {
-          borderRadius: 10,
-          backgroundColor: isDark ? '#0f172a' : '#ffffff',
-          '& fieldset': {
-            borderColor: isDark ? 'rgba(148, 163, 184, 0.3)' : 'rgba(15, 23, 42, 0.12)',
-          },
-          '&:hover fieldset': {
-            borderColor: isDark ? 'rgba(96, 165, 250, 0.6)' : 'rgba(37, 99, 235, 0.4)',
-          },
-          '&.Mui-focused fieldset': {
-            borderColor: '#60a5fa',
+          '& .MuiOutlinedInput-root': {
+            borderRadius: 10,
+            '& fieldset': {
+              borderColor: 'rgba(15, 23, 42, 0.12)',
+            },
+            '&:hover fieldset': {
+              borderColor: 'rgba(37, 99, 235, 0.4)',
+            },
           },
         },
       },
@@ -256,6 +246,5 @@ const createAppTheme = (mode = 'dark') => {
     },
   },
 });
-};
 
-export default createAppTheme;
+export default theme;
