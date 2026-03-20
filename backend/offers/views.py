@@ -27,7 +27,7 @@ class IsOffererOrOwnerOrTradeAdmin(permissions.BasePermission):
                 obj.item_desired.owner == request.user)
 
 class OfferViewSet(viewsets.ModelViewSet):
-    queryset = Offer.objects.all()
+    queryset = Offer.objects.all().order_by('-created_at')
     serializer_class = OfferSerializer
     permission_classes = [IsOffererOrOwnerOrTradeAdmin]
 
@@ -65,15 +65,15 @@ class OfferViewSet(viewsets.ModelViewSet):
         
         # Superusuários e administradores de troca veem todas as ofertas
         if hasattr(user, 'is_trade_admin') and user.is_trade_admin:
-            return Offer.objects.all()
+            return Offer.objects.all().order_by('-created_at')
         if user.is_superuser:
-            return Offer.objects.all()
+            return Offer.objects.all().order_by('-created_at')
             
         # Usuários comuns veem apenas ofertas que fizeram ou receberam
         if user.is_authenticated:
             return Offer.objects.filter(
                 models.Q(offerer=user) | models.Q(item_desired__owner=user)
-            )
+            ).order_by('-created_at')
         
         return Offer.objects.none()
 
