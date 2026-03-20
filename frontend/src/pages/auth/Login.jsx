@@ -68,7 +68,7 @@ const Login = () => {
           TrocaMat
         </Typography>
         <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.65)', maxWidth: 400, lineHeight: 1.7 }}>
-          Plataforma universit\u00E1ria para troca segura de materiais did\u00E1ticos.
+          Plataforma universitária para troca segura de materiais didáticos.
           Conecte-se com outros estudantes e compartilhe conhecimento.
         </Typography>
       </Box>
@@ -91,17 +91,17 @@ const Login = () => {
             >
               TrocaMat
             </Typography>
-            <Typography variant="h3" gutterBottom>
+            <Typography variant="h3" gutterBottom sx={{ lineHeight: 1.3 }}>
               Entrar na sua conta
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Acesse para trocar materiais did\u00E1ticos
+              Acesse para trocar materiais didáticos
             </Typography>
           </Box>
 
           {fromRegister && (
             <Alert severity="success" sx={{ mb: 3 }}>
-              Cadastro realizado com sucesso! Fa\u00E7a login para continuar.
+              Cadastro realizado com sucesso! Faça login para continuar.
             </Alert>
           )}
 
@@ -121,7 +121,7 @@ const Login = () => {
                 required
                 fullWidth
                 name="username"
-                label="Usu\u00E1rio"
+                label="Usuário"
                 autoComplete="username"
                 autoFocus
                 value={formData.username}
@@ -168,12 +168,12 @@ const Login = () => {
                 sx={{ mt: 3, mb: 1 }}
                 disabled={loading}
               >
-                {loading ? 'Entrando\u2026' : 'Entrar'}
+                {loading ? 'Entrando…' : 'Entrar'}
               </Button>
 
               <Box sx={{ textAlign: 'center', mt: 2 }}>
                 <Typography variant="body2" color="text.secondary">
-                  N\u00E3o tem uma conta?{' '}
+                  Não tem uma conta?{' '}
                   <Link component={RouterLink} to="/register" fontWeight={600}>
                     Cadastre-se
                   </Link>

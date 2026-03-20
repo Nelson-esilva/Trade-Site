@@ -48,15 +48,15 @@ const Register = () => {
 
   const validateForm = () => {
     const errors = {};
-    if (!formData.username.trim()) errors.username = 'Nome de usu\u00E1rio \u00E9 obrigat\u00F3rio';
-    else if (formData.username.trim().length < 3) errors.username = 'M\u00EDnimo 3 caracteres';
-    if (!formData.name.trim()) errors.name = 'Nome completo \u00E9 obrigat\u00F3rio';
-    if (!formData.email.trim()) errors.email = 'Email \u00E9 obrigat\u00F3rio';
-    else if (!/\S+@\S+\.\S+/.test(formData.email)) errors.email = 'Email inv\u00E1lido';
-    if (!formData.password) errors.password = 'Senha \u00E9 obrigat\u00F3ria';
-    else if (formData.password.length < 6) errors.password = 'M\u00EDnimo 6 caracteres';
-    if (formData.password !== formData.confirmPassword) errors.confirmPassword = 'As senhas n\u00E3o coincidem';
-    if (!formData.acceptTerms) errors.acceptTerms = 'Voc\u00EA deve aceitar os termos';
+    if (!formData.username.trim()) errors.username = 'Nome de usuário é obrigatório';
+    else if (formData.username.trim().length < 3) errors.username = 'Mínimo 3 caracteres';
+    if (!formData.name.trim()) errors.name = 'Nome completo é obrigatório';
+    if (!formData.email.trim()) errors.email = 'Email é obrigatório';
+    else if (!/\S+@\S+\.\S+/.test(formData.email)) errors.email = 'Email inválido';
+    if (!formData.password) errors.password = 'Senha é obrigatória';
+    else if (formData.password.length < 6) errors.password = 'Mínimo 6 caracteres';
+    if (formData.password !== formData.confirmPassword) errors.confirmPassword = 'As senhas não coincidem';
+    if (!formData.acceptTerms) errors.acceptTerms = 'Você deve aceitar os termos';
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -97,7 +97,7 @@ const Register = () => {
           TrocaMat
         </Typography>
         <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.65)', maxWidth: 400, lineHeight: 1.7 }}>
-          Junte-se \u00E0 comunidade de troca de materiais did\u00E1ticos.
+          Junte-se à comunidade de troca de materiais didáticos.
           Cadastre-se e comece a compartilhar com outros estudantes.
         </Typography>
       </Box>
@@ -112,11 +112,11 @@ const Register = () => {
             >
               TrocaMat
             </Typography>
-            <Typography variant="h3" gutterBottom>
+            <Typography variant="h3" gutterBottom sx={{ lineHeight: 1.3 }}>
               Criar nova conta
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Preencha os dados para se juntar \u00E0 plataforma
+              Preencha os dados para se juntar à plataforma
             </Typography>
           </Box>
 
@@ -134,7 +134,7 @@ const Register = () => {
                     required
                     fullWidth
                     name="username"
-                    label="Nome de Usu\u00E1rio"
+                    label="Nome de Usuário"
                     autoComplete="username"
                     value={formData.username}
                     onChange={handleChange}
@@ -253,7 +253,7 @@ const Register = () => {
                         Eu aceito os{' '}
                         <Link href="#" underline="hover" fontWeight={600}>Termos de Uso</Link>
                         {' '}e a{' '}
-                        <Link href="#" underline="hover" fontWeight={600}>Pol\u00EDtica de Privacidade</Link>
+                        <Link href="#" underline="hover" fontWeight={600}>Política de Privacidade</Link>
                       </Typography>
                     }
                   />
@@ -273,14 +273,14 @@ const Register = () => {
                 sx={{ mt: 3, mb: 1 }}
                 disabled={loading}
               >
-                {loading ? 'Criando conta\u2026' : 'Criar Conta'}
+                {loading ? 'Criando conta…' : 'Criar Conta'}
               </Button>
 
               <Box sx={{ textAlign: 'center', mt: 2 }}>
                 <Typography variant="body2" color="text.secondary">
-                  J\u00E1 tem uma conta?{' '}
+                  Já tem uma conta?{' '}
                   <Link component={RouterLink} to="/login" fontWeight={600}>
-                    Fa\u00E7a login
+                    Faça login
                   </Link>
                 </Typography>
               </Box>
