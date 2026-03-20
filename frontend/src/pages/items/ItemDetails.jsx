@@ -51,8 +51,13 @@ const ItemDetails = () => {
   const [newStatus, setNewStatus] = useState('');
 
   useEffect(() => {
-    if (id) loadItem(id);
-  }, [id, loadItem]);
+    if (!id) return;
+    // Evita refetch em loop quando o item atual já corresponde à rota.
+    if (currentItem && String(currentItem.id) === String(id)) return;
+    loadItem(id).catch(() => {
+      // O erro já é tratado no contexto via estado global `error`.
+    });
+  }, [id, currentItem, loadItem]);
 
   const handleSubmitOffer = async () => {
     if (offerData.offer_type === 'item' && !offerData.item_offered) return;
