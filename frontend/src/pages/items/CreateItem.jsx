@@ -83,16 +83,26 @@ const CreateItem = () => {
     }
   };
 
+  const labelSx = {
+    fontSize: '0.86rem',
+    fontWeight: 700,
+    mb: 0.8,
+    color: '#0f172a',
+  };
+
+  const fieldSx = {
+    '& .MuiOutlinedInput-root': {
+      backgroundColor: '#ffffff',
+    },
+  };
+
   return (
-    <Container maxWidth="lg" sx={{ py: { xs: 4, md: 6 } }}>
+    <Container maxWidth={false} sx={{ py: { xs: 3, md: 4 }, px: { xs: 2, md: 4 } }}>
       <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/')} sx={{ mb: 3, color: 'text.secondary' }}>
         Voltar
       </Button>
 
-      <Typography variant="overline" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-        Publicar
-      </Typography>
-      <Typography variant="h3" sx={{ mb: 1 }}>
+      <Typography variant="h4" sx={{ mb: 0.5, fontWeight: 700 }}>
         Adicionar Novo Item
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
@@ -101,29 +111,49 @@ const CreateItem = () => {
 
       {error && <Alert severity="error" onClose={clearError} sx={{ mb: 3 }}>{error}</Alert>}
 
-      <Paper variant="outlined" sx={{ p: { xs: 3, md: 5 }, borderColor: 'divider' }}>
+      <Paper
+        variant="outlined"
+        sx={{
+          p: { xs: 2, md: 3 },
+          borderColor: '#d1d5db',
+          bgcolor: '#eceff1',
+          borderRadius: 2,
+        }}
+      >
         <Box component="form" onSubmit={handleSubmit}>
           <Grid container spacing={2.5}>
             <Grid item xs={12}>
+              <Typography sx={labelSx}>Título *</Typography>
               <TextField
-                required fullWidth name="title" label="Título do Item"
+                required
+                fullWidth
+                size="small"
+                name="title"
                 value={formData.title} onChange={handleChange}
                 error={!!formErrors.title} helperText={formErrors.title}
-                placeholder="Ex: Livro de Cálculo I - Stewart"
+                placeholder="Ex: Troca de filtro, Reparo na esteira..."
+                sx={fieldSx}
               />
             </Grid>
             <Grid item xs={12}>
+              <Typography sx={labelSx}>Descrição</Typography>
               <TextField
-                required fullWidth multiline rows={4} name="description" label="Descrição"
+                required
+                fullWidth
+                multiline
+                rows={4}
+                name="description"
                 value={formData.description} onChange={handleChange}
                 error={!!formErrors.description} helperText={formErrors.description}
-                placeholder="Descreva o item, sua condição, como foi usado, etc."
+                placeholder="Descreva o item (opcional)"
+                sx={fieldSx}
               />
             </Grid>
             <Grid item xs={12} md={4}>
-              <FormControl fullWidth sx={{ '& .MuiInputBase-root': { minHeight: 56 } }}>
-                <InputLabel>Categoria</InputLabel>
-                <Select name="category" value={formData.category} label="Categoria" onChange={handleChange}>
+              <Typography sx={labelSx}>Categoria</Typography>
+              <FormControl fullWidth size="small" sx={fieldSx}>
+                <InputLabel>Selecione</InputLabel>
+                <Select name="category" value={formData.category} label="Selecione" onChange={handleChange}>
                   <MenuItem value="livros">Livros</MenuItem>
                   <MenuItem value="apostilas">Apostilas</MenuItem>
                   <MenuItem value="equipamentos">Equipamentos</MenuItem>
@@ -132,18 +162,24 @@ const CreateItem = () => {
               </FormControl>
             </Grid>
             <Grid item xs={12} md={4}>
+              <Typography sx={labelSx}>Cidade/Estado *</Typography>
               <TextField
-                required fullWidth name="location" label="Cidade/Estado"
+                required
+                fullWidth
+                size="small"
+                name="location"
                 value={formData.location} onChange={handleChange}
                 error={!!formErrors.location}
                 helperText={formErrors.location || ' '}
                 placeholder="Ex: São Paulo, SP"
+                sx={fieldSx}
               />
             </Grid>
             <Grid item xs={12} md={4}>
-              <FormControl fullWidth sx={{ '& .MuiInputBase-root': { minHeight: 56 } }}>
-                <InputLabel>Status</InputLabel>
-                <Select name="status" value={formData.status} label="Status" onChange={handleChange}>
+              <Typography sx={labelSx}>Status</Typography>
+              <FormControl fullWidth size="small" sx={fieldSx}>
+                <InputLabel>Selecione</InputLabel>
+                <Select name="status" value={formData.status} label="Selecione" onChange={handleChange}>
                   <MenuItem value="disponivel">Disponível</MenuItem>
                   <MenuItem value="indisponível">Indisponível</MenuItem>
                 </Select>
@@ -152,7 +188,7 @@ const CreateItem = () => {
 
             {/* Image upload */}
             <Grid item xs={12}>
-              <Typography variant="h6" sx={{ mb: 1.5, fontSize: '0.95rem' }}>Imagem do Produto</Typography>
+              <Typography sx={labelSx}>Imagem do Produto</Typography>
               {imagePreview && (
                 <Box sx={{ mb: 2, textAlign: 'center' }}>
                   <img
@@ -172,17 +208,18 @@ const CreateItem = () => {
               <Box sx={{ mb: 2 }}>
                 <input accept="image/*" style={{ display: 'none' }} id="image-upload" type="file" onChange={handleImageChange} />
                 <label htmlFor="image-upload">
-                  <Button variant="outlined" component="span" startIcon={<UploadIcon />} fullWidth sx={{ py: 1.5 }}>
+                  <Button variant="outlined" component="span" startIcon={<UploadIcon />} fullWidth sx={{ py: 1.1, bgcolor: '#fff' }}>
                     {selectedImage ? 'Trocar Imagem' : 'Selecionar Imagem'}
                   </Button>
                 </label>
               </Box>
               <TextField
-                fullWidth name="image_url" label="Ou cole uma URL de imagem"
+                fullWidth size="small" name="image_url" label="URL da imagem"
                 value={formData.image_url} onChange={handleChange}
                 placeholder="https://exemplo.com/imagem.jpg"
                 disabled={!!selectedImage}
                 helperText="Alternativa ao upload de arquivo"
+                sx={fieldSx}
               />
             </Grid>
 
