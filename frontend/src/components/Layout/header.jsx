@@ -130,7 +130,7 @@ const Header = () => {
           >
             <SearchIcon sx={{ color: 'rgba(255,255,255,0.4)', fontSize: 20, mr: 1 }} />
             <InputBase
-              placeholder="Buscar materiais\u2026"
+              placeholder="Buscar materiais…"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyPress={handleSearch}
@@ -227,7 +227,7 @@ const Header = () => {
         >
           <SearchIcon sx={{ color: 'rgba(255,255,255,0.4)', fontSize: 18, mr: 1 }} />
           <InputBase
-            placeholder="Buscar\u2026"
+            placeholder="Buscar…"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onKeyPress={handleSearch}

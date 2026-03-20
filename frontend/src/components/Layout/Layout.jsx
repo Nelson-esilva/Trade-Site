@@ -18,17 +18,17 @@ const Footer = () => (
             TrocaMat
           </Typography>
           <Typography variant="body2" sx={{ maxWidth: 320, lineHeight: 1.7 }}>
-            Plataforma universit\u00E1ria para troca segura de materiais did\u00E1ticos entre estudantes.
+            Plataforma universitária para troca segura de materiais didáticos entre estudantes.
           </Typography>
         </Grid>
 
         <Grid item xs={6} md={3}>
           <Typography variant="overline" sx={{ color: 'rgba(255,255,255,0.4)', display: 'block', mb: 1.5 }}>
-            Navega\u00E7\u00E3o
+            Navegação
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
             {[
-              { label: 'In\u00EDcio', href: '/' },
+              { label: 'Início', href: '/' },
               { label: 'Meus Itens', href: '/my-items' },
               { label: 'Ofertas', href: '/my-offers' },
             ].map((link) => (
@@ -78,7 +78,7 @@ const Footer = () => (
 
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
         <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)' }}>
-          \u00A9 {new Date().getFullYear()} TrocaMat. Todos os direitos reservados.
+          © {new Date().getFullYear()} TrocaMat. Todos os direitos reservados.
         </Typography>
         <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.35)' }}>
           Feito para facilitar trocas entre estudantes

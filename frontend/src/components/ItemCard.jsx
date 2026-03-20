@@ -30,15 +30,15 @@ const categoryLabels = {
 };
 
 const categoryIcons = {
-  livros: '\u{1F4DA}',
-  apostilas: '\u{1F4C4}',
-  equipamentos: '\u{1F527}',
-  tecnologia: '\u{1F4BB}',
+  livros: '📚',
+  apostilas: '📄',
+  equipamentos: '🔧',
+  tecnologia: '💻',
 };
 
 const statusMap = {
-  disponivel: { label: 'Dispon\u00EDvel', color: 'success' },
-  'indispon\u00EDvel': { label: 'Indispon\u00EDvel', color: 'error' },
+  disponivel: { label: 'Disponível', color: 'success' },
+  'indisponível': { label: 'Indisponível', color: 'error' },
   trocado: { label: 'Trocado', color: 'info' },
 };
 
@@ -96,7 +96,7 @@ const ItemCard = ({ item, onViewDetails, onMakeOffer }) => {
           >
             <Box sx={{ textAlign: 'center' }}>
               <Typography sx={{ fontSize: '2.5rem', lineHeight: 1 }}>
-                {categoryIcons[item.category] || '\u{1F4E6}'}
+                {categoryIcons[item.category] || '📦'}
               </Typography>
               <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
                 {categoryLabels[item.category] || item.category}
@@ -172,7 +172,7 @@ const ItemCard = ({ item, onViewDetails, onMakeOffer }) => {
         <Box sx={{ display: 'flex', alignItems: 'center', mt: 'auto' }}>
           <LocationIcon sx={{ fontSize: 14, color: 'text.secondary', mr: 0.5 }} />
           <Typography variant="caption" color="text.secondary" noWrap>
-            {item.location || 'Local n\u00E3o informado'}
+            {item.location || 'Local não informado'}
           </Typography>
         </Box>
       </CardContent>

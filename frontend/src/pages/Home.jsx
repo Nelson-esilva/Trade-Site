@@ -70,11 +70,11 @@ const Home = () => {
       return 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=300&fit=crop';
     }
     const lower = title.toLowerCase();
-    if (lower.includes('livro') || lower.includes('c\u00E1lculo'))
+    if (lower.includes('livro') || lower.includes('cálculo'))
       return 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=300&fit=crop';
-    if (lower.includes('apostila') || lower.includes('programa\u00E7\u00E3o'))
+    if (lower.includes('apostila') || lower.includes('programação'))
       return 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=300&fit=crop';
-    if (lower.includes('microsc\u00F3pio') || lower.includes('equipamento'))
+    if (lower.includes('microscópio') || lower.includes('equipamento'))
       return 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=400&h=300&fit=crop';
     const defaults = [
       'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop',
@@ -101,7 +101,7 @@ const Home = () => {
               variant="overline"
               sx={{ color: 'rgba(255,255,255,0.5)', mb: 1.5, display: 'block' }}
             >
-              Plataforma universit\u00E1ria de trocas
+              Plataforma universitária de trocas
             </Typography>
             <Typography variant="h1" sx={{ mb: 2, color: '#fff' }}>
               Troque materiais com mais agilidade
@@ -110,8 +110,8 @@ const Home = () => {
               variant="body1"
               sx={{ color: 'rgba(255,255,255,0.7)', mb: 4, maxWidth: 480, lineHeight: 1.7 }}
             >
-              Publique itens, receba propostas e gerencie ofertas em um \u00FAnico fluxo.
-              Cat\u00E1logo com foco em confian\u00E7a, clareza e velocidade.
+              Publique itens, receba propostas e gerencie ofertas em um único fluxo.
+              Catálogo com foco em confiança, clareza e velocidade.
             </Typography>
           </Box>
 
@@ -128,7 +128,7 @@ const Home = () => {
           >
             <TextField
               fullWidth
-              placeholder="O que voc\u00EA est\u00E1 procurando?"
+              placeholder="O que você está procurando?"
               size="small"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -171,7 +171,7 @@ const Home = () => {
             Categorias
           </Typography>
           <Typography variant="h3" sx={{ mb: 3 }}>
-            Materiais por \u00C1rea
+            Materiais por Área
           </Typography>
           <Grid container spacing={2}>
             {categories.map((cat) => {
@@ -222,10 +222,10 @@ const Home = () => {
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
             <Box>
               <Typography variant="overline" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-                Cat\u00E1logo
+                Catálogo
               </Typography>
               <Typography variant="h3">
-                {searchTerm ? `Resultados para \u201C${searchTerm}\u201D` : 'Itens Dispon\u00EDveis'}
+                {searchTerm ? `Resultados para “${searchTerm}”` : 'Itens Disponíveis'}
               </Typography>
             </Box>
             <Button
@@ -273,7 +273,7 @@ const Home = () => {
                     item={{
                       ...item,
                       category: item.category || 'livros',
-                      location: item.location || 'Local n\u00E3o informado',
+                      location: item.location || 'Local não informado',
                       image: item.image_url_or_upload || item.image_url || getExampleImage(item.title, index),
                       condition: item.condition || 'Bom estado',
                       status: item.status || 'disponivel',

@@ -76,10 +76,10 @@ const Offers = () => {
                   Item Desejado
                 </Typography>
                 <Typography variant="body2" fontWeight={500}>
-                  {desiredItem?.title || 'Item n\u00E3o encontrado'}
+                  {desiredItem?.title || 'Item não encontrado'}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  Por: {offer.offerer || 'Usu\u00E1rio'}
+                  Por: {offer.offerer || 'Usuário'}
                 </Typography>
               </Box>
             </Grid>
@@ -89,10 +89,10 @@ const Offers = () => {
                   Item Oferecido
                 </Typography>
                 <Typography variant="body2" fontWeight={500}>
-                  {offeredItem?.title || 'Item n\u00E3o encontrado'}
+                  {offeredItem?.title || 'Item não encontrado'}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  Por: {offer.offerer || 'Usu\u00E1rio'}
+                  Por: {offer.offerer || 'Usuário'}
                 </Typography>
               </Box>
             </Grid>
@@ -170,13 +170,13 @@ const Offers = () => {
       ) : (
         <Box>
           {tabValue === 0 && (pendingOffers.length === 0
-            ? renderEmptyState(<SwapIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />, 'Nenhuma oferta pendente', 'Quando algu\u00E9m fizer uma oferta por seus itens, ela aparecer\u00E1 aqui')
+            ? renderEmptyState(<SwapIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />, 'Nenhuma oferta pendente', 'Quando alguém fizer uma oferta por seus itens, ela aparecerá aqui')
             : pendingOffers.map(renderOfferCard))}
           {tabValue === 1 && (acceptedOffers.length === 0
-            ? renderEmptyState(<CheckIcon sx={{ fontSize: 48, color: 'success.main', mb: 2 }} />, 'Nenhuma oferta aceita', 'Ofertas aceitas aparecer\u00E3o aqui')
+            ? renderEmptyState(<CheckIcon sx={{ fontSize: 48, color: 'success.main', mb: 2 }} />, 'Nenhuma oferta aceita', 'Ofertas aceitas aparecerão aqui')
             : acceptedOffers.map(renderOfferCard))}
           {tabValue === 2 && (refusedOffers.length === 0
-            ? renderEmptyState(<CancelIcon sx={{ fontSize: 48, color: 'error.main', mb: 2 }} />, 'Nenhuma oferta recusada', 'Ofertas recusadas aparecer\u00E3o aqui')
+            ? renderEmptyState(<CancelIcon sx={{ fontSize: 48, color: 'error.main', mb: 2 }} />, 'Nenhuma oferta recusada', 'Ofertas recusadas aparecerão aqui')
             : refusedOffers.map(renderOfferCard))}
         </Box>
       )}

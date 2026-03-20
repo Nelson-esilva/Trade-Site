@@ -52,8 +52,8 @@ const categoryLabels = {
 };
 
 const statusMap = {
-  disponivel: { label: 'Dispon\u00EDvel', color: 'success' },
-  'indispon\u00EDvel': { label: 'Indispon\u00EDvel', color: 'error' },
+  disponivel: { label: 'Disponível', color: 'success' },
+  'indisponível': { label: 'Indisponível', color: 'error' },
   trocado: { label: 'Trocado', color: 'info' },
 };
 
@@ -101,7 +101,7 @@ const MyItems = () => {
   if (!isAuthenticated) {
     return (
       <Container maxWidth="lg" sx={{ py: 6 }}>
-        <Alert severity="warning">Voc\u00EA precisa estar logado para acessar seus itens.</Alert>
+        <Alert severity="warning">Você precisa estar logado para acessar seus itens.</Alert>
       </Container>
     );
   }
@@ -148,7 +148,7 @@ const MyItems = () => {
             Nenhum item publicado
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Comece adicionando seu primeiro item para trocar com outros usu\u00E1rios!
+            Comece adicionando seu primeiro item para trocar com outros usuários!
           </Typography>
           <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate('/create-item')}>
             Adicionar Primeiro Item
@@ -262,11 +262,11 @@ const MyItems = () => {
 
       {/* Delete confirm */}
       <Dialog open={deleteDialog.open} onClose={() => setDeleteDialog({ open: false, item: null })}>
-        <DialogTitle>Confirmar Exclus\u00E3o</DialogTitle>
+        <DialogTitle>Confirmar Exclusão</DialogTitle>
         <DialogContent>
           <Typography>
             Tem certeza que deseja excluir o item &ldquo;{deleteDialog.item?.title}&rdquo;?
-            Esta a\u00E7\u00E3o n\u00E3o pode ser desfeita.
+            Esta ação não pode ser desfeita.
           </Typography>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
@@ -278,7 +278,7 @@ const MyItems = () => {
             disabled={loading}
             startIcon={loading ? <CircularProgress size={16} /> : <DeleteIcon />}
           >
-            {loading ? 'Excluindo\u2026' : 'Excluir'}
+            {loading ? 'Excluindo…' : 'Excluir'}
           </Button>
         </DialogActions>
       </Dialog>

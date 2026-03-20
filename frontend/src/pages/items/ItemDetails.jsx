@@ -112,7 +112,7 @@ const ItemDetails = () => {
   if (!currentItem) {
     return (
       <Container maxWidth="lg" sx={{ py: 6 }}>
-        <Alert severity="warning">Item n\u00E3o encontrado</Alert>
+        <Alert severity="warning">Item não encontrado</Alert>
       </Container>
     );
   }
@@ -149,7 +149,7 @@ const ItemDetails = () => {
                 {currentItem.title}
               </Typography>
               <Chip
-                label={currentItem.status === 'disponivel' ? 'Dispon\u00EDvel' : 'Indispon\u00EDvel'}
+                label={currentItem.status === 'disponivel' ? 'Disponível' : 'Indisponível'}
                 color={currentItem.status === 'disponivel' ? 'success' : 'default'}
                 variant="outlined"
                 size="small"
@@ -166,8 +166,8 @@ const ItemDetails = () => {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                 <PersonIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
                 <Box>
-                  <Typography variant="caption" color="text.secondary">Propriet\u00E1rio</Typography>
-                  <Typography variant="body2" fontWeight={500}>{currentItem.owner || 'N\u00E3o informado'}</Typography>
+                  <Typography variant="caption" color="text.secondary">Proprietário</Typography>
+                  <Typography variant="body2" fontWeight={500}>{currentItem.owner || 'Não informado'}</Typography>
                 </Box>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -212,7 +212,7 @@ const ItemDetails = () => {
         <DialogTitle>Fazer Oferta</DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Fa\u00E7a uma oferta por &ldquo;{currentItem.title}&rdquo;
+            Faça uma oferta por &ldquo;{currentItem.title}&rdquo;
           </Typography>
           <FormControl fullWidth sx={{ mt: 1 }}>
             <InputLabel>Tipo de Oferta</InputLabel>
@@ -271,8 +271,8 @@ const ItemDetails = () => {
           <FormControl fullWidth sx={{ mt: 2 }}>
             <InputLabel>Status</InputLabel>
             <Select value={newStatus} label="Status" onChange={(e) => setNewStatus(e.target.value)}>
-              <MenuItem value="disponivel">Dispon\u00EDvel</MenuItem>
-              <MenuItem value="indispon\u00EDvel">Indispon\u00EDvel</MenuItem>
+              <MenuItem value="disponivel">Disponível</MenuItem>
+              <MenuItem value="indisponível">Indisponível</MenuItem>
               <MenuItem value="trocado">Trocado</MenuItem>
             </Select>
           </FormControl>

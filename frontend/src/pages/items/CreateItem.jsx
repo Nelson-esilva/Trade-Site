@@ -58,10 +58,10 @@ const CreateItem = () => {
 
   const validateForm = () => {
     const errors = {};
-    if (!formData.title.trim()) errors.title = 'T\u00EDtulo \u00E9 obrigat\u00F3rio';
-    else if (formData.title.trim().length < 3) errors.title = 'M\u00EDnimo 3 caracteres';
-    if (!formData.description.trim()) errors.description = 'Descri\u00E7\u00E3o \u00E9 obrigat\u00F3ria';
-    else if (formData.description.trim().length < 10) errors.description = 'M\u00EDnimo 10 caracteres';
+    if (!formData.title.trim()) errors.title = 'Título é obrigatório';
+    else if (formData.title.trim().length < 3) errors.title = 'Mínimo 3 caracteres';
+    if (!formData.description.trim()) errors.description = 'Descrição é obrigatória';
+    else if (formData.description.trim().length < 10) errors.description = 'Mínimo 10 caracteres';
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -95,7 +95,7 @@ const CreateItem = () => {
         Adicionar Novo Item
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
-        Compartilhe seus materiais did\u00E1ticos com outros estudantes
+        Compartilhe seus materiais didáticos com outros estudantes
       </Typography>
 
       {error && <Alert severity="error" onClose={clearError} sx={{ mb: 3 }}>{error}</Alert>}
@@ -105,18 +105,18 @@ const CreateItem = () => {
           <Grid container spacing={3}>
             <Grid item xs={12}>
               <TextField
-                required fullWidth name="title" label="T\u00EDtulo do Item"
+                required fullWidth name="title" label="Título do Item"
                 value={formData.title} onChange={handleChange}
                 error={!!formErrors.title} helperText={formErrors.title}
-                placeholder="Ex: Livro de C\u00E1lculo I - Stewart"
+                placeholder="Ex: Livro de Cálculo I - Stewart"
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
-                required fullWidth multiline rows={4} name="description" label="Descri\u00E7\u00E3o"
+                required fullWidth multiline rows={4} name="description" label="Descrição"
                 value={formData.description} onChange={handleChange}
                 error={!!formErrors.description} helperText={formErrors.description}
-                placeholder="Descreva o item, sua condi\u00E7\u00E3o, como foi usado, etc."
+                placeholder="Descreva o item, sua condição, como foi usado, etc."
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -134,7 +134,7 @@ const CreateItem = () => {
               <TextField
                 required fullWidth name="location" label="Cidade/Estado"
                 value={formData.location} onChange={handleChange}
-                placeholder="Ex: S\u00E3o Paulo, SP"
+                placeholder="Ex: São Paulo, SP"
               />
             </Grid>
 
@@ -178,8 +178,8 @@ const CreateItem = () => {
               <FormControl fullWidth>
                 <InputLabel>Status</InputLabel>
                 <Select name="status" value={formData.status} label="Status" onChange={handleChange}>
-                  <MenuItem value="disponivel">Dispon\u00EDvel</MenuItem>
-                  <MenuItem value="indispon\u00EDvel">Indispon\u00EDvel</MenuItem>
+                  <MenuItem value="disponivel">Disponível</MenuItem>
+                  <MenuItem value="indisponível">Indisponível</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -187,13 +187,13 @@ const CreateItem = () => {
             <Grid item xs={12}>
               <Box sx={{ bgcolor: '#f8fafc', p: 2.5, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
                 <Typography variant="body2" fontWeight={600} sx={{ mb: 0.5 }}>
-                  Dicas para uma boa descri\u00E7\u00E3o
+                  Dicas para uma boa descrição
                 </Typography>
                 <Typography variant="caption" color="text.secondary" component="div" sx={{ lineHeight: 1.8 }}>
-                  &bull; Mencione a condi\u00E7\u00E3o do item (novo, usado, etc.)<br/>
-                  &bull; Inclua informa\u00E7\u00F5es sobre o uso (semestre, ano)<br/>
-                  &bull; Descreva se h\u00E1 anota\u00E7\u00F5es ou marca\u00E7\u00F5es<br/>
-                  &bull; Mencione se h\u00E1 acess\u00F3rios inclu\u00EDdos
+                  &bull; Mencione a condição do item (novo, usado, etc.)<br/>
+                  &bull; Inclua informações sobre o uso (semestre, ano)<br/>
+                  &bull; Descreva se há anotações ou marcações<br/>
+                  &bull; Mencione se há acessórios incluídos
                 </Typography>
               </Box>
             </Grid>
@@ -208,7 +208,7 @@ const CreateItem = () => {
               startIcon={loading ? <CircularProgress size={18} /> : <SaveIcon />}
               disabled={loading}
             >
-              {loading ? 'Salvando\u2026' : 'Salvar Item'}
+              {loading ? 'Salvando…' : 'Salvar Item'}
             </Button>
           </Box>
         </Box>

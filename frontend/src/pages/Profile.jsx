@@ -81,7 +81,7 @@ const Profile = () => {
   if (!isAuthenticated) {
     return (
       <Container maxWidth="lg" sx={{ py: 6 }}>
-        <Alert severity="warning">Voc\u00EA precisa estar logado para acessar seu perfil.</Alert>
+        <Alert severity="warning">Você precisa estar logado para acessar seu perfil.</Alert>
       </Container>
     );
   }
@@ -118,7 +118,7 @@ const Profile = () => {
               {user?.name?.charAt(0) || user?.username?.charAt(0) || 'U'}
             </Avatar>
             <Typography variant="h5" sx={{ mb: 0.5 }}>
-              {user?.name || user?.username || 'Usu\u00E1rio'}
+              {user?.name || user?.username || 'Usuário'}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
               @{user?.username}
@@ -139,7 +139,7 @@ const Profile = () => {
         <Grid item xs={12} md={8}>
           <Paper variant="outlined" sx={{ p: 4, borderColor: 'divider' }}>
             <Typography variant="h5" sx={{ mb: 2 }}>
-              Informa\u00E7\u00F5es Pessoais
+              Informações Pessoais
             </Typography>
             <Divider sx={{ mb: 3 }} />
 
@@ -148,8 +148,8 @@ const Profile = () => {
                 <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
                   <PersonIcon sx={{ color: 'text.secondary', mt: 0.25 }} />
                   <Box>
-                    <Typography variant="caption" color="text.secondary">Nome de usu\u00E1rio</Typography>
-                    <Typography variant="body1">{user?.username || 'N\u00E3o informado'}</Typography>
+                    <Typography variant="caption" color="text.secondary">Nome de usuário</Typography>
+                    <Typography variant="body1">{user?.username || 'Não informado'}</Typography>
                   </Box>
                 </Box>
               </Grid>
@@ -158,7 +158,7 @@ const Profile = () => {
                   <EmailIcon sx={{ color: 'text.secondary', mt: 0.25 }} />
                   <Box>
                     <Typography variant="caption" color="text.secondary">Email</Typography>
-                    <Typography variant="body1">{user?.email || 'N\u00E3o informado'}</Typography>
+                    <Typography variant="body1">{user?.email || 'Não informado'}</Typography>
                   </Box>
                 </Box>
               </Grid>
@@ -245,7 +245,7 @@ const Profile = () => {
             startIcon={loading ? <CircularProgress size={16} /> : <SaveIcon />}
             disabled={loading}
           >
-            {loading ? 'Salvando\u2026' : 'Salvar'}
+            {loading ? 'Salvando…' : 'Salvar'}
           </Button>
         </DialogActions>
       </Dialog>

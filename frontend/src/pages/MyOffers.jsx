@@ -93,7 +93,7 @@ const MyOffers = () => {
   if (!isAuthenticated) {
     return (
       <Container maxWidth="lg" sx={{ py: 6 }}>
-        <Alert severity="warning">Voc\u00EA precisa estar logado para acessar suas ofertas.</Alert>
+        <Alert severity="warning">Você precisa estar logado para acessar suas ofertas.</Alert>
       </Container>
     );
   }
@@ -211,7 +211,7 @@ const MyOffers = () => {
   return (
     <Container maxWidth="lg" sx={{ py: { xs: 4, md: 6 } }}>
       <Typography variant="overline" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-        Negocia\u00E7\u00F5es
+        Negociações
       </Typography>
       <Typography variant="h3" sx={{ mb: 4 }}>
         Minhas Ofertas
@@ -223,20 +223,20 @@ const MyOffers = () => {
         <Tabs value={tabValue} onChange={(_, v) => setTabValue(v)} sx={{ minHeight: 48 }}>
           <Tab label={`Recebidas (${receivedOffers.length})`} icon={<SwapIcon />} iconPosition="start" />
           <Tab label={`Enviadas (${sentOffers.length})`} icon={<SwapIcon />} iconPosition="start" />
-          <Tab label={`Hist\u00F3rico (${historicalOffers.length})`} icon={<AcceptIcon />} iconPosition="start" />
+          <Tab label={`Histórico (${historicalOffers.length})`} icon={<AcceptIcon />} iconPosition="start" />
         </Tabs>
       </Paper>
 
       {tabValue === 0 && (receivedOffers.length === 0
-        ? renderEmptyState(<SwapIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />, 'Nenhuma oferta recebida', 'Quando algu\u00E9m fizer uma oferta para seus itens, ela aparecer\u00E1 aqui.')
+        ? renderEmptyState(<SwapIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />, 'Nenhuma oferta recebida', 'Quando alguém fizer uma oferta para seus itens, ela aparecerá aqui.')
         : <Grid container spacing={2}>{receivedOffers.map(o => renderOfferCard(o, 'received'))}</Grid>)}
 
       {tabValue === 1 && (sentOffers.length === 0
-        ? renderEmptyState(<SwapIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />, 'Nenhuma oferta enviada', 'Quando voc\u00EA fizer uma oferta, ela aparecer\u00E1 aqui.')
+        ? renderEmptyState(<SwapIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />, 'Nenhuma oferta enviada', 'Quando você fizer uma oferta, ela aparecerá aqui.')
         : <Grid container spacing={2}>{sentOffers.map(o => renderOfferCard(o, 'sent'))}</Grid>)}
 
       {tabValue === 2 && (historicalOffers.length === 0
-        ? renderEmptyState(<AcceptIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />, 'Nenhuma oferta no hist\u00F3rico', 'Ofertas aceitas, recusadas ou trocadas aparecer\u00E3o aqui.')
+        ? renderEmptyState(<AcceptIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />, 'Nenhuma oferta no histórico', 'Ofertas aceitas, recusadas ou trocadas aparecerão aqui.')
         : <Grid container spacing={2}>{historicalOffers.map(o => renderOfferCard(o, 'history'))}</Grid>)}
 
       {/* Confirm dialog */}
@@ -256,7 +256,7 @@ const MyOffers = () => {
             disabled={loading}
             startIcon={loading ? <CircularProgress size={16} /> : (confirmDialog.type === 'accept' ? <AcceptIcon /> : <RejectIcon />)}
           >
-            {loading ? 'Processando\u2026' : (confirmDialog.type === 'accept' ? 'Aceitar' : 'Recusar')}
+            {loading ? 'Processando…' : (confirmDialog.type === 'accept' ? 'Aceitar' : 'Recusar')}
           </Button>
         </DialogActions>
       </Dialog>

@@ -61,9 +61,9 @@ const EditItem = () => {
 
   const validateForm = () => {
     const errors = {};
-    if (!formData.title.trim()) errors.title = 'T\u00EDtulo \u00E9 obrigat\u00F3rio';
-    if (!formData.description.trim()) errors.description = 'Descri\u00E7\u00E3o \u00E9 obrigat\u00F3ria';
-    if (!formData.location.trim()) errors.location = 'Localiza\u00E7\u00E3o \u00E9 obrigat\u00F3ria';
+    if (!formData.title.trim()) errors.title = 'Título é obrigatório';
+    if (!formData.description.trim()) errors.description = 'Descrição é obrigatória';
+    if (!formData.location.trim()) errors.location = 'Localização é obrigatória';
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -86,7 +86,7 @@ const EditItem = () => {
       </Button>
 
       <Typography variant="overline" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-        Edi\u00E7\u00E3o
+        Edição
       </Typography>
       <Typography variant="h3" sx={{ mb: 4 }}>
         Editar Item
@@ -99,14 +99,14 @@ const EditItem = () => {
           <Grid container spacing={3}>
             <Grid item xs={12}>
               <TextField
-                required fullWidth name="title" label="T\u00EDtulo do Item"
+                required fullWidth name="title" label="Título do Item"
                 value={formData.title} onChange={handleChange}
                 error={!!formErrors.title} helperText={formErrors.title}
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
-                required fullWidth multiline rows={4} name="description" label="Descri\u00E7\u00E3o"
+                required fullWidth multiline rows={4} name="description" label="Descrição"
                 value={formData.description} onChange={handleChange}
                 error={!!formErrors.description} helperText={formErrors.description}
               />
@@ -140,8 +140,8 @@ const EditItem = () => {
               <FormControl fullWidth>
                 <InputLabel>Status</InputLabel>
                 <Select name="status" value={formData.status} label="Status" onChange={handleChange}>
-                  <MenuItem value="disponivel">Dispon\u00EDvel</MenuItem>
-                  <MenuItem value="indispon\u00EDvel">Indispon\u00EDvel</MenuItem>
+                  <MenuItem value="disponivel">Disponível</MenuItem>
+                  <MenuItem value="indisponível">Indisponível</MenuItem>
                   <MenuItem value="trocado">Trocado</MenuItem>
                 </Select>
               </FormControl>
@@ -157,7 +157,7 @@ const EditItem = () => {
               startIcon={loading ? <CircularProgress size={18} /> : <SaveIcon />}
               disabled={loading}
             >
-              {loading ? 'Salvando\u2026' : 'Salvar Altera\u00E7\u00F5es'}
+              {loading ? 'Salvando…' : 'Salvar Alterações'}
             </Button>
           </Box>
         </Box>
