@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   Container,
-  Paper,
   TextField,
   Button,
   Typography,
@@ -13,6 +12,7 @@ import {
   MenuItem,
   Alert,
   CircularProgress,
+  Divider,
 } from '@mui/material';
 import {
   Save as SaveIcon,
@@ -83,175 +83,215 @@ const CreateItem = () => {
     }
   };
 
-  const labelSx = {
-    fontSize: '0.86rem',
-    fontWeight: 700,
-    mb: 0.8,
-    color: '#0f172a',
-  };
-
-  const fieldSx = {
-    '& .MuiOutlinedInput-root': {
-      backgroundColor: '#ffffff',
-    },
-  };
-
   return (
-    <Container maxWidth={false} sx={{ py: { xs: 3, md: 4 }, px: { xs: 2, md: 4 } }}>
-      <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/')} sx={{ mb: 3, color: 'text.secondary' }}>
+    <Container maxWidth="md" sx={{ py: { xs: 4, md: 6 } }}>
+      <Button
+        startIcon={<ArrowBackIcon />}
+        onClick={() => navigate('/')}
+        sx={{ mb: 4, color: 'text.secondary' }}
+      >
         Voltar
       </Button>
 
-      <Typography variant="h4" sx={{ mb: 0.5, fontWeight: 700 }}>
-        Adicionar Novo Item
+      <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5 }}>
+        Novo Item
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
-        Compartilhe seus materiais didáticos com outros estudantes
+      <Typography variant="body1" color="text.secondary" sx={{ mb: 5 }}>
+        Preencha as informações do material que deseja disponibilizar para troca.
       </Typography>
 
-      {error && <Alert severity="error" onClose={clearError} sx={{ mb: 3 }}>{error}</Alert>}
+      {error && (
+        <Alert severity="error" onClose={clearError} sx={{ mb: 4 }}>
+          {error}
+        </Alert>
+      )}
 
-      <Paper
-        variant="outlined"
-        sx={{
-          p: { xs: 2, md: 3 },
-          borderColor: '#d1d5db',
-          bgcolor: '#eceff1',
-          borderRadius: 2,
-        }}
-      >
-        <Box component="form" onSubmit={handleSubmit}>
-          <Grid container spacing={2.5}>
-            <Grid item xs={12}>
-              <Typography sx={labelSx}>Título *</Typography>
-              <TextField
-                required
-                fullWidth
-                size="small"
-                name="title"
-                value={formData.title} onChange={handleChange}
-                error={!!formErrors.title} helperText={formErrors.title}
-                placeholder="Ex: Troca de filtro, Reparo na esteira..."
-                sx={fieldSx}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Typography sx={labelSx}>Descrição</Typography>
-              <TextField
-                required
-                fullWidth
-                multiline
-                rows={4}
-                name="description"
-                value={formData.description} onChange={handleChange}
-                error={!!formErrors.description} helperText={formErrors.description}
-                placeholder="Descreva o item (opcional)"
-                sx={fieldSx}
-              />
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <Typography sx={labelSx}>Categoria</Typography>
-              <FormControl fullWidth size="small" sx={fieldSx}>
-                <InputLabel>Selecione</InputLabel>
-                <Select name="category" value={formData.category} label="Selecione" onChange={handleChange}>
-                  <MenuItem value="livros">Livros</MenuItem>
-                  <MenuItem value="apostilas">Apostilas</MenuItem>
-                  <MenuItem value="equipamentos">Equipamentos</MenuItem>
-                  <MenuItem value="tecnologia">Tecnologia</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <Typography sx={labelSx}>Cidade/Estado *</Typography>
-              <TextField
-                required
-                fullWidth
-                size="small"
-                name="location"
-                value={formData.location} onChange={handleChange}
-                error={!!formErrors.location}
-                helperText={formErrors.location || ' '}
-                placeholder="Ex: São Paulo, SP"
-                sx={fieldSx}
-              />
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <Typography sx={labelSx}>Status</Typography>
-              <FormControl fullWidth size="small" sx={fieldSx}>
-                <InputLabel>Selecione</InputLabel>
-                <Select name="status" value={formData.status} label="Selecione" onChange={handleChange}>
-                  <MenuItem value="disponivel">Disponível</MenuItem>
-                  <MenuItem value="indisponível">Indisponível</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
+      <Box component="form" onSubmit={handleSubmit}>
+        {/* Informações básicas */}
+        <Typography variant="subtitle2" sx={{ mb: 2, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.75rem' }}>
+          Informações básicas
+        </Typography>
 
-            {/* Image upload */}
-            <Grid item xs={12}>
-              <Typography sx={labelSx}>Imagem do Produto</Typography>
-              {imagePreview && (
-                <Box sx={{ mb: 2, textAlign: 'center' }}>
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    style={{ maxWidth: '100%', maxHeight: 200, borderRadius: 12, objectFit: 'cover' }}
-                  />
-                  <Button
-                    startIcon={<DeleteIcon />}
-                    onClick={() => { setSelectedImage(null); setImagePreview(null); }}
-                    color="error" size="small" sx={{ mt: 1 }}
-                  >
-                    Remover
-                  </Button>
-                </Box>
-              )}
-              <Box sx={{ mb: 2 }}>
-                <input accept="image/*" style={{ display: 'none' }} id="image-upload" type="file" onChange={handleImageChange} />
-                <label htmlFor="image-upload">
-                  <Button variant="outlined" component="span" startIcon={<UploadIcon />} fullWidth sx={{ py: 1.1, bgcolor: '#fff' }}>
-                    {selectedImage ? 'Trocar Imagem' : 'Selecionar Imagem'}
-                  </Button>
-                </label>
-              </Box>
-              <TextField
-                fullWidth size="small" name="image_url" label="URL da imagem"
-                value={formData.image_url} onChange={handleChange}
-                placeholder="https://exemplo.com/imagem.jpg"
-                disabled={!!selectedImage}
-                helperText="Alternativa ao upload de arquivo"
-                sx={fieldSx}
-              />
-            </Grid>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mb: 5 }}>
+          <TextField
+            required
+            fullWidth
+            name="title"
+            label="Título do Item"
+            value={formData.title}
+            onChange={handleChange}
+            error={!!formErrors.title}
+            helperText={formErrors.title}
+            placeholder="Ex: Livro de Cálculo I - Stewart, 8ª edição"
+          />
 
-            <Grid item xs={12}>
-              <Box sx={{ bgcolor: '#f8fafc', p: 2.5, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
-                <Typography variant="body2" fontWeight={600} sx={{ mb: 0.5 }}>
-                  Dicas para uma boa descrição
-                </Typography>
-                <Typography variant="caption" color="text.secondary" component="div" sx={{ lineHeight: 1.8 }}>
-                  &bull; Mencione a condição do item (novo, usado, etc.)<br/>
-                  &bull; Inclua informações sobre o uso (semestre, ano)<br/>
-                  &bull; Descreva se há anotações ou marcações<br/>
-                  &bull; Mencione se há acessórios incluídos
-                </Typography>
-              </Box>
-            </Grid>
+          <TextField
+            required
+            fullWidth
+            multiline
+            rows={4}
+            name="description"
+            label="Descrição"
+            value={formData.description}
+            onChange={handleChange}
+            error={!!formErrors.description}
+            helperText={formErrors.description || 'Descreva a condição, uso e detalhes relevantes do item.'}
+            placeholder="Ex: Livro em bom estado, sem anotações, capa íntegra..."
+          />
+        </Box>
+
+        <Divider sx={{ mb: 4 }} />
+
+        {/* Classificação */}
+        <Typography variant="subtitle2" sx={{ mb: 2, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.75rem' }}>
+          Classificação e localização
+        </Typography>
+
+        <Grid container spacing={3} sx={{ mb: 5 }}>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <InputLabel>Categoria</InputLabel>
+              <Select name="category" value={formData.category} label="Categoria" onChange={handleChange}>
+                <MenuItem value="livros">Livros</MenuItem>
+                <MenuItem value="apostilas">Apostilas</MenuItem>
+                <MenuItem value="equipamentos">Equipamentos</MenuItem>
+                <MenuItem value="tecnologia">Tecnologia</MenuItem>
+              </Select>
+            </FormControl>
           </Grid>
 
-          <Box sx={{ mt: 4, display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
-            <Button variant="outlined" onClick={() => navigate('/')} disabled={loading}>
-              Cancelar
-            </Button>
-            <Button
-              type="submit" variant="contained"
-              startIcon={loading ? <CircularProgress size={18} /> : <SaveIcon />}
-              disabled={loading}
-            >
-              {loading ? 'Salvando…' : 'Salvar Item'}
-            </Button>
-          </Box>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              required
+              fullWidth
+              name="location"
+              label="Cidade / Estado"
+              value={formData.location}
+              onChange={handleChange}
+              error={!!formErrors.location}
+              helperText={formErrors.location}
+              placeholder="São Paulo, SP"
+            />
+          </Grid>
+
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <InputLabel>Status</InputLabel>
+              <Select name="status" value={formData.status} label="Status" onChange={handleChange}>
+                <MenuItem value="disponivel">Disponível</MenuItem>
+                <MenuItem value="indisponível">Indisponível</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+        </Grid>
+
+        <Divider sx={{ mb: 4 }} />
+
+        {/* Imagem */}
+        <Typography variant="subtitle2" sx={{ mb: 2, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.75rem' }}>
+          Imagem do produto
+        </Typography>
+
+        <Box sx={{ mb: 5 }}>
+          {imagePreview && (
+            <Box sx={{ mb: 3, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <Box
+                component="img"
+                src={imagePreview}
+                alt="Preview"
+                sx={{
+                  maxWidth: '100%',
+                  maxHeight: 240,
+                  borderRadius: 2,
+                  objectFit: 'cover',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                }}
+              />
+              <Button
+                startIcon={<DeleteIcon />}
+                onClick={() => { setSelectedImage(null); setImagePreview(null); }}
+                color="error"
+                size="small"
+                sx={{ mt: 1.5 }}
+              >
+                Remover imagem
+              </Button>
+            </Box>
+          )}
+
+          <Grid container spacing={3}>
+            <Grid item xs={12} sm={6}>
+              <input
+                accept="image/*"
+                style={{ display: 'none' }}
+                id="image-upload"
+                type="file"
+                onChange={handleImageChange}
+              />
+              <label htmlFor="image-upload">
+                <Button
+                  variant="outlined"
+                  component="span"
+                  startIcon={<UploadIcon />}
+                  fullWidth
+                  sx={{ py: 1.75 }}
+                >
+                  {selectedImage ? 'Trocar Imagem' : 'Upload do computador'}
+                </Button>
+              </label>
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                name="image_url"
+                label="Ou cole uma URL"
+                value={formData.image_url}
+                onChange={handleChange}
+                placeholder="https://exemplo.com/imagem.jpg"
+                disabled={!!selectedImage}
+              />
+            </Grid>
+          </Grid>
         </Box>
-      </Paper>
+
+        <Divider sx={{ mb: 4 }} />
+
+        {/* Dicas */}
+        <Box sx={{ bgcolor: '#f8fafc', p: 3, borderRadius: 2, border: '1px solid', borderColor: 'divider', mb: 5 }}>
+          <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>
+            Dicas para um bom anúncio
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 2 }}>
+            • Mencione a condição do item (novo, seminovo, usado)<br />
+            • Inclua informações sobre uso (semestre, ano, disciplina)<br />
+            • Descreva se há anotações, marcações ou defeitos<br />
+            • Mencione se há acessórios incluídos (CD, caderno de exercícios, etc.)
+          </Typography>
+        </Box>
+
+        {/* Ações */}
+        <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+          <Button
+            variant="outlined"
+            onClick={() => navigate('/')}
+            disabled={loading}
+            sx={{ px: 4 }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            type="submit"
+            variant="contained"
+            startIcon={loading ? <CircularProgress size={18} /> : <SaveIcon />}
+            disabled={loading}
+            sx={{ px: 4 }}
+          >
+            {loading ? 'Publicando…' : 'Publicar Item'}
+          </Button>
+        </Box>
+      </Box>
     </Container>
   );
 };
