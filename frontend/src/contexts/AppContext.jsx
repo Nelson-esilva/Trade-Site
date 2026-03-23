@@ -1,5 +1,7 @@
-import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useCallback, useRef } from 'react';
 import apiService from '../services/api';
+
+const IDLE_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutos
 
 // Estado inicial
 const initialState = {
@@ -223,6 +225,7 @@ const AppContext = createContext();
 // Provider
 export const AppProvider = ({ children }) => {
   const [state, dispatch] = useReducer(appReducer, initialState);
+  const inactivityTimerRef = useRef(null);
 
   // === FUNÇÕES AUXILIARES ===
   const loadCurrentUser = useCallback(async () => {
@@ -317,6 +320,34 @@ export const AppProvider = ({ children }) => {
     }
   }, []);
 
+  const clearInactivityTimer = useCallback(() => {
+    if (inactivityTimerRef.current) {
+      clearTimeout(inactivityTimerRef.current);
+      inactivityTimerRef.current = null;
+    }
+  }, []);
+
+  const resetInactivityTimer = useCallback(() => {
+    clearInactivityTimer();
+    inactivityTimerRef.current = setTimeout(async () => {
+      try {
+        await apiService.logout();
+      } catch (error) {
+        console.warn('Falha ao encerrar sessão por inatividade:', error);
+      } finally {
+        dispatch({ type: ActionTypes.LOGOUT });
+        dispatch({
+          type: ActionTypes.ADD_NOTIFICATION,
+          payload: {
+            id: Date.now(),
+            message: 'Sessão expirada por inatividade. Faça login novamente.',
+            type: 'warning',
+          },
+        });
+      }
+    }, IDLE_TIMEOUT_MS);
+  }, [clearInactivityTimer]);
+
   const registerUser = useCallback(async (userData) => {
     try {
       dispatch({ type: ActionTypes.SET_LOADING, payload: true });
@@ -381,6 +412,30 @@ export const AppProvider = ({ children }) => {
     // Não carregar nada se não autenticado - dados serão carregados após login
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Dependências vazias para executar apenas uma vez
+
+  // Logout automático por inatividade (5 minutos)
+  useEffect(() => {
+    if (!state.isAuthenticated) {
+      clearInactivityTimer();
+      return undefined;
+    }
+
+    const activityEvents = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'click'];
+    const handleActivity = () => resetInactivityTimer();
+
+    activityEvents.forEach((eventName) => {
+      window.addEventListener(eventName, handleActivity, { passive: true });
+    });
+
+    resetInactivityTimer();
+
+    return () => {
+      activityEvents.forEach((eventName) => {
+        window.removeEventListener(eventName, handleActivity);
+      });
+      clearInactivityTimer();
+    };
+  }, [state.isAuthenticated, resetInactivityTimer, clearInactivityTimer]);
 
 
 
